@@ -4,9 +4,16 @@ Donate link:
 Tags: OpenID, XRD, well-known, XML, Discovery, host-meta, Webfinger
 Requires at least: 2.7
 Tested up to: 2.9.9
-Stable tag:
+Stable tag: 0.5
 
 Webfinger for WordPress!
+
+This plugin requires:
+
+* the `/.well-known/`-plugin: http://wordpress.org/extend/plugins/well-known/
+* the `host-meta`-plugin: http://wordpress.org/extend/plugins/host-meta/
+
+more doku soon!
 
 == Changelog ==
 

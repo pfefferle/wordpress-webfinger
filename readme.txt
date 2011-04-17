@@ -1,10 +1,10 @@
 === Webfinger ===
 Contributors: Matthias Pfefferle
-Donate link: http://www.14101978.de
-Tags: OpenID, XRD, well-known, XML, Discovery, host-meta, Webfinger
+Donate link: http://14101978.de
+Tags: OpenID, XRD, well-known, XML, Discovery, host-meta, Webfinger, diso, OStatus, OStatus Stack
 Requires at least: 2.7
-Tested up to: 2.9.9
-Stable tag: 0.5
+Tested up to: 3.9
+Stable tag: 0.9
 
 Webfinger for WordPress!
 
@@ -17,6 +17,15 @@ more doku soon!
 
 == Changelog ==
 
+= 0.9 =
+* OStatus improvements
+* Better uri handling
+* Identifier overview (more to come)
+* Added filters
+* Added functions to get a users webfingers
+= 0.7 =
+* Added do_action param (for future OStatus plugin)
+* Author-Url as Webfinger-Identifier
 = 0.5 =
 * Initial release
 

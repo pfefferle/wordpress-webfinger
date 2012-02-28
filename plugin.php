@@ -308,13 +308,6 @@ class WebfingerPlugin {
     
     return false;
   }
-  
-  /**
-   * add the host meta information
-   */
-  public function add_host_meta_link() {     
-    echo "<Link rel='lrdd' template='".get_option('siteurl')."/?webfinger-uri={uri}' type='application/xrd+xml' />";
-  }
 
   /**
    * add the host meta information

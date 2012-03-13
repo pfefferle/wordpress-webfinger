@@ -432,7 +432,7 @@ class WebfingerPlugin {
 function webfinger_init() {
   $webfinger = new WebfingerPlugin();
   
-  // host-meta recource
+  // host-meta resource
   add_action('well_known_host-meta', array(&$webfinger, 'render_host_meta'), -1, 1);
   add_action('well_known_host-meta.json', array(&$webfinger, 'render_host_meta'), -1, 1);
   // simple web discovery

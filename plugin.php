@@ -77,6 +77,7 @@ class WebfingerPlugin {
     $vars[] = 'format';
     $vars[] = 'principal';
     $vars[] = 'service';
+    $vars[] = 'resource';
     return $vars;
   }
   
@@ -399,11 +400,42 @@ class WebfingerPlugin {
       return get_userdatabylogin($id_or_name_or_object);
     }
   }
+  
+  /**
+   * host-meta resource feature
+   *
+   * @param array $query
+   */
+  public function render_host_meta($query) {
+    if (!array_key_exists("resource", $query)) {
+      return;
+    }
+    
+    // match user
+    if (!$this->user = $this->get_user_by_uri($query['resource'])) {
+      header("HTTP/1.0 404 Not Found");
+      echo "Resource ".$query['resource']." not found";
+      exit;
+    }
+    
+    $this->webfinger_uri = $query['resource'];
+    
+    if ($query['well-known'] == "host-meta.json") {
+      $this->render_jrd();
+    } else {
+      $this->render_xrd();
+    }
+    exit;
+  }
 }
 
 function webfinger_init() {
   $webfinger = new WebfingerPlugin();
-
+  
+  // host-meta recource
+  add_action('well_known_host-meta', array(&$webfinger, 'render_host_meta'), -1, 1);
+  add_action('well_known_host-meta.json', array(&$webfinger, 'render_host_meta'), -1, 1);
+  // simple web discovery
   add_action('well_known_simple-web-discovery', array(&$webfinger, 'render_simple_web_discovery'), 2);
   add_filter('query_vars', array(&$webfinger, 'query_vars'));
   add_action('parse_request', array(&$webfinger, 'parse_request'));

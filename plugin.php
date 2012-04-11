@@ -78,6 +78,7 @@ class WebfingerPlugin {
     $vars[] = 'principal';
     $vars[] = 'service';
     $vars[] = 'resource';
+    $vars[] = 'rel';
     return $vars;
   }
   

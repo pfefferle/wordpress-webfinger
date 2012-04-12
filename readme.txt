@@ -4,7 +4,7 @@ Donate link: http://14101978.de
 Tags: OpenID, XRD, well-known, XML, Discovery, host-meta, Webfinger, diso, OStatus, OStatus Stack, simple web discovery, swd
 Requires at least: 2.7
 Tested up to: 3.3.1
-Stable tag: 1.2
+Stable tag: 1.3.1
 
 Webfinger (and simple-web-discovery) for WordPress!
 
@@ -21,6 +21,10 @@ This plugin requires:
 more doku soon!
 
 == Changelog ==
+= 1.3.1 =
+* added "rel"-filter (work in progress)
+= 1.3 =
+* added host-meta resource feature (see latest spec)
 = 1.2 =
 * added 404 http error if user doesn't exist
 * added jrd discovery for host-meta

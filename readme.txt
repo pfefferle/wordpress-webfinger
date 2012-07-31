@@ -10,7 +10,8 @@ Webfinger (and simple-web-discovery) for WordPress!
 
 == Description ==
 
-Webfinger: http://tools.ietf.org/html/draft-jones-appsawg-webfinger
+Webfinger: http://tools.ietf.org/html/draft-ietf-appsawg-webfinger
+
 simple-web-discovery: http://tools.ietf.org/html/draft-jones-simple-web-discovery
 
 This plugin requires:

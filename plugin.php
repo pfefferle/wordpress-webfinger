@@ -34,21 +34,26 @@ function get_webfinger($id_or_name_or_object = null, $protocol = false) {
  * returns all webfingers
  *
  * @param mixed $id_or_name_or_object
- * @param boolean $protocol
  * 
  * @return array
  */
-function get_webfingers($id_or_name_or_object = null, $protocol = false) {
+function get_webfingers($id_or_name_or_object = null) {
   $webfinger = new WebfingerPlugin();
   $user = $webfinger->get_user_by_various($id_or_name_or_object);
   $webfingers = array();
   
   if ($user) {
-    $webfingers[] = ($protocol ? "acct:" : "").get_webfinger($user);
+    $webfingers[] = get_webfinger($user, true);
     $webfingers[] = get_author_posts_url($user->ID, $user->user_nicename);
+    if ($user->user_email && $webfinger->check_mail_domain($user->user_email)) {
+      $webfingers[] = "mailto:".$user->user_email;
+    }
+    if (get_user_meta($user->ID, "jabber", true) && $webfinger->check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
+      $webfingers[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
+    }
     $webfingers = apply_filters('webfingers', $webfingers);
 
-    return $webfingers;
+    return array_unique($webfingers);
   } else {
     return array();
   }
@@ -184,7 +189,7 @@ class WebfingerPlugin {
     if(!$photo) $photo = 'http://www.gravatar.com/avatar/'.md5($this->user->user_email);
     
     $webfinger = array('subject' => $this->webfinger_uri,
-                       'aliases' => array($url),
+                       'aliases' => get_webfingers($this->user->ID),
                        'links' => array(
                          array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url),
                          array('rel' => 'http://webfinger.net/rel/avatar',  'href' => $photo)
@@ -343,7 +348,7 @@ class WebfingerPlugin {
    * @param stdClass $user
    */
   public function user_profile_infos($user) {
-    $webfingers = get_webfingers($user, true);
+    $webfingers = get_webfingers($user);
 ?>
     <h3 id="webfinger">Webfinger</h3>
     
@@ -400,6 +405,21 @@ class WebfingerPlugin {
     } else {
       return get_userdatabylogin($id_or_name_or_object);
     }
+  }
+  
+  /**
+   * check if the email address has the same domain as the blog
+   *
+   * @param string $email
+   * @return boolean
+   */
+  public function check_mail_domain($email) {
+    if (preg_match('/^([a-zA-Z]+:)?([^@]+)@([a-zA-Z0-9._-]+)$/i', $email, $email_parts) &&
+        ($email_parts[3] == parse_url(get_bloginfo('url'), PHP_URL_HOST))) {
+      return true;
+    }
+    
+    return false;
   }
   
   /**

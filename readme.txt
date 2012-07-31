@@ -23,6 +23,7 @@ more doku soon!
 == Changelog ==
 = 1.3.1 =
 * added "rel"-filter (work in progress)
+* added more aliases
 = 1.3 =
 * added host-meta resource feature (see latest spec)
 = 1.2 =

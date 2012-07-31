@@ -37,7 +37,7 @@ function get_webfinger($id_or_name_or_object = null, $protocol = false) {
  * 
  * @return array
  */
-function get_webfingers($id_or_name_or_object = null) {
+function get_webfingers($id_or_name_or_object = null, $deprecated = true) {
   $webfinger = new WebfingerPlugin();
   $user = $webfinger->get_user_by_various($id_or_name_or_object);
   $webfingers = array();

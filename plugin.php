@@ -429,6 +429,11 @@ class WebfingerPlugin {
    */
   public function render_host_meta($query) {
     if (!array_key_exists("resource", $query)) {
+      if ($query["well-known"] == "webfinger") {
+        header("HTTP/1.0 404 Not Found");
+        echo "you need to add a Resource parameter";
+        exit;
+      }
       return;
     }
     
@@ -483,6 +488,8 @@ class WebfingerPlugin {
 function webfinger_init() {
   $webfinger = new WebfingerPlugin();
   
+  // testing "webfinger" well-known uri
+  add_action('well_known_webfinger', array(&$webfinger, 'render_host_meta'));
   // host-meta resource
   add_action('well_known_host-meta', array(&$webfinger, 'render_host_meta'), -1, 1);
   add_action('well_known_host-meta.json', array(&$webfinger, 'render_host_meta'), -1, 1);

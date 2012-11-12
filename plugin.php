@@ -463,6 +463,8 @@ class WebfingerPlugin {
     if (!array_key_exists('rel', $queries)) {
       return $array;
     }
+
+    remove_all_actions('webfinger_xrd');
     
     // filter webfinger-array
     $links = array();

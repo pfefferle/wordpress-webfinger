@@ -429,11 +429,6 @@ class WebfingerPlugin {
    */
   public function render_host_meta($query) {
     if (!array_key_exists("resource", $query)) {
-      if ($query["well-known"] == "webfinger") {
-        header("HTTP/1.0 404 Not Found");
-        echo "you need to add a Resource parameter";
-        exit;
-      }
       return;
     }
     
@@ -452,6 +447,29 @@ class WebfingerPlugin {
       $this->render_xrd($query);
     }
     exit;
+  }
+  
+  /**
+   * support for "webfinger" well-known - uri
+   *
+   * @see http://tools.ietf.org/html/draft-ietf-appsawg-webfinger-07#section-4
+   * @param array $query
+   */
+  public function render_webfinger($query) {
+    if (!array_key_exists("resource", $query)) {
+      return;
+    }
+    
+    // match user
+    if (!$this->user = $this->get_user_by_uri($query['resource'])) {
+      header("HTTP/1.0 404 Not Found");
+      echo "Resource ".$query['resource']." not found";
+      exit;
+    }
+    
+    $this->webfinger_uri = $query['resource'];
+    
+    $this->render_jrd($query);
   }
   
   /**
@@ -489,7 +507,7 @@ function webfinger_init() {
   $webfinger = new WebfingerPlugin();
   
   // testing "webfinger" well-known uri
-  add_action('well_known_webfinger', array(&$webfinger, 'render_host_meta'));
+  add_action('well_known_webfinger', array(&$webfinger, 'render_webfinger'));
   // host-meta resource
   add_action('well_known_host-meta', array(&$webfinger, 'render_host_meta'), -1, 1);
   add_action('well_known_host-meta.json', array(&$webfinger, 'render_host_meta'), -1, 1);

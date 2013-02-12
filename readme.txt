@@ -3,25 +3,21 @@ Contributors: pfefferle
 Donate link: http://14101978.de
 Tags: OpenID, XRD, well-known, XML, Discovery, host-meta, Webfinger, diso, OStatus, OStatus Stack, simple web discovery, swd
 Requires at least: 2.7
-Tested up to: 3.4
+Tested up to: 3.5.1
 Stable tag: 1.3.1
 
-Webfinger (and simple-web-discovery) for WordPress!
+Webfinger for WordPress!
 
 == Description ==
 
 Webfinger: http://tools.ietf.org/html/draft-ietf-appsawg-webfinger
 
-simple-web-discovery: http://tools.ietf.org/html/draft-jones-simple-web-discovery
-
-This plugin requires:
-
-* the `/.well-known/`-plugin: http://wordpress.org/extend/plugins/well-known/
-* the `host-meta`-plugin: http://wordpress.org/extend/plugins/host-meta/
-
 more doku soon!
 
 == Changelog ==
+= 2.0.0 =
+* complete refactoring
+* removed simple-web-discovery
 = 1.4.0 =
 * small fixes
 * added "webfinger" as well-known uri

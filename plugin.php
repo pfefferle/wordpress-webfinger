@@ -26,13 +26,12 @@ class WebfingerPlugin {
     load_plugin_textdomain('webfinger', null, basename(dirname( __FILE__ )));
 
     add_action('query_vars', array($this, 'query_vars'));
-    add_action('parse_request', array($this, 'parse_request'));
-    
-    // testing "webfinger" well-known uri
-    add_action('well_known_webfinger', array($this, 'render_output'), 1, 1);
+    add_action('parse_request', array($this, 'parse_request'), 42);
+    add_action('generate_rewrite_rules', array($this, 'rewrite_rules'));
+
     // host-meta resource
-    add_action('well_known_host-meta', array($this, 'render_output'), -1, 1);
-    add_action('well_known_host-meta.json', array($this, 'render_output'), -1, 1);
+    //add_action('well_known_host-meta', array($this, 'host_meta_draft'), -1, 1);
+    //add_action('well_known_host-meta.json', array($this, 'host_meta_draft'), -1, 1);
 
     add_action('webfinger_render_json', array($this, 'render_jrd'), 1, 1);
     add_action('webfinger_render_jrd', array($this, 'render_jrd'), 1, 1);
@@ -62,14 +61,16 @@ class WebfingerPlugin {
   }
   
   /**
-   * parses the request
+   * Add rewrite rules
    *
-   * @return mixed
+   * @param WP_Rewrite
    */
-  public function parse_request($wp) {
-    if (array_key_exists('webfinger', $wp->query_vars)) {
-      $this->render_output($wp->query_vars);
-    }
+  function rewrite_rules( $wp_rewrite ) {
+    $webfinger_rules = array(
+      '(.well-known/webfinger)' => 'index.php?webfinger=true',
+    );
+
+    $wp_rewrite->rules = $webfinger_rules + $wp_rewrite->rules;
   }
   
   /**
@@ -77,32 +78,28 @@ class WebfingerPlugin {
    *
    * @param array
    */
-  public function render_output($query_vars) {
+  public function parse_request($wp) {
     // check if "resource" param exists
-    if (!array_key_exists('resource', $query_vars)) {
+    if (!array_key_exists('resource', $wp->query_vars)) {
       return;
     }
     
     // find matching user
-    $user = $this->get_user_by_uri($query_vars['resource']);
+    $user = $this->get_user_by_uri($wp->query_vars['resource']);
       
     if (!$user) {
       return;
     }
 
     $format = 'json';
-    if (array_key_exists('well-known', $query_vars) &&
-        $query_vars['well-known'] == "host-meta") {
-      $format = 'xrd';
-    }
-    if (array_key_exists('format', $query_vars)) {
-      $format = $query_vars['format'];
+    if (array_key_exists('format', $wp->query_vars)) {
+      $format = $wp->query_vars['format'];
     }
       
-    $webfinger = apply_filters('webfinger', array(), $user, $query_vars['resource'], $query_vars);
+    $webfinger = apply_filters('webfinger', array(), $user, $wp->query_vars['resource'], $wp->query_vars);
     
-    do_action("webfinger_render_{$format}", $webfinger, $user, $query_vars);
-    do_action("webfinger_render", $format, $webfinger, $user, $query_vars);
+    do_action("webfinger_render", $format, $webfinger, $user, $wp->query_vars);
+    do_action("webfinger_render_{$format}", $webfinger, $user, $wp->query_vars);
   }
   
   /**
@@ -110,7 +107,7 @@ class WebfingerPlugin {
    */
   public function render_jrd($webfinger) {
     header("Access-Control-Allow-Origin: *");
-    header('Content-Type: application/json; charset=' . get_option('blog_charset'), true);
+    header('Content-Type: application/jrd+json; charset=' . get_option('blog_charset'), true);
 
     echo json_encode($webfinger);
     exit();
@@ -145,7 +142,7 @@ class WebfingerPlugin {
     $photo = get_user_meta($user->ID, 'photo', true);
     if(!$photo) $photo = 'http://www.gravatar.com/avatar/'.md5($user->user_email);
     $webfinger = array('subject' => $resource,
-                       //'aliases' => get_webfingers($user->ID),
+                       'aliases' => $this->get_resources($user->ID),
                        'links' => array(
                          array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url),
                          array('rel' => 'http://webfinger.net/rel/avatar',  'href' => $photo)
@@ -192,7 +189,6 @@ class WebfingerPlugin {
    */
   public function add_host_meta_links($array) {
     $array["links"][] = array("rel" => "lrdd", "template" => home_url("/?webfinger=true&resource={uri}&format=xrd"), "type" => "application/xrd+xml");
-    $array["links"][] = array("rel" => "lrdd", "template" => home_url("/?webfinger=true&resource={uri}"), "type" => "application/json");
 
     return $array;
   }
@@ -309,6 +305,102 @@ class WebfingerPlugin {
     }
     
     return $xrd;
+  }
+  
+  /**
+   * returns a users default webfinger
+   *
+   * @param mixed $id_or_name_or_object
+   * @param boolean $protocol
+   * @return string
+   */
+  function get_resource($id_or_name_or_object, $protocol = false) {
+    $user = $this->get_user_by_various($id_or_name_or_object);
+  
+    if ($user) {
+      $resource = $user->user_login."@".parse_url(get_bloginfo('url'), PHP_URL_HOST);
+      if ($protocol) {
+        $resource = "acct:".$resource;
+      }
+      return $resource;
+    } else {
+      return null;
+    }
+  }
+  
+  /**
+   * returns all webfinger "resources"
+   *
+   * @param mixed $id_or_name_or_object
+   *
+   * @return array
+   */
+  public function get_resources($id_or_name_or_object) {
+    $user = $this->get_user_by_various($id_or_name_or_object);
+  
+    if ($user) {
+      $resources[] = $this->get_resource($user, true);
+      $resources[] = get_author_posts_url($user->ID, $user->user_nicename);
+      if ($user->user_email && $this->check_mail_domain($user->user_email)) {
+        $resources[] = "mailto:".$user->user_email;
+      }
+      if (get_user_meta($user->ID, "jabber", true) && $webfinger->check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
+        $resources[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
+      }
+      $resources = apply_filters('resources', $resources);
+
+      return array_unique($resources);
+    } else {
+      return array();
+    }
+  }
+  
+  /**
+   * Convenience method to get user data by ID, username, object or from current user.
+   *
+   * @param mixed $id_or_name_or_object the username, ID or object. If not provided, the current user will be used.
+   * @return bool|object False on failure, User DB row object
+   *
+   * @author Will Norris
+   * @see get_userdata_by_various() # DiSo OpenID-Plugin
+   */
+  public function get_user_by_various($id_or_name_or_object = null) {
+    if ( $id_or_name_or_object === null ) {
+      $user = wp_get_current_user();
+      if ($user == null) return false;
+      return $user->data;
+    } else if ( is_object($id_or_name_or_object) ) {
+      return $id_or_name_or_object;
+    } else if ( is_numeric($id_or_name_or_object) ) {
+      return get_userdata($id_or_name_or_object);
+    } else {
+      return get_userdatabylogin($id_or_name_or_object);
+    }
+  }
+  
+  /**
+   * check if the email address has the same domain as the blog
+   *
+   * @param string $email
+   * @return boolean
+   */
+  public function check_mail_domain($email) {
+    if (preg_match('/^([a-zA-Z]+:)?([^@]+)@([a-zA-Z0-9._-]+)$/i', $email, $email_parts) &&
+        ($email_parts[3] == parse_url(get_bloginfo('url'), PHP_URL_HOST))) {
+      return true;
+    }
+    
+    return false;
+  }
+  
+  public function host_meta_draft($query_vars) {
+    global $wp;
+
+    if (!array_key_exists('resource', $query_vars)) {
+      return;
+    }
+    
+    $wp->query_var['webfinger'] = true;
   }
 }
 

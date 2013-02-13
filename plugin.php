@@ -16,13 +16,6 @@ Author URI: http://notizblog.org/
 class WebfingerPlugin {
   
   public function __construct() {
-    add_action('init', array( $this, 'init' ));
-    
-    register_activation_hook(__FILE__, 'flush_rewrite_rules');
-    register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
-  }
-  
-  public function init() {
     load_plugin_textdomain('webfinger', null, basename(dirname( __FILE__ )));
 
     add_action('query_vars', array($this, 'query_vars'));
@@ -42,6 +35,10 @@ class WebfingerPlugin {
     add_filter('webfinger', array($this, 'filter_by_rel'), 99, 4);
     
     add_filter('host_meta', array($this, 'add_host_meta_links'));
+    
+    
+    register_activation_hook(__FILE__, 'flush_rewrite_rules');
+    register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
   }
   
   /**

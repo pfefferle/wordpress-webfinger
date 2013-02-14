@@ -4,7 +4,7 @@ Plugin Name: Webfinger
 Plugin URI: http://wordpress.org/extend/plugins/webfinger/
 Description: Webfinger for WordPress
 Version: 2.0.0-dev
-Author: Matthias Pfefferle
+Author: pfefferle
 Author URI: http://notizblog.org/
 */
 
@@ -14,32 +14,6 @@ Author URI: http://notizblog.org/
  * @author Matthias Pfefferle
  */
 class WebfingerPlugin {
-  
-  public function __construct() {
-    load_plugin_textdomain('webfinger', null, basename(dirname( __FILE__ )));
-
-    add_action('query_vars', array($this, 'query_vars'));
-    add_action('parse_request', array($this, 'parse_request'), 42);
-    add_action('generate_rewrite_rules', array($this, 'rewrite_rules'));
-
-    // host-meta resource
-    //add_action('well_known_host-meta', array($this, 'host_meta_draft'), -1, 1);
-    //add_action('well_known_host-meta.json', array($this, 'host_meta_draft'), -1, 1);
-
-    add_action('webfinger_render_json', array($this, 'render_jrd'), 1, 1);
-    add_action('webfinger_render_jrd', array($this, 'render_jrd'), 1, 1);
-    
-    add_action('webfinger_render_xrd', array($this, 'render_xrd'), 1, 2);
-    
-    add_filter('webfinger', array($this, 'generate_default_content'), 0, 3);
-    add_filter('webfinger', array($this, 'filter_by_rel'), 99, 4);
-    
-    add_filter('host_meta', array($this, 'add_host_meta_links'));
-    
-    
-    register_activation_hook(__FILE__, 'flush_rewrite_rules');
-    register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
-  }
   
   /**
    * adds some query vars
@@ -82,7 +56,7 @@ class WebfingerPlugin {
     }
     
     // find matching user
-    $user = $this->get_user_by_uri($wp->query_vars['resource']);
+    $user = WebfingerPlugin::get_user_by_uri($wp->query_vars['resource']);
       
     if (!$user) {
       return;
@@ -123,7 +97,7 @@ class WebfingerPlugin {
       do_action('webfinger_ns');
     echo ">\n";
 
-    echo $this->jrd_to_xrd($webfinger);
+    echo WebfingerPlugin::jrd_to_xrd($webfinger);
       // add xml-only content
       do_action('webfinger_xrd', $user);
     
@@ -139,7 +113,7 @@ class WebfingerPlugin {
     $photo = get_user_meta($user->ID, 'photo', true);
     if(!$photo) $photo = 'http://www.gravatar.com/avatar/'.md5($user->user_email);
     $webfinger = array('subject' => $resource,
-                       'aliases' => $this->get_resources($user->ID),
+                       'aliases' => WebfingerPlugin::get_resources($user->ID),
                        'links' => array(
                          array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url),
                          array('rel' => 'http://webfinger.net/rel/avatar',  'href' => $photo)
@@ -290,7 +264,7 @@ class WebfingerPlugin {
           }
           if ($cascaded) {
             $xrd .= ">";
-            $xrd .= $this->jrd_to_xrd($temp);
+            $xrd .= WebfingerPlugin::jrd_to_xrd($temp);
             $xrd .= "</Link>";
           } else {
             $xrd .= " />";
@@ -312,7 +286,7 @@ class WebfingerPlugin {
    * @return string
    */
   function get_resource($id_or_name_or_object, $protocol = false) {
-    $user = $this->get_user_by_various($id_or_name_or_object);
+    $user = WebfingerPlugin::get_user_by_various($id_or_name_or_object);
   
     if ($user) {
       $resource = $user->user_login."@".parse_url(get_bloginfo('url'), PHP_URL_HOST);
@@ -333,12 +307,12 @@ class WebfingerPlugin {
    * @return array
    */
   public function get_resources($id_or_name_or_object) {
-    $user = $this->get_user_by_various($id_or_name_or_object);
+    $user = WebfingerPlugin::get_user_by_various($id_or_name_or_object);
   
     if ($user) {
-      $resources[] = $this->get_resource($user, true);
+      $resources[] = WebfingerPlugin::get_resource($user, true);
       $resources[] = get_author_posts_url($user->ID, $user->user_nicename);
-      if ($user->user_email && $this->check_mail_domain($user->user_email)) {
+      if ($user->user_email && WebfingerPlugin::check_mail_domain($user->user_email)) {
         $resources[] = "mailto:".$user->user_email;
       }
       if (get_user_meta($user->ID, "jabber", true) && $webfinger->check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
@@ -401,4 +375,26 @@ class WebfingerPlugin {
   }
 }
 
-new WebfingerPlugin();
+load_plugin_textdomain('webfinger', null, basename(dirname( __FILE__ )));
+
+add_action('query_vars', array('WebfingerPlugin', 'query_vars'));
+add_action('parse_request', array('WebfingerPlugin', 'parse_request'), 42);
+add_action('generate_rewrite_rules', array('WebfingerPlugin', 'rewrite_rules'));
+
+// host-meta resource
+//add_action('well_known_host-meta', array('WebfingerPlugin', 'host_meta_draft'), -1, 1);
+//add_action('well_known_host-meta.json', array('WebfingerPlugin', 'host_meta_draft'), -1, 1);
+
+add_action('webfinger_render_json', array('WebfingerPlugin', 'render_jrd'), 1, 1);
+add_action('webfinger_render_jrd', array('WebfingerPlugin', 'render_jrd'), 1, 1);
+    
+add_action('webfinger_render_xrd', array('WebfingerPlugin', 'render_xrd'), 1, 2);
+    
+add_filter('webfinger', array('WebfingerPlugin', 'generate_default_content'), 0, 3);
+add_filter('webfinger', array('WebfingerPlugin', 'filter_by_rel'), 99, 4);
+    
+add_filter('host_meta', array('WebfingerPlugin', 'add_host_meta_links'));
+    
+    
+register_activation_hook(__FILE__, 'flush_rewrite_rules');
+register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

@@ -375,8 +375,6 @@ class WebfingerPlugin {
   }
 }
 
-load_plugin_textdomain('webfinger', null, basename(dirname( __FILE__ )));
-
 add_action('query_vars', array('WebfingerPlugin', 'query_vars'));
 add_action('parse_request', array('WebfingerPlugin', 'parse_request'), 42);
 add_action('generate_rewrite_rules', array('WebfingerPlugin', 'rewrite_rules'));

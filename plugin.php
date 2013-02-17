@@ -38,7 +38,7 @@ class WebfingerPlugin {
    */
   function rewrite_rules( $wp_rewrite ) {
     $webfinger_rules = array(
-      '(.well-known/webfinger)' => 'index.php?webfinger=true',
+      '.well-known/webfinger' => 'index.php?webfinger=true'
     );
 
     $wp_rewrite->rules = $webfinger_rules + $wp_rewrite->rules;
@@ -54,7 +54,7 @@ class WebfingerPlugin {
     if (!array_key_exists('resource', $wp->query_vars)) {
       return;
     }
-    
+
     // find matching user
     $user = WebfingerPlugin::get_user_by_uri($wp->query_vars['resource']);
       
@@ -78,7 +78,7 @@ class WebfingerPlugin {
    */
   public function render_jrd($webfinger) {
     header("Access-Control-Allow-Origin: *");
-    header('Content-Type: application/jrd+json; charset=' . get_option('blog_charset'), true);
+    header('Content-Type: application/jrd+json; charset=' . get_bloginfo('charset'), true);
 
     echo json_encode($webfinger);
     exit();
@@ -89,9 +89,9 @@ class WebfingerPlugin {
    */
   public function render_xrd($webfinger, $user) {
     header("Access-Control-Allow-Origin: *");
-    header('Content-Type: application/xrd+xml; charset=' . get_option('blog_charset'), true);
+    header('Content-Type: application/xrd+xml; charset=' . get_bloginfo('charset'), true);
   
-    echo "<?xml version='1.0' encoding='".get_option('blog_charset')."'?>\n";
+    echo "<?xml version='1.0' encoding='".get_bloginfo('charset')."'?>\n";
     echo "<XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'\n";
       // add xml-only namespaces
       do_action('webfinger_ns');
@@ -159,7 +159,7 @@ class WebfingerPlugin {
    * add the host meta information
    */
   public function add_host_meta_links($array) {
-    $array["links"][] = array("rel" => "lrdd", "template" => home_url("/?webfinger=true&resource={uri}&format=xrd"), "type" => "application/xrd+xml");
+    $array["links"][] = array("rel" => "lrdd", "template" => site_url("/?webfinger=true&resource={uri}&format=xrd"), "type" => "application/xrd+xml");
 
     return $array;
   }
@@ -289,7 +289,7 @@ class WebfingerPlugin {
     $user = WebfingerPlugin::get_user_by_various($id_or_name_or_object);
   
     if ($user) {
-      $resource = $user->user_login."@".parse_url(get_bloginfo('url'), PHP_URL_HOST);
+      $resource = $user->user_login."@".parse_url(home_url(), PHP_URL_HOST);
       if ($protocol) {
         $resource = "acct:".$resource;
       }
@@ -357,14 +357,14 @@ class WebfingerPlugin {
    */
   public function check_mail_domain($email) {
     if (preg_match('/^([a-zA-Z]+:)?([^@]+)@([a-zA-Z0-9._-]+)$/i', $email, $email_parts) &&
-        ($email_parts[3] == parse_url(get_bloginfo('url'), PHP_URL_HOST))) {
+        ($email_parts[3] == parse_url(home_url(), PHP_URL_HOST))) {
       return true;
     }
     
     return false;
   }
   
-  public function host_meta_draft($query_vars) {
+  /*public function host_meta_draft($query_vars) {
     global $wp;
 
     if (!array_key_exists('resource', $query_vars)) {
@@ -372,7 +372,7 @@ class WebfingerPlugin {
     }
     
     $wp->query_var['webfinger'] = true;
-  }
+  }*/
 }
 
 add_action('query_vars', array('WebfingerPlugin', 'query_vars'));
@@ -392,7 +392,6 @@ add_filter('webfinger', array('WebfingerPlugin', 'generate_default_content'), 0,
 add_filter('webfinger', array('WebfingerPlugin', 'filter_by_rel'), 99, 4);
     
 add_filter('host_meta', array('WebfingerPlugin', 'add_host_meta_links'));
-    
     
 register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

@@ -398,11 +398,7 @@ add_action('webfinger_render_xrd', array('WebfingerPlugin', 'render_xrd'), 1, 2)
 add_filter('webfinger', array('WebfingerPlugin', 'generate_default_content'), 0, 3);
 add_filter('webfinger', array('WebfingerPlugin', 'filter_by_rel'), 99, 4);
     
-<<<<<<< HEAD
 add_filter('host_meta', array('WebfingerPlugin', 'add_host_meta_links'));
-=======
-add_filter('host_meta', array('WebfingerPlugin', 'add_host_meta_links'));  
->>>>>>> added host-meta support
     
 register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

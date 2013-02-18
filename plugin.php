@@ -364,24 +364,31 @@ class WebfingerPlugin {
     return false;
   }
   
-  /*public function host_meta_draft($query_vars) {
-    global $wp;
+  public function host_meta_draft($format, $host_meta, $query_vars) {
 
     if (!array_key_exists('resource', $query_vars)) {
       return;
     }
     
-    $wp->query_var['webfinger'] = true;
-  }*/
+    // find matching user
+    $user = WebfingerPlugin::get_user_by_uri($query_vars['resource']);
+      
+    if (!$user) {
+      return;
+    }
+      
+    $webfinger = apply_filters('webfinger', array(), $user, $query_vars['resource'], $query_vars);
+    
+    do_action("webfinger_render", $format, $webfinger, $user, $query_vars);
+    do_action("webfinger_render_{$format}", $webfinger, $user, $query_vars);
+  }
 }
 
 add_action('query_vars', array('WebfingerPlugin', 'query_vars'));
 add_action('parse_request', array('WebfingerPlugin', 'parse_request'), 42);
 add_action('generate_rewrite_rules', array('WebfingerPlugin', 'rewrite_rules'));
 
-// host-meta resource
-//add_action('well_known_host-meta', array('WebfingerPlugin', 'host_meta_draft'), -1, 1);
-//add_action('well_known_host-meta.json', array('WebfingerPlugin', 'host_meta_draft'), -1, 1);
+add_action('host_meta_render', array('WebfingerPlugin', 'host_meta_draft'), 1, 3);
 
 add_action('webfinger_render_json', array('WebfingerPlugin', 'render_jrd'), 1, 1);
 add_action('webfinger_render_jrd', array('WebfingerPlugin', 'render_jrd'), 1, 1);
@@ -391,7 +398,11 @@ add_action('webfinger_render_xrd', array('WebfingerPlugin', 'render_xrd'), 1, 2)
 add_filter('webfinger', array('WebfingerPlugin', 'generate_default_content'), 0, 3);
 add_filter('webfinger', array('WebfingerPlugin', 'filter_by_rel'), 99, 4);
     
+<<<<<<< HEAD
 add_filter('host_meta', array('WebfingerPlugin', 'add_host_meta_links'));
+=======
+add_filter('host_meta', array('WebfingerPlugin', 'add_host_meta_links'));  
+>>>>>>> added host-meta support
     
 register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

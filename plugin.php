@@ -23,7 +23,7 @@ class WebfingerPlugin {
    */
   public function query_vars($vars) {
     $vars[] = 'webfinger-uri';
-    $vars[] = 'webfinger';
+    $vars[] = 'well-known';
     $vars[] = 'format';
     $vars[] = 'resource';
     $vars[] = 'rel';
@@ -38,7 +38,7 @@ class WebfingerPlugin {
    */
   function rewrite_rules( $wp_rewrite ) {
     $webfinger_rules = array(
-      '.well-known/webfinger' => 'index.php?webfinger=true'
+      '.well-known/webfinger' => 'index.php?well-known=webfinger'
     );
 
     $wp_rewrite->rules = $webfinger_rules + $wp_rewrite->rules;
@@ -159,7 +159,7 @@ class WebfingerPlugin {
    * add the host meta information
    */
   public function add_host_meta_links($array) {
-    $array["links"][] = array("rel" => "lrdd", "template" => site_url("/?webfinger=true&resource={uri}&format=xrd"), "type" => "application/xrd+xml");
+    $array["links"][] = array("rel" => "lrdd", "template" => site_url("/?well-known=webfinger&resource={uri}&format=xrd"), "type" => "application/xrd+xml");
 
     return $array;
   }
@@ -385,7 +385,7 @@ class WebfingerPlugin {
 }
 
 add_action('query_vars', array('WebfingerPlugin', 'query_vars'));
-add_action('parse_request', array('WebfingerPlugin', 'parse_request'), 42);
+add_action('parse_request', array('WebfingerPlugin', 'parse_request'));
 add_action('generate_rewrite_rules', array('WebfingerPlugin', 'rewrite_rules'));
 
 add_action('host_meta_render', array('WebfingerPlugin', 'host_meta_draft'), 1, 3);

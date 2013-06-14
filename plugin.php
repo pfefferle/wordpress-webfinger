@@ -3,7 +3,7 @@
 Plugin Name: Webfinger
 Plugin URI: http://wordpress.org/extend/plugins/webfinger/
 Description: Webfinger for WordPress
-Version: 2.0.0
+Version: 2.0.1
 Author: pfefferle
 Author URI: http://notizblog.org/
 */
@@ -315,7 +315,7 @@ class WebfingerPlugin {
       if ($user->user_email && WebfingerPlugin::check_mail_domain($user->user_email)) {
         $resources[] = "mailto:".$user->user_email;
       }
-      if (get_user_meta($user->ID, "jabber", true) && $webfinger->check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
+      if (get_user_meta($user->ID, "jabber", true) && WebfingerPlugin::check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
         $resources[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
       }
       $resources = apply_filters('resources', $resources);

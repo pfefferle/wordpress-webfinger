@@ -4,7 +4,7 @@ Donate link: http://14101978.de
 Tags: OpenID, XRD, well-known, XML, Discovery, host-meta, Webfinger, diso, OStatus, OStatus Stack, simple web discovery, swd
 Requires at least: 2.7
 Tested up to: 3.5.1
-Stable tag: 1.3.1
+Stable tag: 2.0.0
 
 Webfinger for WordPress!
 

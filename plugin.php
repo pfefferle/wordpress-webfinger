@@ -3,7 +3,7 @@
 Plugin Name: Webfinger
 Plugin URI: http://wordpress.org/extend/plugins/webfinger/
 Description: Webfinger for WordPress
-Version: 2.0.0-dev
+Version: 2.0.0
 Author: pfefferle
 Author URI: http://notizblog.org/
 */

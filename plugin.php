@@ -392,7 +392,8 @@ add_action('host_meta_render', array('WebfingerPlugin', 'host_meta_draft'), 1, 3
 
 add_action('webfinger_render_json', array('WebfingerPlugin', 'render_jrd'), 1, 1);
 add_action('webfinger_render_jrd', array('WebfingerPlugin', 'render_jrd'), 1, 1);
-    
+
+add_action('webfinger_render_xml', array('WebfingerPlugin', 'render_xrd'), 1, 2);
 add_action('webfinger_render_xrd', array('WebfingerPlugin', 'render_xrd'), 1, 2);
     
 add_filter('webfinger', array('WebfingerPlugin', 'generate_default_content'), 0, 3);

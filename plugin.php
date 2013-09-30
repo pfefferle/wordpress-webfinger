@@ -56,7 +56,7 @@ class WebfingerPlugin {
     }
 
     // find matching user
-    $user = WebfingerPlugin::get_user_by_uri($wp->query_vars['resource']);
+    $user = self::get_user_by_uri($wp->query_vars['resource']);
       
     if (!$user) {
       return;
@@ -97,7 +97,7 @@ class WebfingerPlugin {
       do_action('webfinger_ns');
     echo ">\n";
 
-    echo WebfingerPlugin::jrd_to_xrd($webfinger);
+    echo self::jrd_to_xrd($webfinger);
       // add xml-only content
       do_action('webfinger_xrd', $user);
     
@@ -113,7 +113,7 @@ class WebfingerPlugin {
     $photo = get_user_meta($user->ID, 'photo', true);
     if(!$photo) $photo = 'http://www.gravatar.com/avatar/'.md5($user->user_email);
     $webfinger = array('subject' => $resource,
-                       'aliases' => WebfingerPlugin::get_resources($user->ID),
+                       'aliases' => self::get_resources($user->ID),
                        'links' => array(
                          array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url),
                          array('rel' => 'http://webfinger.net/rel/avatar',  'href' => $photo)
@@ -264,7 +264,7 @@ class WebfingerPlugin {
           }
           if ($cascaded) {
             $xrd .= ">";
-            $xrd .= WebfingerPlugin::jrd_to_xrd($temp);
+            $xrd .= self::jrd_to_xrd($temp);
             $xrd .= "</Link>";
           } else {
             $xrd .= " />";
@@ -286,7 +286,7 @@ class WebfingerPlugin {
    * @return string
    */
   function get_resource($id_or_name_or_object, $protocol = false) {
-    $user = WebfingerPlugin::get_user_by_various($id_or_name_or_object);
+    $user = self::get_user_by_various($id_or_name_or_object);
   
     if ($user) {
       $resource = $user->user_login."@".parse_url(home_url(), PHP_URL_HOST);
@@ -307,15 +307,15 @@ class WebfingerPlugin {
    * @return array
    */
   public function get_resources($id_or_name_or_object) {
-    $user = WebfingerPlugin::get_user_by_various($id_or_name_or_object);
+    $user = self::get_user_by_various($id_or_name_or_object);
   
     if ($user) {
-      $resources[] = WebfingerPlugin::get_resource($user, true);
+      $resources[] = self::get_resource($user, true);
       $resources[] = get_author_posts_url($user->ID, $user->user_nicename);
-      if ($user->user_email && WebfingerPlugin::check_mail_domain($user->user_email)) {
+      if ($user->user_email && self::check_mail_domain($user->user_email)) {
         $resources[] = "mailto:".$user->user_email;
       }
-      if (get_user_meta($user->ID, "jabber", true) && WebfingerPlugin::check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
+      if (get_user_meta($user->ID, "jabber", true) && self::check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
         $resources[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
       }
       $resources = apply_filters('resources', $resources);
@@ -371,7 +371,7 @@ class WebfingerPlugin {
     }
     
     // find matching user
-    $user = WebfingerPlugin::get_user_by_uri($query_vars['resource']);
+    $user = self::get_user_by_uri($query_vars['resource']);
       
     if (!$user) {
       return;

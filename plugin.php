@@ -67,13 +67,28 @@ class WebfingerPlugin {
       echo 'no user found';
       exit;
     }
-
+    
+    // filter webfinger array
+    $webfinger = apply_filters('webfinger', array(), $user, $wp->query_vars['resource'], $wp->query_vars);
+    
+    // interpret accept header
+    if ($pos = stripos($_SERVER['HTTP_ACCEPT'], ';')) {
+      $accept_header = substr($_SERVER['HTTP_ACCEPT'], 0, $pos);
+    } else {
+      $accept_header = $_SERVER['HTTP_ACCEPT'];
+    }
+    
+    // accept header as an array
+    $accept = explode(',', trim($accept_header));
+    
+    do_action("webfinger_render_mime", $accept, $webfinger, $user, $wp->query_vars);
+    
+    // old query-var filter used for example by the host-meta.json version
+    // @link http://tools.ietf.org/html/draft-ietf-appsawg-webfinger-02
     $format = 'json';
     if (array_key_exists('format', $wp->query_vars)) {
       $format = $wp->query_vars['format'];
     }
-      
-    $webfinger = apply_filters('webfinger', array(), $user, $wp->query_vars['resource'], $wp->query_vars);
     
     do_action("webfinger_render", $format, $webfinger, $user, $wp->query_vars);
     do_action("webfinger_render_{$format}", $webfinger, $user, $wp->query_vars);
@@ -82,8 +97,23 @@ class WebfingerPlugin {
   /**
    * renders the webfinger file in json
    */
+  public function render_by_mime($accept, $webfinger, $user) {
+    // render jrd
+    if (in_array(array("application/json", "application/jrd+json"), $accept)) {
+      self::render_jrd($webfinger);
+    }
+    
+    // render xrd
+    if (in_array("application/xrd+xml", $accept)) {
+      self::render_xrd($webfinger, $user);
+    }
+  }
+  
+  /**
+   * renders the webfinger file in json
+   */
   public function render_jrd($webfinger) {
-    header("Access-Control-Allow-Origin: *");
+    header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/jrd+json; charset=' . get_bloginfo('charset'), true);
 
     echo json_encode($webfinger);
@@ -94,7 +124,7 @@ class WebfingerPlugin {
    * renders the webfinger file in xml
    */
   public function render_xrd($webfinger, $user) {
-    header("Access-Control-Allow-Origin: *");
+    header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/xrd+xml; charset=' . get_bloginfo('charset'), true);
   
     echo "<?xml version='1.0' encoding='".get_bloginfo('charset')."'?>\n";
@@ -221,14 +251,14 @@ class WebfingerPlugin {
     foreach ($webfinger as $type => $content) {
       // print subject
       if ($type == "subject") {
-        $xrd .= "<Subject>$content</Subject>";
+        $xrd .= "<Subject>".htmlspecialchars($content)."</Subject>";
         continue;
       }
       
       // print aliases
       if ($type == "aliases") {
         foreach ($content as $uri) {
-          $xrd .= "<Alias>".htmlentities($uri)."</Alias>";
+          $xrd .= "<Alias>".htmlspecialchars($uri)."</Alias>";
         }
         continue;
       }
@@ -236,7 +266,7 @@ class WebfingerPlugin {
       // print properties
       if ($type == "properties") {
         foreach ($content as $type => $uri) {
-          $xrd .= "<Property type='".htmlentities($type)."'>".htmlentities($uri)."</Property>";
+          $xrd .= "<Property type='".htmlspecialchars($type)."'>".htmlspecialchars($uri)."</Property>";
         }
         continue;
       }
@@ -245,9 +275,9 @@ class WebfingerPlugin {
       if ($type == "titles") {
         foreach ($content as $key => $value) {
           if ($key == "default") {
-            $xrd .= "<Title>".htmlentities($value)."</Title>";
+            $xrd .= "<Title>".htmlspecialchars($value)."</Title>";
           } else {
-            $xrd .= "<Title xml:lang='".htmlentities($key)."'>".htmlentities($value)."</Title>";
+            $xrd .= "<Title xml:lang='".htmlspecialchars($key)."'>".htmlspecialchars($value)."</Title>";
           }
         }
         continue;
@@ -265,7 +295,7 @@ class WebfingerPlugin {
               $temp[$key] = $value;
               $cascaded = true;
             } else {
-              $xrd .= htmlentities($key)."='".htmlentities($value)."' ";
+              $xrd .= htmlspecialchars($key)."='".htmlspecialchars($value)."' ";
             }
           }
           if ($cascaded) {
@@ -401,7 +431,9 @@ add_action('webfinger_render_jrd', array('WebfingerPlugin', 'render_jrd'), 1, 1)
 
 add_action('webfinger_render_xml', array('WebfingerPlugin', 'render_xrd'), 1, 2);
 add_action('webfinger_render_xrd', array('WebfingerPlugin', 'render_xrd'), 1, 2);
-    
+
+add_action('webfinger_render_mime', array('WebfingerPlugin', 'render_by_mime'), 1, 3);
+ 
 add_filter('webfinger', array('WebfingerPlugin', 'generate_default_content'), 0, 3);
 add_filter('webfinger', array('WebfingerPlugin', 'filter_by_rel'), 99, 4);
     

@@ -52,14 +52,20 @@ class WebfingerPlugin {
   public function parse_request($wp) {
     // check if "resource" param exists
     if (!array_key_exists('resource', $wp->query_vars)) {
-      return;
+      header('HTTP/1.0 400 Bad Request');
+      header('Content-Type: text/plain; charset=' . get_bloginfo('charset'), true);
+      echo 'missing "resource" parameter';
+      exit;
     }
 
     // find matching user
     $user = self::get_user_by_uri($wp->query_vars['resource']);
       
     if (!$user) {
-      return;
+      header('HTTP/1.0 404 Not Found');
+      header('Content-Type: text/plain; charset=' . get_bloginfo('charset'), true);
+      echo 'no user found';
+      exit;
     }
 
     $format = 'json';

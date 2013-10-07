@@ -47,9 +47,20 @@ class WebfingerPlugin {
   /**
    * renders the output-file
    *
-   * @param array
+   * @param array $wp
+   *
+   * @filter webfinger
+   * @action webfinger_render_mime
+   * @action webfinger_render
+   * @action webfinger_render_{$format}
    */
   public function parse_request($wp) {
+    // check if it is a webfinger request or not
+    if (!array_key_exists('well-known', $wp->query_vars) ||
+        $wp->query_vars['well-known'] != 'webfinger') {
+      return;
+    }
+    
     // check if "resource" param exists
     if (!array_key_exists('resource', $wp->query_vars)) {
       header('HTTP/1.0 400 Bad Request');
@@ -60,7 +71,8 @@ class WebfingerPlugin {
 
     // find matching user
     $user = self::get_user_by_uri($wp->query_vars['resource']);
-      
+    
+    // check if "user" exists
     if (!$user) {
       header('HTTP/1.0 404 Not Found');
       header('Content-Type: text/plain; charset=' . get_bloginfo('charset'), true);
@@ -96,6 +108,8 @@ class WebfingerPlugin {
   
   /**
    * renders the webfinger file in json
+   * 
+   * @param string $accept the mime-type (for example "application/json")
    */
   public function render_by_mime($accept, $webfinger, $user) {
     // render jrd
@@ -110,7 +124,9 @@ class WebfingerPlugin {
   }
   
   /**
-   * renders the webfinger file in json
+   * renders the webfinger jrd-document (json)
+   *
+   * @param array $webfinger the webfinger data-array
    */
   public function render_jrd($webfinger) {
     header('Access-Control-Allow-Origin: *');
@@ -121,7 +137,12 @@ class WebfingerPlugin {
   }
   
   /**
-   * renders the webfinger file in xml
+   * renders the webfinger xrd-document (xml)
+   *
+   * @param array $webfinger the webfinger data-array
+   *
+   * @action webfinger_ns
+   * @action webfinger_xrd
    */
   public function render_xrd($webfinger, $user) {
     header('Access-Control-Allow-Origin: *');
@@ -143,18 +164,29 @@ class WebfingerPlugin {
   
   /**
    * generates the webfinger base array
+   *
+   * @param array $webfinger the webfinger data-array
+   * @param stdClass $user the WordPress user
+   * @param string $resource the resource param
+   * @return array the enriched webfinger data-array
    */
   public function generate_default_content($webfinger, $user, $resource) {
+    // generate "profile" url
     $url = get_author_posts_url($user->ID, $user->user_nicename);
+    // generate default photo-url
     $photo = get_user_meta($user->ID, 'photo', true);
     if(!$photo) $photo = 'http://www.gravatar.com/avatar/'.md5($user->user_email);
+
+    // generate default array
     $webfinger = array('subject' => $resource,
                        'aliases' => self::get_resources($user->ID),
                        'links' => array(
                          array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url),
                          array('rel' => 'http://webfinger.net/rel/avatar',  'href' => $photo)
                         ));
-    if ($user->user_url) {
+    
+    // add user_url if set
+    if (isset($user->user_url)) {
       $webfinger['links'][] = array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $user->user_url);
     }
     
@@ -164,7 +196,7 @@ class WebfingerPlugin {
   /**
    * filters the webfinger array by request params like "rel"
    *
-   * @link tools.ietf.org/html/draft-jones-appsawg-webfinger#section-4.3
+   * @link http://tools.ietf.org/html/rfc7033#section-4.3
    * @param array $array
    * @param stdClass $user
    * @param array $queries
@@ -193,6 +225,9 @@ class WebfingerPlugin {
   
   /**
    * add the host meta information
+   *
+   * @param array $array the webfinger data-array
+   * @return array the enriched version
    */
   public function add_host_meta_links($array) {
     $array["links"][] = array("rel" => "lrdd", "template" => site_url("/?well-known=webfinger&resource={uri}&format=xrd"), "type" => "application/xrd+xml");
@@ -243,7 +278,7 @@ class WebfingerPlugin {
    * recursive helper to generade the xrd-xml from the jrd array
    *
    * @param string $host_meta
-   * @return string
+   * @return string the xrd (xml) document
    */
   public function jrd_to_xrd($webfinger) {
     $xrd = null;
@@ -339,7 +374,6 @@ class WebfingerPlugin {
    * returns all webfinger "resources"
    *
    * @param mixed $id_or_name_or_object
-   *
    * @return array
    */
   public function get_resources($id_or_name_or_object) {
@@ -400,8 +434,20 @@ class WebfingerPlugin {
     return false;
   }
   
+  /**
+   * Implements the host-meta version descibed in the Webfinger-Draft 02 
+   *
+   * @link http://tools.ietf.org/html/draft-ietf-appsawg-webfinger-02
+   * @param string $format for example jrd (json) or xrd (xml)
+   * @param array $host-meta the host-meta infos as array
+   * @param array $query_vars the WordPress query-vars array
+   *
+   * @filter webfinger
+   * @action webfinger_render
+   * @action webfinger_render_{$format}
+   */
   public function host_meta_draft($format, $host_meta, $query_vars) {
-
+    // check resource param
     if (!array_key_exists('resource', $query_vars)) {
       return;
     }
@@ -412,9 +458,11 @@ class WebfingerPlugin {
     if (!$user) {
       return;
     }
-      
+    
+    // generate webfinger array
     $webfinger = apply_filters('webfinger', array(), $user, $query_vars['resource'], $query_vars);
     
+    // run actions
     do_action("webfinger_render", $format, $webfinger, $user, $query_vars);
     do_action("webfinger_render_{$format}", $webfinger, $user, $query_vars);
   }

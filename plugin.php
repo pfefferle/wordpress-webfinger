@@ -14,7 +14,7 @@ Author URI: http://notizblog.org/
  * @author Matthias Pfefferle
  */
 class WebFingerPlugin {
-  
+
   /**
    * adds some query vars
    *
@@ -30,7 +30,7 @@ class WebFingerPlugin {
 
     return $vars;
   }
-  
+
   /**
    * Add rewrite rules
    *
@@ -43,7 +43,7 @@ class WebFingerPlugin {
 
     $wp_rewrite->rules = $webfinger_rules + $wp_rewrite->rules;
   }
-  
+
   /**
    * renders the output-file
    *
@@ -60,7 +60,7 @@ class WebFingerPlugin {
         $wp->query_vars['well-known'] != 'webfinger') {
       return;
     }
-    
+
     // check if "resource" param exists
     if (!array_key_exists('resource', $wp->query_vars)) {
       header('HTTP/1.0 400 Bad Request');
@@ -71,7 +71,7 @@ class WebFingerPlugin {
 
     // find matching user
     $user = self::get_user_by_uri($wp->query_vars['resource']);
-    
+
     // check if "user" exists
     if (!$user) {
       header('HTTP/1.0 404 Not Found');
@@ -79,36 +79,36 @@ class WebFingerPlugin {
       echo 'no user found';
       exit;
     }
-    
+
     // filter webfinger array
     $webfinger = apply_filters('webfinger', array(), $user, $wp->query_vars['resource'], $wp->query_vars);
-    
+
     // interpret accept header
     if ($pos = stripos($_SERVER['HTTP_ACCEPT'], ';')) {
       $accept_header = substr($_SERVER['HTTP_ACCEPT'], 0, $pos);
     } else {
       $accept_header = $_SERVER['HTTP_ACCEPT'];
     }
-    
+
     // accept header as an array
     $accept = explode(',', trim($accept_header));
-    
+
     do_action("webfinger_render_mime", $accept, $webfinger, $user, $wp->query_vars);
-    
+
     // old query-var filter used for example by the host-meta.json version
     // @link http://tools.ietf.org/html/draft-ietf-appsawg-webfinger-02
     $format = 'json';
     if (array_key_exists('format', $wp->query_vars)) {
       $format = $wp->query_vars['format'];
     }
-    
+
     do_action("webfinger_render", $format, $webfinger, $user, $wp->query_vars);
     do_action("webfinger_render_{$format}", $webfinger, $user, $wp->query_vars);
   }
-  
+
   /**
    * renders the webfinger file in json
-   * 
+   *
    * @param string $accept the mime-type (for example "application/json")
    */
   public function render_by_mime($accept, $webfinger, $user) {
@@ -116,13 +116,13 @@ class WebFingerPlugin {
     if (in_array(array("application/json", "application/jrd+json"), $accept)) {
       self::render_jrd($webfinger);
     }
-    
+
     // render xrd
     if (in_array("application/xrd+xml", $accept)) {
       self::render_xrd($webfinger, $user);
     }
   }
-  
+
   /**
    * renders the webfinger jrd-document (json)
    *
@@ -135,7 +135,7 @@ class WebFingerPlugin {
     echo json_encode($webfinger);
     exit();
   }
-  
+
   /**
    * renders the webfinger xrd-document (xml)
    *
@@ -147,7 +147,7 @@ class WebFingerPlugin {
   public function render_xrd($webfinger, $user) {
     header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/xrd+xml; charset=' . get_bloginfo('charset'), true);
-  
+
     echo "<?xml version='1.0' encoding='".get_bloginfo('charset')."'?>\n";
     echo "<XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'\n";
       // add xml-only namespaces
@@ -157,11 +157,11 @@ class WebFingerPlugin {
     echo self::jrd_to_xrd($webfinger);
       // add xml-only content
       do_action('webfinger_xrd', $user);
-    
+
     echo "\n</XRD>";
     exit;
   }
-  
+
   /**
    * generates the webfinger base array
    *
@@ -184,15 +184,15 @@ class WebFingerPlugin {
                          array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url),
                          array('rel' => 'http://webfinger.net/rel/avatar',  'href' => $photo)
                         ));
-    
+
     // add user_url if set
     if (isset($user->user_url)) {
       $webfinger['links'][] = array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $user->user_url);
     }
-    
+
     return $webfinger;
   }
-  
+
   /**
    * filters the webfinger array by request params like "rel"
    *
@@ -209,7 +209,7 @@ class WebFingerPlugin {
     }
 
     remove_all_actions('webfinger_xrd');
-  
+
     // filter webfinger-array
     $links = array();
     foreach ($webfinger['links'] as $link) {
@@ -218,11 +218,11 @@ class WebFingerPlugin {
       }
     }
     $webfinger['links'] = $links;
-    
+
     // return only "links" with the matching
     return $webfinger;
   }
-  
+
   /**
    * add the host meta information
    *
@@ -234,18 +234,18 @@ class WebFingerPlugin {
 
     return $array;
   }
-  
+
   /**
-   * returns a Userobject 
+   * returns a Userobject
    *
    * @param string $uri
    * @return stdClass
    */
   private function get_user_by_uri($uri) {
     global $wpdb;
-    
+
     $uri = urldecode($uri);
-  
+
     if (preg_match("~^https?://~i", $uri)) {
       // check if url matches with a
       // users profile url
@@ -259,9 +259,9 @@ class WebFingerPlugin {
       $username = $array[2];
       $host = $array[3];
       $email = $username."@".$host;
-      
+
       if ($host == parse_url(get_bloginfo('url'), PHP_URL_HOST)) {
-        $sql =  "SELECT * FROM $wpdb->users u INNER JOIN $wpdb->usermeta um ON u.id=um.user_id WHERE u.user_email = '%s' OR 
+        $sql =  "SELECT * FROM $wpdb->users u INNER JOIN $wpdb->usermeta um ON u.id=um.user_id WHERE u.user_email = '%s' OR
                                                   (um.meta_key = 'jabber' AND um.meta_value = '%s') OR
                                                   u.user_login = '%s' LIMIT 1;";
         $user = $wpdb->get_results($wpdb->prepare($sql, $email, $email, $username));
@@ -270,10 +270,10 @@ class WebFingerPlugin {
         }
       }
     }
-    
+
     return false;
   }
-  
+
   /**
    * recursive helper to generade the xrd-xml from the jrd array
    *
@@ -289,7 +289,7 @@ class WebFingerPlugin {
         $xrd .= "<Subject>".htmlspecialchars($content)."</Subject>";
         continue;
       }
-      
+
       // print aliases
       if ($type == "aliases") {
         foreach ($content as $uri) {
@@ -297,7 +297,7 @@ class WebFingerPlugin {
         }
         continue;
       }
-      
+
       // print properties
       if ($type == "properties") {
         foreach ($content as $type => $uri) {
@@ -305,7 +305,7 @@ class WebFingerPlugin {
         }
         continue;
       }
-      
+
       // print titles
       if ($type == "titles") {
         foreach ($content as $key => $value) {
@@ -317,7 +317,7 @@ class WebFingerPlugin {
         }
         continue;
       }
-      
+
       // print links
       if ($type == "links") {
         foreach ($content as $links) {
@@ -341,14 +341,14 @@ class WebFingerPlugin {
             $xrd .= " />";
           }
         }
-        
+
         continue;
       }
     }
-    
+
     return $xrd;
   }
-  
+
   /**
    * returns a users default webfinger
    *
@@ -358,7 +358,7 @@ class WebFingerPlugin {
    */
   function get_resource($id_or_name_or_object, $protocol = false) {
     $user = self::get_user_by_various($id_or_name_or_object);
-  
+
     if ($user) {
       $resource = $user->user_login."@".parse_url(home_url(), PHP_URL_HOST);
       if ($protocol) {
@@ -369,7 +369,7 @@ class WebFingerPlugin {
       return null;
     }
   }
-  
+
   /**
    * returns all webfinger "resources"
    *
@@ -378,7 +378,7 @@ class WebFingerPlugin {
    */
   public function get_resources($id_or_name_or_object) {
     $user = self::get_user_by_various($id_or_name_or_object);
-  
+
     if ($user) {
       $resources[] = self::get_resource($user, true);
       $resources[] = get_author_posts_url($user->ID, $user->user_nicename);
@@ -395,7 +395,7 @@ class WebFingerPlugin {
       return array();
     }
   }
-  
+
   /**
    * Convenience method to get user data by ID, username, object or from current user.
    *
@@ -418,7 +418,7 @@ class WebFingerPlugin {
       return get_userdatabylogin($id_or_name_or_object);
     }
   }
-  
+
   /**
    * check if the email address has the same domain as the blog
    *
@@ -430,12 +430,12 @@ class WebFingerPlugin {
         ($email_parts[3] == parse_url(home_url(), PHP_URL_HOST))) {
       return true;
     }
-    
+
     return false;
   }
-  
+
   /**
-   * Implements the host-meta version descibed in the WebFinger-Draft 02 
+   * Implements the host-meta version descibed in the WebFinger-Draft 02
    *
    * @link http://tools.ietf.org/html/draft-ietf-appsawg-webfinger-02
    * @param string $format for example jrd (json) or xrd (xml)
@@ -451,17 +451,17 @@ class WebFingerPlugin {
     if (!array_key_exists('resource', $query_vars)) {
       return;
     }
-    
+
     // find matching user
     $user = self::get_user_by_uri($query_vars['resource']);
-      
+
     if (!$user) {
       return;
     }
-    
+
     // generate webfinger array
     $webfinger = apply_filters('webfinger', array(), $user, $query_vars['resource'], $query_vars);
-    
+
     // run actions
     do_action("webfinger_render", $format, $webfinger, $user, $query_vars);
     do_action("webfinger_render_{$format}", $webfinger, $user, $query_vars);
@@ -481,11 +481,11 @@ add_action('webfinger_render_xml', array('WebFingerPlugin', 'render_xrd'), 1, 2)
 add_action('webfinger_render_xrd', array('WebFingerPlugin', 'render_xrd'), 1, 2);
 
 add_action('webfinger_render_mime', array('WebFingerPlugin', 'render_by_mime'), 1, 3);
- 
+
 add_filter('webfinger', array('WebFingerPlugin', 'generate_default_content'), 0, 3);
 add_filter('webfinger', array('WebFingerPlugin', 'filter_by_rel'), 99, 4);
-    
+
 add_filter('host_meta', array('WebFingerPlugin', 'add_host_meta_links'));
-    
+
 register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

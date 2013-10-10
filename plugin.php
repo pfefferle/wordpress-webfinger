@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Webfinger
+Plugin Name: WebFinger
 Plugin URI: http://wordpress.org/extend/plugins/webfinger/
-Description: Webfinger for WordPress
+Description: WebFinger for WordPress
 Version: 2.1.0-dev
 Author: pfefferle
 Author URI: http://notizblog.org/
@@ -13,7 +13,7 @@ Author URI: http://notizblog.org/
  *
  * @author Matthias Pfefferle
  */
-class WebfingerPlugin {
+class WebFingerPlugin {
   
   /**
    * adds some query vars
@@ -435,7 +435,7 @@ class WebfingerPlugin {
   }
   
   /**
-   * Implements the host-meta version descibed in the Webfinger-Draft 02 
+   * Implements the host-meta version descibed in the WebFinger-Draft 02 
    *
    * @link http://tools.ietf.org/html/draft-ietf-appsawg-webfinger-02
    * @param string $format for example jrd (json) or xrd (xml)
@@ -468,24 +468,24 @@ class WebfingerPlugin {
   }
 }
 
-add_action('query_vars', array('WebfingerPlugin', 'query_vars'));
-add_action('parse_request', array('WebfingerPlugin', 'parse_request'));
-add_action('generate_rewrite_rules', array('WebfingerPlugin', 'rewrite_rules'));
+add_action('query_vars', array('WebFingerPlugin', 'query_vars'));
+add_action('parse_request', array('WebFingerPlugin', 'parse_request'));
+add_action('generate_rewrite_rules', array('WebFingerPlugin', 'rewrite_rules'));
 
-add_action('host_meta_render', array('WebfingerPlugin', 'host_meta_draft'), 1, 3);
+add_action('host_meta_render', array('WebFingerPlugin', 'host_meta_draft'), 1, 3);
 
-add_action('webfinger_render_json', array('WebfingerPlugin', 'render_jrd'), 1, 1);
-add_action('webfinger_render_jrd', array('WebfingerPlugin', 'render_jrd'), 1, 1);
+add_action('webfinger_render_json', array('WebFingerPlugin', 'render_jrd'), 1, 1);
+add_action('webfinger_render_jrd', array('WebFingerPlugin', 'render_jrd'), 1, 1);
 
-add_action('webfinger_render_xml', array('WebfingerPlugin', 'render_xrd'), 1, 2);
-add_action('webfinger_render_xrd', array('WebfingerPlugin', 'render_xrd'), 1, 2);
+add_action('webfinger_render_xml', array('WebFingerPlugin', 'render_xrd'), 1, 2);
+add_action('webfinger_render_xrd', array('WebFingerPlugin', 'render_xrd'), 1, 2);
 
-add_action('webfinger_render_mime', array('WebfingerPlugin', 'render_by_mime'), 1, 3);
+add_action('webfinger_render_mime', array('WebFingerPlugin', 'render_by_mime'), 1, 3);
  
-add_filter('webfinger', array('WebfingerPlugin', 'generate_default_content'), 0, 3);
-add_filter('webfinger', array('WebfingerPlugin', 'filter_by_rel'), 99, 4);
+add_filter('webfinger', array('WebFingerPlugin', 'generate_default_content'), 0, 3);
+add_filter('webfinger', array('WebFingerPlugin', 'filter_by_rel'), 99, 4);
     
-add_filter('host_meta', array('WebfingerPlugin', 'add_host_meta_links'));
+add_filter('host_meta', array('WebFingerPlugin', 'add_host_meta_links'));
     
 register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

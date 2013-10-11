@@ -1,7 +1,7 @@
 === Webfinger ===
 Contributors: pfefferle
 Donate link: http://14101978.de
-Tags: OpenID, XRD, well-known, Discovery, host-meta, Webfinger, DiSo, OStatus, JRD
+Tags: well-known, discovery, webfinger, JRD
 Requires at least: 2.7
 Tested up to: 3.6.1
 Stable tag: 2.0.1
@@ -10,13 +10,7 @@ Webfinger for WordPress!
 
 == Description ==
 
-Enables Webfinger support for WordPress.
-
-The plugin supports the following specs:
-
-* [RFC 7033](http://tools.ietf.org/html/rfc7033)
-* [Draft 02 (host-meta + resource)](http://tools.ietf.org/html/draft-ietf-appsawg-webfinger-02) ([host-meta plugin](http://wordpress.org/plugins/host-meta/) needed)
-* [host-meta + Web Linking version](http://code.google.com/p/webfinger/) ([host-meta plugin](http://wordpress.org/plugins/host-meta/) needed)
+Enables Webfinger ([RFC 7033](http://tools.ietf.org/html/rfc7033)) support for WordPress.
 
 About Webfinger:
 
@@ -56,10 +50,10 @@ Please visit <http://webfinger.net>
 Project maintined on github at
 [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
 
-= 2.1.0 =
+= 3.0.0 =
 
 * added correct error-responses
-* added support for different support headers
+* remove legacy support for XRD and host-meta (props to Will Norris)
 
 = 2.0.1 =
 
@@ -132,3 +126,9 @@ Project maintined on github at
 1. Upload the `webfinger`-folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the *Plugins* menu in WordPress
 3. ...and that's it :)
+
+== Upgrade Notice ==
+
+= 3.0.0 =
+
+This versions drops classic WebFinger support to keep the plugin short and simple

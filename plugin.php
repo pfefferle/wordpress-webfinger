@@ -22,9 +22,7 @@ class WebFingerPlugin {
    * @return array
    */
   public function query_vars($vars) {
-    $vars[] = 'webfinger-uri';
     $vars[] = 'well-known';
-    $vars[] = 'format';
     $vars[] = 'resource';
     $vars[] = 'rel';
 
@@ -45,14 +43,12 @@ class WebFingerPlugin {
   }
 
   /**
-   * renders the output-file
+   * Parse the webfinger request and render the document.
    *
-   * @param array $wp
+   * @param WP $wp WordPress request context
    *
-   * @filter webfinger
-   * @action webfinger_render_mime
-   * @action webfinger_render
-   * @action webfinger_render_{$format}
+   * @uses apply_filters() Calls 'webfinger' on webfinger data array
+   * @uses do_action() Calls 'webfinger_render' to render webfinger data
    */
   public function parse_request($wp) {
     // check if it is a webfinger request or not
@@ -63,7 +59,7 @@ class WebFingerPlugin {
 
     // check if "resource" param exists
     if (!array_key_exists('resource', $wp->query_vars)) {
-      header('HTTP/1.0 400 Bad Request');
+      status_header(400);
       header('Content-Type: text/plain; charset=' . get_bloginfo('charset'), true);
       echo 'missing "resource" parameter';
       exit;
@@ -74,7 +70,7 @@ class WebFingerPlugin {
 
     // check if "user" exists
     if (!$user) {
-      header('HTTP/1.0 404 Not Found');
+      status_header(404);
       header('Content-Type: text/plain; charset=' . get_bloginfo('charset'), true);
       echo 'no user found';
       exit;
@@ -82,49 +78,11 @@ class WebFingerPlugin {
 
     // filter webfinger array
     $webfinger = apply_filters('webfinger', array(), $user, $wp->query_vars['resource'], $wp->query_vars);
-
-    // interpret accept header
-    if ($pos = stripos($_SERVER['HTTP_ACCEPT'], ';')) {
-      $accept_header = substr($_SERVER['HTTP_ACCEPT'], 0, $pos);
-    } else {
-      $accept_header = $_SERVER['HTTP_ACCEPT'];
-    }
-
-    // accept header as an array
-    $accept = explode(',', trim($accept_header));
-
-    do_action("webfinger_render_mime", $accept, $webfinger, $user, $wp->query_vars);
-
-    // old query-var filter used for example by the host-meta.json version
-    // @link http://tools.ietf.org/html/draft-ietf-appsawg-webfinger-02
-    $format = 'json';
-    if (array_key_exists('format', $wp->query_vars)) {
-      $format = $wp->query_vars['format'];
-    }
-
-    do_action("webfinger_render", $format, $webfinger, $user, $wp->query_vars);
-    do_action("webfinger_render_{$format}", $webfinger, $user, $wp->query_vars);
+    do_action('webfinger_render', $webfinger);
   }
 
   /**
-   * renders the webfinger file in json
-   *
-   * @param string $accept the mime-type (for example "application/json")
-   */
-  public function render_by_mime($accept, $webfinger, $user) {
-    // render jrd
-    if (in_array(array("application/json", "application/jrd+json"), $accept)) {
-      self::render_jrd($webfinger);
-    }
-
-    // render xrd
-    if (in_array("application/xrd+xml", $accept)) {
-      self::render_xrd($webfinger, $user);
-    }
-  }
-
-  /**
-   * renders the webfinger jrd-document (json)
+   * Render the JRD representation of the webfinger resource.
    *
    * @param array $webfinger the webfinger data-array
    */
@@ -134,32 +92,6 @@ class WebFingerPlugin {
 
     echo json_encode($webfinger);
     exit();
-  }
-
-  /**
-   * renders the webfinger xrd-document (xml)
-   *
-   * @param array $webfinger the webfinger data-array
-   *
-   * @action webfinger_ns
-   * @action webfinger_xrd
-   */
-  public function render_xrd($webfinger, $user) {
-    header('Access-Control-Allow-Origin: *');
-    header('Content-Type: application/xrd+xml; charset=' . get_bloginfo('charset'), true);
-
-    echo "<?xml version='1.0' encoding='".get_bloginfo('charset')."'?>\n";
-    echo "<XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'\n";
-      // add xml-only namespaces
-      do_action('webfinger_ns');
-    echo ">\n";
-
-    echo self::jrd_to_xrd($webfinger);
-      // add xml-only content
-      do_action('webfinger_xrd', $user);
-
-    echo "\n</XRD>";
-    exit;
   }
 
   /**
@@ -208,8 +140,6 @@ class WebFingerPlugin {
       return $webfinger;
     }
 
-    remove_all_actions('webfinger_xrd');
-
     // filter webfinger-array
     $links = array();
     foreach ($webfinger['links'] as $link) {
@@ -221,18 +151,6 @@ class WebFingerPlugin {
 
     // return only "links" with the matching
     return $webfinger;
-  }
-
-  /**
-   * add the host meta information
-   *
-   * @param array $array the webfinger data-array
-   * @return array the enriched version
-   */
-  public function add_host_meta_links($array) {
-    $array["links"][] = array("rel" => "lrdd", "template" => site_url("/?well-known=webfinger&resource={uri}&format=xrd"), "type" => "application/xrd+xml");
-
-    return $array;
   }
 
   /**
@@ -272,81 +190,6 @@ class WebFingerPlugin {
     }
 
     return false;
-  }
-
-  /**
-   * recursive helper to generade the xrd-xml from the jrd array
-   *
-   * @param string $host_meta
-   * @return string the xrd (xml) document
-   */
-  public function jrd_to_xrd($webfinger) {
-    $xrd = null;
-
-    foreach ($webfinger as $type => $content) {
-      // print subject
-      if ($type == "subject") {
-        $xrd .= "<Subject>".htmlspecialchars($content)."</Subject>";
-        continue;
-      }
-
-      // print aliases
-      if ($type == "aliases") {
-        foreach ($content as $uri) {
-          $xrd .= "<Alias>".htmlspecialchars($uri)."</Alias>";
-        }
-        continue;
-      }
-
-      // print properties
-      if ($type == "properties") {
-        foreach ($content as $type => $uri) {
-          $xrd .= "<Property type='".htmlspecialchars($type)."'>".htmlspecialchars($uri)."</Property>";
-        }
-        continue;
-      }
-
-      // print titles
-      if ($type == "titles") {
-        foreach ($content as $key => $value) {
-          if ($key == "default") {
-            $xrd .= "<Title>".htmlspecialchars($value)."</Title>";
-          } else {
-            $xrd .= "<Title xml:lang='".htmlspecialchars($key)."'>".htmlspecialchars($value)."</Title>";
-          }
-        }
-        continue;
-      }
-
-      // print links
-      if ($type == "links") {
-        foreach ($content as $links) {
-          $temp = array();
-          $cascaded = false;
-          $xrd .= "<Link ";
-
-          foreach ($links as $key => $value) {
-            if (is_array($value)) {
-              $temp[$key] = $value;
-              $cascaded = true;
-            } else {
-              $xrd .= htmlspecialchars($key)."='".htmlspecialchars($value)."' ";
-            }
-          }
-          if ($cascaded) {
-            $xrd .= ">";
-            $xrd .= self::jrd_to_xrd($temp);
-            $xrd .= "</Link>";
-          } else {
-            $xrd .= " />";
-          }
-        }
-
-        continue;
-      }
-    }
-
-    return $xrd;
   }
 
   /**
@@ -434,58 +277,16 @@ class WebFingerPlugin {
     return false;
   }
 
-  /**
-   * Implements the host-meta version descibed in the WebFinger-Draft 02
-   *
-   * @link http://tools.ietf.org/html/draft-ietf-appsawg-webfinger-02
-   * @param string $format for example jrd (json) or xrd (xml)
-   * @param array $host-meta the host-meta infos as array
-   * @param array $query_vars the WordPress query-vars array
-   *
-   * @filter webfinger
-   * @action webfinger_render
-   * @action webfinger_render_{$format}
-   */
-  public function host_meta_draft($format, $host_meta, $query_vars) {
-    // check resource param
-    if (!array_key_exists('resource', $query_vars)) {
-      return;
-    }
-
-    // find matching user
-    $user = self::get_user_by_uri($query_vars['resource']);
-
-    if (!$user) {
-      return;
-    }
-
-    // generate webfinger array
-    $webfinger = apply_filters('webfinger', array(), $user, $query_vars['resource'], $query_vars);
-
-    // run actions
-    do_action("webfinger_render", $format, $webfinger, $user, $query_vars);
-    do_action("webfinger_render_{$format}", $webfinger, $user, $query_vars);
-  }
 }
 
 add_action('query_vars', array('WebFingerPlugin', 'query_vars'));
 add_action('parse_request', array('WebFingerPlugin', 'parse_request'));
 add_action('generate_rewrite_rules', array('WebFingerPlugin', 'rewrite_rules'));
 
-add_action('host_meta_render', array('WebFingerPlugin', 'host_meta_draft'), 1, 3);
-
-add_action('webfinger_render_json', array('WebFingerPlugin', 'render_jrd'), 1, 1);
-add_action('webfinger_render_jrd', array('WebFingerPlugin', 'render_jrd'), 1, 1);
-
-add_action('webfinger_render_xml', array('WebFingerPlugin', 'render_xrd'), 1, 2);
-add_action('webfinger_render_xrd', array('WebFingerPlugin', 'render_xrd'), 1, 2);
-
-add_action('webfinger_render_mime', array('WebFingerPlugin', 'render_by_mime'), 1, 3);
-
 add_filter('webfinger', array('WebFingerPlugin', 'generate_default_content'), 0, 3);
 add_filter('webfinger', array('WebFingerPlugin', 'filter_by_rel'), 99, 4);
 
-add_filter('host_meta', array('WebFingerPlugin', 'add_host_meta_links'));
+add_action('webfinger_render', array('WebFingerPlugin', 'render_jrd'), 20, 1);
 
 register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

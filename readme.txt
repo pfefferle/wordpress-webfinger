@@ -1,5 +1,5 @@
 === Webfinger ===
-Contributors: pfefferle
+Contributors: pfefferle, willnorris
 Donate link: http://14101978.de
 Tags: well-known, discovery, webfinger, JRD
 Requires at least: 2.7

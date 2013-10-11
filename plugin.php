@@ -12,6 +12,7 @@ Author URI: http://notizblog.org/
  * webfinger
  *
  * @author Matthias Pfefferle
+ * @author Will Norris
  */
 class WebFingerPlugin {
 

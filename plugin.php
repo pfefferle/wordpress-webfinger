@@ -232,7 +232,7 @@ class WebFingerPlugin {
       if (get_user_meta($user->ID, "jabber", true) && self::check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
         $resources[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
       }
-      $resources = apply_filters('resources', $resources);
+      $resources = apply_filters('webfinger_resources', $resources);
 
       return array_unique($resources);
     } else {

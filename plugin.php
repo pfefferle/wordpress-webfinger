@@ -119,7 +119,7 @@ class WebFingerPlugin {
                         ));
 
     // add user_url if set
-    if (isset($user->user_url)) {
+    if (isset($user->user_url) && !empty($user->user_url)) {
       $webfinger['links'][] = array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $user->user_url);
     }
 
@@ -158,39 +158,102 @@ class WebFingerPlugin {
    * returns a Userobject
    *
    * @param string $uri
-   * @return stdClass
+   * @return WP_User
+   * @uses apply_filters() uses 'webfinger_user' to filter the user and 'webfinger_user_query' to add custom query-params
    */
   private function get_user_by_uri($uri) {
     global $wpdb;
 
     $uri = urldecode($uri);
 
-    if (preg_match("~^https?://~i", $uri)) {
-      // check if url matches with a
-      // users profile url
-      foreach (get_users_of_blog() as $user) {
-        if (rtrim(str_replace("www.", "", get_author_posts_url($user->ID, $user->user_nicename)), "/") ==
-            rtrim(str_replace("www.", "", $uri), "/")) {
-          return $user;
-        }
-      }
-    } elseif (preg_match('/^([a-zA-Z]+:)?([^@]+)@([a-zA-Z0-9._-]+)$/i', $uri, $array)) {
-      $username = $array[2];
-      $host = $array[3];
-      $email = $username."@".$host;
-
-      if ($host == parse_url(get_bloginfo('url'), PHP_URL_HOST)) {
-        $sql =  "SELECT * FROM $wpdb->users u INNER JOIN $wpdb->usermeta um ON u.id=um.user_id WHERE u.user_email = '%s' OR
-                                                  (um.meta_key = 'jabber' AND um.meta_value = '%s') OR
-                                                  u.user_login = '%s' LIMIT 1;";
-        $user = $wpdb->get_results($wpdb->prepare($sql, $email, $email, $username));
-        if (!empty($user)) {
-          return $user[0];
-        }
-      }
+    if (!preg_match("/^([a-zA-Z^:]+):(.*)$/i", $uri, $match)) {
+      // no valid scheme provided
+      return null;
     }
 
-    return false;
+    // extract the scheme
+    $scheme = $match[1];
+    // extract the "host"
+    $host = $match[2];
+
+    switch ($scheme) {
+      // check urls
+      case "http":
+      case "https":
+        if ($author_id = url_to_authorid($uri)) {
+          $user = get_userdata($author_id);
+
+          return apply_filters("webfinger_user", $user, $uri);
+        }
+
+        // search url in user_url
+        $args = array(
+          'search'         => $uri,
+          'search_columns' => array('user_url'),
+          'meta_compare'   => '=',
+        );
+        break;
+      // check acct scheme
+      case "acct":
+        // get the identifier at the left of the '@'
+        $parts = explode("@", $host);
+
+        $args = array(
+          'search'         => $parts[0],
+      	  'search_columns' => array('user_name', 'display_name', 'user_login'),
+          'meta_compare'   => '=',
+        );
+        break;
+      // check mailto scheme
+      case "mailto":
+        $args = array(
+      	  'search'         => $host,
+      	  'search_columns' => array('user_email'),
+          'meta_compare'   => '=',
+        );
+        break;
+      // check instant messaging schemes
+      case "xmpp":
+      case "im":
+        $args = array(
+          'meta_query' => array(
+            'relation' => 'OR',
+            array(
+              'key'     => 'jabber',
+              'value'   => $host,
+              'compare' => '='
+            ),
+            array(
+              'key'     => 'yim',
+              'value'   => $host,
+              'compare' => '='
+            ),
+            array(
+              'key'     => 'aim',
+              'value'   => $host,
+              'compare' => '='
+            )
+          )
+        );
+        break;
+      default:
+        $args = array();
+        break;
+    }
+
+    $args = apply_filters("webfinger_user_query", $args, $uri, $scheme);
+
+    // get user query
+    $user_query = new WP_User_Query($args);
+
+    // check result
+    if (!empty($user_query->results)) {
+      $user = $user_query->results[0];
+    } else {
+      $user = null;
+    }
+    
+    return apply_filters("webfinger_user", $user, $uri);
   }
 
   /**
@@ -278,6 +341,52 @@ class WebFingerPlugin {
     return false;
   }
 
+}
+
+if (!function_exists('url_to_authorid')) {
+  /**
+   * Examine a url and try to determine the author ID it represents.
+   *
+   * Checks are supposedly from the hosted site blog.
+   *
+   * @param string $url Permalink to check.
+   * @return int User ID, or 0 on failure.
+   */
+  function url_to_authorid($url) {
+    global $wp_rewrite;
+
+    // check if url hase the same host
+    if (parse_url(site_url(), PHP_URL_HOST) != parse_url($url, PHP_URL_HOST)) {
+      return 0;
+    }
+
+    // First, check to see if there is a 'author=N' to match against
+    if ( preg_match('/[?&]author=(\d+)/i', $url, $values) ) {
+      $id = absint($values[1]);
+      if ( $id )
+        return $id;
+    }
+
+    // Check to see if we are using rewrite rules
+    $rewrite = $wp_rewrite->wp_rewrite_rules();
+
+    // Not using rewrite rules, and 'p=N' and 'page_id=N' methods failed, so we're out of options
+    if ( empty($rewrite) )
+      return 0;
+
+    // generate rewrite rule for the author url
+    $author_rewrite = $wp_rewrite->get_author_permastruct();
+    $author_regexp = str_replace("%author%", "", $author_rewrite);
+
+    // match the rewrite rule with the passed url
+    if (preg_match("/https?:\/\/(.+)".preg_quote($author_regexp, '/')."([^\/]+)/i", $url, $match)) {
+      if ($user = get_user_by("slug", $match[2])) {
+        return $user->ID;
+      }
+    }
+
+    return 0;
+  }
 }
 
 add_action('query_vars', array('WebFingerPlugin', 'query_vars'));

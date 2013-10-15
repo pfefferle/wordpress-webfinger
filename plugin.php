@@ -340,13 +340,13 @@ class WebFingerPlugin {
 
 if (!function_exists('url_to_authorid')) {
   /**
-	 * Examine a url and try to determine the author ID it represents.
-	 *
-	 * Checks are supposedly from the hosted site blog.
-	 *
-	 * @param string $url Permalink to check.
-	 * @return int User ID, or 0 on failure.
-	 */
+   * Examine a url and try to determine the author ID it represents.
+   *
+   * Checks are supposedly from the hosted site blog.
+   *
+   * @param string $url Permalink to check.
+   * @return int User ID, or 0 on failure.
+   */
   function url_to_authorid($url) {
     global $wp_rewrite;
 

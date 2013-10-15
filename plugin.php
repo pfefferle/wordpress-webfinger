@@ -111,7 +111,7 @@ class WebFingerPlugin {
     if(!$photo) $photo = 'http://www.gravatar.com/avatar/'.md5($user->user_email);
 
     // generate default array
-    $webfinger = array('subject' => $resource,
+    $webfinger = array('subject' => self::get_resource($user->ID),
                        'aliases' => self::get_resources($user->ID),
                        'links' => array(
                          array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url),
@@ -260,18 +260,15 @@ class WebFingerPlugin {
    * returns a users default webfinger
    *
    * @param mixed $id_or_name_or_object
-   * @param boolean $protocol
-   * @return string
+   * @return string|null
    */
-  function get_resource($id_or_name_or_object, $protocol = false) {
+  function get_resource($id_or_name_or_object) {
     $user = self::get_user_by_various($id_or_name_or_object);
 
     if ($user) {
       $resource = $user->user_login."@".parse_url(home_url(), PHP_URL_HOST);
-      if ($protocol) {
-        $resource = "acct:".$resource;
-      }
-      return $resource;
+      
+      return $resources = apply_filters('webfinger_resource', "acct:".$resource, $user);
     } else {
       return null;
     }
@@ -295,7 +292,7 @@ class WebFingerPlugin {
       if (get_user_meta($user->ID, "jabber", true) && self::check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
         $resources[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
       }
-      $resources = apply_filters('webfinger_resources', $resources);
+      $resources = apply_filters('webfinger_resources', $resources, $user);
 
       return array_unique($resources);
     } else {

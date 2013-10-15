@@ -119,7 +119,7 @@ class WebFingerPlugin {
                         ));
 
     // add user_url if set
-    if (isset($user->user_url)) {
+    if (isset($user->user_url) && !empty($user->user_url)) {
       $webfinger['links'][] = array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $user->user_url);
     }
 
@@ -159,6 +159,7 @@ class WebFingerPlugin {
    *
    * @param string $uri
    * @return WP_User
+   * @uses apply_filters() uses 'webfinger_user' to filter the user and 'webfinger_user_query' to add custom query-params
    */
   private function get_user_by_uri($uri) {
     global $wpdb;
@@ -180,7 +181,9 @@ class WebFingerPlugin {
       case "http":
       case "https":
         if ($author_id = url_to_authorid($uri)) {
-          return get_userdata($author_id);
+          $user = get_userdata($author_id);
+
+          return apply_filters("webfinger_user", $user, $uri);
         }
 
         // search url in user_url
@@ -245,10 +248,12 @@ class WebFingerPlugin {
 
     // check result
     if (!empty($user_query->results)) {
-      return $user_query->results[0];
+      $user = $user_query->results[0];
     } else {
-      return null;
+      $user = null;
     }
+    
+    return apply_filters("webfinger_user", $user, $uri);
   }
 
   /**

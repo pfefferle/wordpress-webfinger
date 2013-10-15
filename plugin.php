@@ -170,9 +170,12 @@ class WebFingerPlugin {
       return null;
     }
 
-    $args = array();
+    // extract the scheme
+    $scheme = $match[1];
+    // extract the "host"
+    $host = $match[2];
 
-    switch ($match[1]) {
+    switch ($scheme) {
       // check urls
       case "http":
       case "https":
@@ -182,18 +185,18 @@ class WebFingerPlugin {
 
         // search url in user_url
         $args = array(
-        	'search'         => $uri,
-        	'search_columns' => array('user_url'),
+          'search'         => $uri,
+          'search_columns' => array('user_url'),
           'meta_compare'   => '=',
         );
         break;
       // check acct scheme
       case "acct":
         // get the identifier at the left of the '@'
-        $parts = explode("@", $match[2]);
+        $parts = explode("@", $host);
 
         $args = array(
-      	  'search'         => $parts[0],
+          'search'         => $parts[0],
       	  'search_columns' => array('user_name', 'display_name', 'user_login'),
           'meta_compare'   => '=',
         );
@@ -201,7 +204,7 @@ class WebFingerPlugin {
       // check mailto scheme
       case "mailto":
         $args = array(
-      	  'search'         => $match[2],
+      	  'search'         => $host,
       	  'search_columns' => array('user_email'),
           'meta_compare'   => '=',
         );
@@ -210,35 +213,38 @@ class WebFingerPlugin {
       case "xmpp":
       case "im":
         $args = array(
-      	  'meta_query' => array(
-      		  'relation' => 'OR',
-      		  array(
-      			  'key'     => 'jabber',
-      			  'value'   => $match[2],
-      			  'compare' => '='
-      		  ),
-      		  array(
-      			  'key'     => 'yim',
-      			  'value'   => $match[2],
-      			  'compare' => '='
-      		  ),
-      		  array(
-      			  'key'     => 'aim',
-      			  'value'   => $match[2],
-      			  'compare' => '='
-      		  )
-      	  )
+          'meta_query' => array(
+            'relation' => 'OR',
+            array(
+              'key'     => 'jabber',
+              'value'   => $host,
+              'compare' => '='
+            ),
+            array(
+              'key'     => 'yim',
+              'value'   => $host,
+              'compare' => '='
+            ),
+            array(
+              'key'     => 'aim',
+              'value'   => $host,
+              'compare' => '='
+            )
+          )
         );
+        break;
+      default:
+        $args = array();
         break;
     }
 
-    $args = apply_filters("webfinger_user_query", $args);
+    $args = apply_filters("webfinger_user_query", $args, $uri, $scheme);
 
     // get user query
-    $user_query = new WP_User_Query( $args );
+    $user_query = new WP_User_Query($args);
 
     // check result
-    if ( ! empty( $user_query->results ) ) {
+    if (!empty($user_query->results)) {
       return $user_query->results[0];
     } else {
       return null;

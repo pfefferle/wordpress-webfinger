@@ -1,4 +1,4 @@
-=== Webfinger ===
+=== WebFinger ===
 Contributors: pfefferle, willnorris
 Donate link: http://14101978.de
 Tags: well-known, discovery, webfinger, JRD
@@ -6,13 +6,13 @@ Requires at least: 2.7
 Tested up to: 3.6.1
 Stable tag: 2.0.1
 
-Webfinger for WordPress!
+WebFinger for WordPress!
 
 == Description ==
 
-Enables Webfinger ([RFC 7033](http://tools.ietf.org/html/rfc7033)) support for WordPress.
+Enables WebFinger ([RFC 7033](http://tools.ietf.org/html/rfc7033)) support for WordPress.
 
-About Webfinger:
+About WebFinger:
 
 WebFinger is used to discover information about people or other
 entities on the Internet that are identified by a URI using
@@ -25,7 +25,7 @@ The JSON object is referred to as the JSON Resource Descriptor (JRD).
 
 == FAQ ==
 
-= How can I extend Webfinger =
+= How can I extend WebFinger =
 
 You can add your own links or properties like that:
 
@@ -39,9 +39,9 @@ You can add your own links or properties like that:
 
 = Where can I find the Spec? =
 
-Webfinger was specified as [RFC 7033](http://tools.ietf.org/html/rfc7033)
+WebFinger was specified as [RFC 7033](http://tools.ietf.org/html/rfc7033)
 
-= Where can I find out more about Webfinger? =
+= Where can I find out more about WebFinger? =
 
 Please visit <http://webfinger.net>
 

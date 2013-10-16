@@ -252,7 +252,7 @@ class WebFingerPlugin {
     } else {
       $user = null;
     }
-    
+
     return apply_filters("webfinger_user", $user, $uri);
   }
 
@@ -267,7 +267,7 @@ class WebFingerPlugin {
 
     if ($user) {
       $resource = $user->user_login."@".parse_url(home_url(), PHP_URL_HOST);
-      
+
       return $resources = apply_filters('webfinger_resource', "acct:".$resource, $user);
     } else {
       return null;

@@ -135,16 +135,28 @@ class WebFingerPlugin {
    * @param array $queries
    * @return array
    */
-  public function filter_by_rel($webfinger, $user, $resource, $queries) {
+  public function filter_by_rel($webfinger) {
+    // explode the query-string by hand because php not
+    // support multiple queries with the same name
+    $query = explode("&", $_SERVER['QUERY_STRING']);
+    $params = array();
+
+    foreach($query as $param) {
+      list($name, $value) = explode('=', $param);
+      $params[urldecode($name)][] = urldecode($value);
+    }
+
     // check if "rel" is set
-    if (!array_key_exists('rel', $queries)) {
+    if (!array_key_exists('rel', $params)) {
       return $webfinger;
     }
+
+    $rels = $params['rel'];
 
     // filter webfinger-array
     $links = array();
     foreach ($webfinger['links'] as $link) {
-      if ($link["rel"] == $queries["rel"]) {
+      if (in_array($link["rel"], $rels)) {
         $links[] = $link;
       }
     }
@@ -391,7 +403,7 @@ add_action('parse_request', array('WebFingerPlugin', 'parse_request'));
 add_action('generate_rewrite_rules', array('WebFingerPlugin', 'rewrite_rules'));
 
 add_filter('webfinger', array('WebFingerPlugin', 'generate_default_content'), 0, 3);
-add_filter('webfinger', array('WebFingerPlugin', 'filter_by_rel'), 99, 4);
+add_filter('webfinger', array('WebFingerPlugin', 'filter_by_rel'), 99, 1);
 
 add_action('webfinger_render', array('WebFingerPlugin', 'render_jrd'), 20, 1);
 

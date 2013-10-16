@@ -151,12 +151,10 @@ class WebFingerPlugin {
       return $webfinger;
     }
 
-    $rels = $params['rel'];
-
     // filter webfinger-array
     $links = array();
     foreach ($webfinger['links'] as $link) {
-      if (in_array($link["rel"], $rels)) {
+      if (in_array($link["rel"], $params['rel'])) {
         $links[] = $link;
       }
     }

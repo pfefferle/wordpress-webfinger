@@ -29,13 +29,13 @@ The JSON object is referred to as the JSON Resource Descriptor (JRD).
 
 You can add your own links or properties like that:
 
-	function oexchange_target_link($array) {
-		$array["links"][] = array("rel" => "http://oexchange.org/spec/0.8/rel/resident-target",
-															"href" => "http://example.com",
-															"type" => "application/xrd+xml");
-		return $array;
-	}
-	add_filter('webfinger', 'oexchange_target_link');
+    function oexchange_target_link($array) {
+      $array["links"][] = array("rel" => "http://oexchange.org/spec/0.8/rel/resident-target",
+        "href" => "http://example.com",
+        "type" => "application/xrd+xml");
+      return $array;
+    }
+    add_filter('webfinger', 'oexchange_target_link');
 
 = Where can I find the Spec? =
 

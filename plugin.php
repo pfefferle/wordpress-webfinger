@@ -17,7 +17,7 @@ Author URI: http://notizblog.org/
 class WebFingerPlugin {
 
   /**
-   * adds some query vars
+   * add query vars
    *
    * @param array $vars
    * @return array
@@ -31,7 +31,7 @@ class WebFingerPlugin {
   }
 
   /**
-   * Add rewrite rules
+   * add rewrite rules
    *
    * @param WP_Rewrite
    */
@@ -44,7 +44,7 @@ class WebFingerPlugin {
   }
 
   /**
-   * Parse the webfinger request and render the document.
+   * parse the webfinger request and render the document.
    *
    * @param WP $wp WordPress request context
    *
@@ -83,7 +83,7 @@ class WebFingerPlugin {
   }
 
   /**
-   * Render the JRD representation of the webfinger resource.
+   * render the JRD representation of the webfinger resource.
    *
    * @param array $webfinger the webfinger data-array
    */
@@ -136,7 +136,7 @@ class WebFingerPlugin {
    * @return array
    */
   public function filter_by_rel($webfinger) {
-    // explode the query-string by hand because php not
+    // explode the query-string by hand because php does not
     // support multiple queries with the same name
     $query = explode("&", $_SERVER['QUERY_STRING']);
     $params = array();
@@ -160,7 +160,7 @@ class WebFingerPlugin {
     }
     $webfinger['links'] = $links;
 
-    // return only "links" with the matching
+    // return only "links" with the matching rel-values
     return $webfinger;
   }
 
@@ -169,7 +169,8 @@ class WebFingerPlugin {
    *
    * @param string $uri
    * @return WP_User
-   * @uses apply_filters() uses 'webfinger_user' to filter the user and 'webfinger_user_query' to add custom query-params
+   * @uses apply_filters() uses 'webfinger_user' to filter the
+   *       user and 'webfinger_user_query' to add custom query-params
    */
   private function get_user_by_uri($uri) {
     global $wpdb;
@@ -210,15 +211,15 @@ class WebFingerPlugin {
 
         $args = array(
           'search'         => $parts[0],
-      	  'search_columns' => array('user_name', 'display_name', 'user_login'),
+          'search_columns' => array('user_name', 'display_name', 'user_login'),
           'meta_compare'   => '=',
         );
         break;
       // check mailto scheme
       case "mailto":
         $args = array(
-      	  'search'         => $host,
-      	  'search_columns' => array('user_email'),
+          'search'         => $host,
+          'search_columns' => array('user_email'),
           'meta_compare'   => '=',
         );
         break;
@@ -311,7 +312,7 @@ class WebFingerPlugin {
   }
 
   /**
-   * Convenience method to get user data by ID, username, object or from current user.
+   * convenience method to get user data by ID, username, object or from current user.
    *
    * @param mixed $id_or_name_or_object the username, ID or object. If not provided, the current user will be used.
    * @return bool|object False on failure, User DB row object

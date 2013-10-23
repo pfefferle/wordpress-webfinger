@@ -111,8 +111,8 @@ class WebFingerPlugin {
     if(!$photo) $photo = 'http://www.gravatar.com/avatar/'.md5($user->user_email);
 
     // generate default array
-    $webfinger = array('subject' => self::get_resource($user->ID),
-                       'aliases' => self::get_resources($user->ID),
+    $webfinger = array('subject' => self::get_user_resource($user->ID),
+                       'aliases' => self::get_user_resources($user->ID),
                        'links' => array(
                          array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url),
                          array('rel' => 'http://webfinger.net/rel/avatar',  'href' => $photo)
@@ -273,13 +273,13 @@ class WebFingerPlugin {
    * @param mixed $id_or_name_or_object
    * @return string|null
    */
-  function get_resource($id_or_name_or_object) {
+  function get_user_resource($id_or_name_or_object) {
     $user = self::get_user_by_various($id_or_name_or_object);
 
     if ($user) {
       $resource = $user->user_login."@".parse_url(home_url(), PHP_URL_HOST);
 
-      return $resources = apply_filters('webfinger_resource', "acct:".$resource, $user);
+      return apply_filters('webfinger_user_resource', "acct:".$resource, $user);
     } else {
       return null;
     }
@@ -291,11 +291,11 @@ class WebFingerPlugin {
    * @param mixed $id_or_name_or_object
    * @return array
    */
-  public function get_resources($id_or_name_or_object) {
+  public function get_user_resources($id_or_name_or_object) {
     $user = self::get_user_by_various($id_or_name_or_object);
 
     if ($user) {
-      $resources[] = self::get_resource($user, true);
+      $resources[] = self::get_user_resource($user, true);
       $resources[] = get_author_posts_url($user->ID, $user->user_nicename);
       if ($user->user_email && self::check_mail_domain($user->user_email)) {
         $resources[] = "mailto:".$user->user_email;
@@ -303,7 +303,7 @@ class WebFingerPlugin {
       if (get_user_meta($user->ID, "jabber", true) && self::check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
         $resources[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
       }
-      $resources = apply_filters('webfinger_resources', $resources, $user);
+      $resources = apply_filters('webfinger_user_resources', $resources, $user);
 
       return array_unique($resources);
     } else {

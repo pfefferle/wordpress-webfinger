@@ -103,7 +103,7 @@ class WebFingerPlugin {
    * @param string $resource the resource param
    * @return array the enriched webfinger data-array
    */
-  public function generate_default_content($webfinger, $user, $resource) {
+  public function generate_user_data($webfinger, $user, $resource) {
     // generate "profile" url
     $url = get_author_posts_url($user->ID, $user->user_nicename);
     // generate default photo-url
@@ -409,7 +409,7 @@ add_action('query_vars', array('WebFingerPlugin', 'query_vars'));
 add_action('parse_request', array('WebFingerPlugin', 'parse_request'));
 add_action('generate_rewrite_rules', array('WebFingerPlugin', 'rewrite_rules'));
 
-add_filter('webfinger', array('WebFingerPlugin', 'generate_default_content'), 0, 3);
+add_filter('webfinger', array('WebFingerPlugin', 'generate_user_data'), 0, 3);
 add_filter('webfinger', array('WebFingerPlugin', 'filter_by_rel'), 99, 1);
 
 add_action('webfinger_render', array('WebFingerPlugin', 'render_jrd'), 20, 1);

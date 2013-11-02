@@ -22,7 +22,7 @@ class WebFingerPlugin {
    * @param array $vars
    * @return array
    */
-  public function query_vars($vars) {
+  public static function query_vars($vars) {
     $vars[] = 'well-known';
     $vars[] = 'resource';
     $vars[] = 'rel';
@@ -35,7 +35,7 @@ class WebFingerPlugin {
    *
    * @param WP_Rewrite
    */
-  function rewrite_rules( $wp_rewrite ) {
+  public static function rewrite_rules( $wp_rewrite ) {
     $webfinger_rules = array(
       '.well-known/webfinger' => 'index.php?well-known=webfinger'
     );
@@ -51,7 +51,7 @@ class WebFingerPlugin {
    * @uses apply_filters() Calls 'webfinger' on webfinger data array
    * @uses do_action() Calls 'webfinger_render' to render webfinger data
    */
-  public function parse_request($wp) {
+  public static function parse_request($wp) {
     // check if it is a webfinger request or not
     if (!array_key_exists('well-known', $wp->query_vars) ||
         $wp->query_vars['well-known'] != 'webfinger') {
@@ -87,7 +87,7 @@ class WebFingerPlugin {
    *
    * @param array $webfinger the webfinger data-array
    */
-  public function render_jrd($webfinger) {
+  public static function render_jrd($webfinger) {
     header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/jrd+json; charset=' . get_bloginfo('charset'), true);
 
@@ -103,7 +103,7 @@ class WebFingerPlugin {
    * @param string $resource the resource param
    * @return array the enriched webfinger data-array
    */
-  public function generate_user_data($webfinger, $user, $resource) {
+  public static function generate_user_data($webfinger, $user, $resource) {
     // generate "profile" url
     $url = get_author_posts_url($user->ID, $user->user_nicename);
     // generate default photo-url
@@ -135,7 +135,7 @@ class WebFingerPlugin {
    * @param array $queries
    * @return array
    */
-  public function filter_by_rel($webfinger) {
+  public static function filter_by_rel($webfinger) {
     // explode the query-string by hand because php does not
     // support multiple queries with the same name
     $query = explode("&", $_SERVER['QUERY_STRING']);
@@ -172,7 +172,7 @@ class WebFingerPlugin {
    * @uses apply_filters() uses 'webfinger_user' to filter the
    *       user and 'webfinger_user_query' to add custom query-params
    */
-  private function get_user_by_uri($uri) {
+  private static function get_user_by_uri($uri) {
     global $wpdb;
 
     $uri = urldecode($uri);
@@ -281,7 +281,7 @@ class WebFingerPlugin {
    * @param mixed $id_or_name_or_object
    * @return string|null
    */
-  function get_user_resource($id_or_name_or_object) {
+  public static function get_user_resource($id_or_name_or_object) {
     $user = self::get_user_by_various($id_or_name_or_object);
 
     if ($user) {
@@ -299,7 +299,7 @@ class WebFingerPlugin {
    * @param mixed $id_or_name_or_object
    * @return array
    */
-  public function get_user_resources($id_or_name_or_object) {
+  public static function get_user_resources($id_or_name_or_object) {
     $user = self::get_user_by_various($id_or_name_or_object);
 
     if ($user) {
@@ -328,7 +328,7 @@ class WebFingerPlugin {
    * @author Will Norris
    * @see get_userdata_by_various() # DiSo OpenID-Plugin
    */
-  public function get_user_by_various($id_or_name_or_object = null) {
+  public static function get_user_by_various($id_or_name_or_object = null) {
     if ( $id_or_name_or_object === null ) {
       $user = wp_get_current_user();
       if ($user == null) return false;
@@ -348,7 +348,7 @@ class WebFingerPlugin {
    * @param string $email
    * @return boolean
    */
-  public function check_mail_domain($email) {
+  public static function check_mail_domain($email) {
     if (preg_match('/^([a-zA-Z]+:)?([^@]+)@([a-zA-Z0-9._-]+)$/i', $email, $email_parts) &&
         ($email_parts[3] == parse_url(home_url(), PHP_URL_HOST))) {
       return true;

@@ -136,6 +136,11 @@ class WebFingerPlugin {
    * @return array
    */
   public static function filter_by_rel($webfinger) {
+    // check if "rel" is set
+    if (!array_key_exists('rel', $_GET)) {
+      return $webfinger;
+    }
+
     // explode the query-string by hand because php does not
     // support multiple queries with the same name
     $query = explode("&", $_SERVER['QUERY_STRING']);
@@ -144,11 +149,6 @@ class WebFingerPlugin {
     foreach($query as $param) {
       list($name, $value) = explode('=', $param);
       $params[urldecode($name)][] = urldecode($value);
-    }
-
-    // check if "rel" is set
-    if (!array_key_exists('rel', $params)) {
-      return $webfinger;
     }
 
     // filter webfinger-array

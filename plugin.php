@@ -147,7 +147,7 @@ class WebFingerPlugin {
     $params = array();
 
     foreach($query as $param) {
-      list($name, $value) = explode('=', $param);
+      @list($name, $value) = explode('=', $param);
       $params[urldecode($name)][] = urldecode($value);
     }
 

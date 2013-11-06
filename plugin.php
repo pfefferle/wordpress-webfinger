@@ -300,21 +300,24 @@ class WebFingerPlugin {
   public static function get_user_resources($id_or_name_or_object) {
     $user = self::get_user_by_various($id_or_name_or_object);
 
-    if ($user) {
-      $resources[] = self::get_user_resource($user, true);
-      $resources[] = get_author_posts_url($user->ID, $user->user_nicename);
-      if ($user->user_email && self::check_mail_domain($user->user_email)) {
-        $resources[] = "mailto:".$user->user_email;
-      }
-      if (get_user_meta($user->ID, "jabber", true) && self::check_mail_domain(get_user_meta($user->ID, "jabber", true))) {
-        $resources[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
-      }
-      $resources = apply_filters('webfinger_user_resources', $resources, $user);
-
-      return array_unique($resources);
-    } else {
+    if (!$user) {
       return array();
     }
+
+    $resources[] = self::get_user_resource($user, true);
+    $resources[] = get_author_posts_url($user->ID, $user->user_nicename);
+
+    if ($user->user_email) {
+      $resources[] = "mailto:".$user->user_email;
+    }
+
+    if (get_user_meta($user->ID, "jabber", true)) {
+      $resources[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
+    }
+
+    $resources = apply_filters('webfinger_user_resources', $resources, $user);
+
+    return array_unique($resources);
   }
 
   /**
@@ -338,21 +341,6 @@ class WebFingerPlugin {
     } else {
       return get_userdatabylogin($id_or_name_or_object);
     }
-  }
-
-  /**
-   * check if the email address has the same domain as the blog
-   *
-   * @param string $email
-   * @return boolean
-   */
-  public static function check_mail_domain($email) {
-    if (preg_match('/^([a-zA-Z]+:)?([^@]+)@([a-zA-Z0-9._-]+)$/i', $email, $email_parts) &&
-        ($email_parts[3] == parse_url(home_url(), PHP_URL_HOST))) {
-      return true;
-    }
-
-    return false;
   }
 
 }

@@ -173,8 +173,6 @@ class WebFingerPlugin {
    *       user and 'webfinger_user_query' to add custom query-params
    */
   private static function get_user_by_uri($uri) {
-    global $wpdb;
-
     $uri = urldecode($uri);
 
     if (!preg_match("/^([a-zA-Z^:]+):(.*)$/i", $uri, $match)) {

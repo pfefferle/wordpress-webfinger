@@ -59,7 +59,8 @@ class WebFingerPlugin {
     }
 
     // check if "resource" param exists
-    if (!array_key_exists('resource', $wp->query_vars)) {
+    if (!array_key_exists('resource', $wp->query_vars) ||
+        empty($wp->query_vars['resource'])) {
       status_header(400);
       header('Content-Type: text/plain; charset=' . get_bloginfo('charset'), true);
       echo 'missing "resource" parameter';

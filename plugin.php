@@ -183,7 +183,7 @@ class WebFingerPlugin {
     }
 
     // ignore the default user query and return your own WP_User
-    if ($user = apply_filters("webfinger_before_user_query", null, $uri)) {
+    if ($user = apply_filters("webfinger_pre_user_query", null, $uri)) {
       // check if $user is a correct WP_User
       if (is_object($user) && get_class($user) == "WP_User") {
         return $user;
@@ -272,7 +272,7 @@ class WebFingerPlugin {
       $user = null;
     }
 
-    return apply_filters("webfinger_after_user_query", $user, $uri);
+    return apply_filters("webfinger_post_user_query", $user, $uri);
   }
 
   /**

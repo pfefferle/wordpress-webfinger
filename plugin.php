@@ -145,17 +145,28 @@ class WebFingerPlugin {
     // explode the query-string by hand because php does not
     // support multiple queries with the same name
     $query = explode("&", $_SERVER['QUERY_STRING']);
-    $params = array();
+    $rels = array();
 
     foreach($query as $param) {
-      @list($name, $value) = explode('=', $param);
-      $params[urldecode($name)][] = urldecode($value);
+      $param = explode('=', $param);
+
+      // check if query-string is valid and if it is a 'rel'
+      if (isset($param[0], $param[1]) &&
+          $param[0] == 'rel' &&
+          !empty($param[1])) {
+        $rels[] = urldecode(trim($param[1]));
+      }
+    }
+
+    // check if there is something to filter
+    if (empty($rels)) {
+      return $webfinger;
     }
 
     // filter webfinger-array
     $links = array();
     foreach ($webfinger['links'] as $link) {
-      if (in_array($link["rel"], $params['rel'])) {
+      if (in_array($link["rel"], $rels)) {
         $links[] = $link;
       }
     }

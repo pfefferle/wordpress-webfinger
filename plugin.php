@@ -386,7 +386,7 @@ if (!function_exists('url_to_authorid')) {
     // Check to see if we are using rewrite rules
     $rewrite = $wp_rewrite->wp_rewrite_rules();
 
-    // Not using rewrite rules, and 'p=N' and 'page_id=N' methods failed, so we're out of options
+    // Not using rewrite rules, and 'author=N' method failed, so we're out of options
     if ( empty($rewrite) )
       return 0;
 

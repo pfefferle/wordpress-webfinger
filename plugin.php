@@ -67,19 +67,18 @@ class WebFingerPlugin {
       exit;
     }
 
-    // find matching user
-    $user = self::get_user_by_uri($wp->query_vars['resource']);
+    // filter webfinger array
+    $webfinger = apply_filters('webfinger_data', array(), $wp->query_vars['resource']);
 
     // check if "user" exists
-    if (!$user) {
+    if (empty($webfinger)) {
       status_header(404);
       header('Content-Type: text/plain; charset=' . get_bloginfo('charset'), true);
-      echo 'no user found';
+      echo "no data for resource '{$wp->query_vars['resource']}' found";
       exit;
     }
 
-    // filter webfinger array
-    $webfinger = apply_filters('webfinger', array(), $user, $wp->query_vars['resource'], $wp->query_vars);
+    
     do_action('webfinger_render', $webfinger);
   }
 
@@ -104,7 +103,14 @@ class WebFingerPlugin {
    * @param string $resource the resource param
    * @return array the enriched webfinger data-array
    */
-  public static function generate_user_data($webfinger, $user, $resource) {
+  public static function generate_user_data($webfinger, $resource) {
+    // find matching user
+    $user = self::get_user_by_uri($resource);
+    
+    if (!$user) {
+      return $webfinger;
+    }
+    
     // generate "profile" url
     $url = get_author_posts_url($user->ID, $user->user_nicename);
     // generate default photo-url
@@ -124,7 +130,7 @@ class WebFingerPlugin {
       $webfinger['links'][] = array('rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $user->user_url);
     }
 
-    return $webfinger;
+    return apply_filters('webfinger_user_data', $webfinger, $resource, $user);
   }
 
   /**
@@ -354,7 +360,21 @@ class WebFingerPlugin {
       return get_userdatabylogin($id_or_name_or_object);
     }
   }
-
+  
+  /**
+   * backwards compatibility for old versions. please don't use!
+   *
+   * @deprecated
+   *
+   * @param array $webfinger
+   * @param string $resource
+   * @param WP_User $user
+   * @return array
+   */
+  public static function legacy_filter($webfinger, $resource, $user) {
+    // filter webfinger array
+    return apply_filters('webfinger', $webfinger, $user, $resource, $_GET);
+  }
 }
 
 if (!function_exists('url_to_authorid')) {
@@ -407,8 +427,11 @@ add_action('query_vars', array('WebFingerPlugin', 'query_vars'));
 add_action('parse_request', array('WebFingerPlugin', 'parse_request'));
 add_action('generate_rewrite_rules', array('WebFingerPlugin', 'rewrite_rules'));
 
-add_filter('webfinger', array('WebFingerPlugin', 'generate_user_data'), 0, 3);
-add_filter('webfinger', array('WebFingerPlugin', 'filter_by_rel'), 99, 1);
+add_filter('webfinger_data', array('WebFingerPlugin', 'generate_user_data'), 10, 3);
+add_filter('webfinger_data', array('WebFingerPlugin', 'filter_by_rel'), 99, 1);
+
+// support plugins pre 3.0.0
+add_filter('webfinger_user_data', array('WebFingerPlugin', 'legacy_filter'), null, 3);
 
 add_action('webfinger_render', array('WebFingerPlugin', 'render_jrd'), 20, 1);
 

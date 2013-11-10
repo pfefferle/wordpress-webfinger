@@ -63,7 +63,7 @@ class WebFingerPlugin {
         empty($wp->query_vars['resource'])) {
       status_header(400);
       header('Content-Type: text/plain; charset=' . get_bloginfo('charset'), true);
-      echo 'missing "resource" parameter';
+      echo "missing 'resource' parameter";
       exit;
     }
 

@@ -218,7 +218,7 @@ class WebFingerPlugin {
         if ($author_id = url_to_authorid($uri)) {
           $user = get_userdata($author_id);
 
-          return apply_filters("webfinger_after_user_query", $user, $uri);
+          return apply_filters("webfinger_post_user_query", $user, $uri);
         }
 
         // search url in user_url

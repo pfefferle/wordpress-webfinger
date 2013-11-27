@@ -78,7 +78,6 @@ class WebFingerPlugin {
       exit;
     }
 
-    
     do_action('webfinger_render', $webfinger);
   }
 
@@ -106,11 +105,11 @@ class WebFingerPlugin {
   public static function generate_user_data($webfinger, $resource) {
     // find matching user
     $user = self::get_user_by_uri($resource);
-    
+
     if (!$user) {
       return $webfinger;
     }
-    
+
     // generate "profile" url
     $url = get_author_posts_url($user->ID, $user->user_nicename);
     // generate default photo-url
@@ -215,18 +214,23 @@ class WebFingerPlugin {
       // check urls
       case "http":
       case "https":
+        // check if is the author url
         if ($author_id = url_to_authorid($uri)) {
-          $user = get_userdata($author_id);
-
-          return apply_filters("webfinger_post_user_query", $user, $uri);
+          $args = array(
+            'search'         => $author_id,
+            'search_columns' => array('ID'),
+            'meta_compare'   => '=',
+          );
+        // check other urls
+        } else {
+          // search url in user_url
+          $args = array(
+            'search'         => $uri,
+            'search_columns' => array('user_url'),
+            'meta_compare'   => '=',
+          );
         }
 
-        // search url in user_url
-        $args = array(
-          'search'         => $uri,
-          'search_columns' => array('user_url'),
-          'meta_compare'   => '=',
-        );
         break;
       // check acct scheme
       case "acct":
@@ -360,7 +364,7 @@ class WebFingerPlugin {
       return get_userdatabylogin($id_or_name_or_object);
     }
   }
-  
+
   /**
    * backwards compatibility for old versions. please don't use!
    *

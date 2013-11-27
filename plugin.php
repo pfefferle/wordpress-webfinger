@@ -197,14 +197,6 @@ class WebFingerPlugin {
       return null;
     }
 
-    // ignore the default user query and return your own WP_User
-    if ($user = apply_filters("webfinger_pre_user_query", null, $uri)) {
-      // check if $user is a correct WP_User
-      if (is_object($user) && get_class($user) == "WP_User") {
-        return $user;
-      }
-    }
-
     // extract the scheme
     $scheme = $match[1];
     // extract the "host"
@@ -292,7 +284,7 @@ class WebFingerPlugin {
       $user = null;
     }
 
-    return apply_filters("webfinger_post_user_query", $user, $uri);
+    return $user;
   }
 
   /**
@@ -435,9 +427,9 @@ add_filter('webfinger_data', array('WebFingerPlugin', 'generate_user_data'), 10,
 add_filter('webfinger_data', array('WebFingerPlugin', 'filter_by_rel'), 99, 1);
 
 // support plugins pre 3.0.0
-add_filter('webfinger_user_data', array('WebFingerPlugin', 'legacy_filter'), null, 3);
+add_filter('webfinger_user_data', array('WebFingerPlugin', 'legacy_filter'), 10, 3);
 
-add_action('webfinger_render', array('WebFingerPlugin', 'render_jrd'), 20, 1);
+add_action('webfinger_render', array('WebFingerPlugin', 'render_jrd'));
 
 register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

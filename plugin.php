@@ -102,9 +102,9 @@ class WebFingerPlugin {
    * @param string $resource the resource param
    * @return array the enriched webfinger data-array
    */
-  public static function default_user_data($webfinger, $resource) {
+  public static function generate_user_data($webfinger, $resource) {
     // find matching user
-    $user = apply_filters("webfinger_user", null, $resource);
+    $user = self::get_user_by_uri($resource);
 
     if (!$user) {
       return $webfinger;
@@ -133,19 +133,6 @@ class WebFingerPlugin {
   }
 
   /**
-   * default user matcher
-   *
-   * @uses get_user_by_uri()
-   * @param stdClass $user the WordPress user
-   * @param string $resource the resource param
-   * @return stdClass the user
-   */
-  public static function default_user($user, $resource) {
-
-    return self::get_user_by_uri($resource);
-  }
-
-  /**
    * filters the webfinger array by request params like "rel"
    *
    * @link http://tools.ietf.org/html/rfc7033#section-4.3
@@ -157,11 +144,6 @@ class WebFingerPlugin {
   public static function filter_by_rel($webfinger) {
     // check if "rel" is set
     if (!array_key_exists('rel', $_GET)) {
-      return $webfinger;
-    }
-
-    // check if array has any "links"
-    if (!isset($webfinger['links'])) {
       return $webfinger;
     }
 
@@ -188,7 +170,6 @@ class WebFingerPlugin {
 
     // filter webfinger-array
     $links = array();
-
     foreach ($webfinger['links'] as $link) {
       if (in_array($link["rel"], $rels)) {
         $links[] = $link;
@@ -442,10 +423,8 @@ add_action('query_vars', array('WebFingerPlugin', 'query_vars'));
 add_action('parse_request', array('WebFingerPlugin', 'parse_request'));
 add_action('generate_rewrite_rules', array('WebFingerPlugin', 'rewrite_rules'));
 
-add_filter('webfinger_data', array('WebFingerPlugin', 'default_user_data'), 10, 3);
+add_filter('webfinger_data', array('WebFingerPlugin', 'generate_user_data'), 10, 3);
 add_filter('webfinger_data', array('WebFingerPlugin', 'filter_by_rel'), 99, 1);
-
-add_filter('webfinger_user', array('WebFingerPlugin', 'default_user'), 10, 2);
 
 // support plugins pre 3.0.0
 add_filter('webfinger_user_data', array('WebFingerPlugin', 'legacy_filter'), 10, 3);

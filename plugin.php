@@ -142,10 +142,18 @@ class WebFingerPlugin {
    * @return array
    */
   public static function filter_by_rel($webfinger) {
-    // check if "rel" is set
-    if (!array_key_exists('rel', $_GET)) {
+
+
+    // check if webfinger is empty or if "rel"
+    // is set or if array has any "links"
+    if (empty($webfinger) ||
+        !array_key_exists('rel', $_GET) ||
+        !isset($webfinger['links'])) {
       return $webfinger;
     }
+
+    //
+
 
     // explode the query-string by hand because php does not
     // support multiple queries with the same name

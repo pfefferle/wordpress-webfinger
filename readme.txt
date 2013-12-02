@@ -5,6 +5,8 @@ Tags: well-known, discovery, webfinger, JRD
 Requires at least: 2.7
 Tested up to: 3.6.1
 Stable tag: 2.0.1
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 WebFinger for WordPress!
 
@@ -23,19 +25,19 @@ The JSON object is referred to as the JSON Resource Descriptor (JRD).
 
 (quote from the [RFC](http://tools.ietf.org/html/rfc7033))
 
-== FAQ ==
+== Frequently Asked Questions ==
 
 = How can I extend WebFinger =
 
 You can add your own links or properties like that:
 
-    function oexchange_target_link($array) {
-      $array["links"][] = array("rel" => "http://oexchange.org/spec/0.8/rel/resident-target",
-        "href" => "http://example.com",
-        "type" => "application/xrd+xml");
-      return $array;
-    }
-    add_filter('webfinger', 'oexchange_target_link');
+`function oexchange_target_link($array) {
+  $array["links"][] = array("rel" => "http://oexchange.org/spec/0.8/rel/resident-target",
+    "href" => "http://example.com",
+    "type" => "application/xrd+xml");
+  return $array;
+}
+add_filter('webfinger', 'oexchange_target_link');`
 
 = Where can I find the Spec? =
 

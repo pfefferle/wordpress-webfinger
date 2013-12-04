@@ -58,6 +58,8 @@ class WebFingerPlugin {
       return;
     }
 
+    header('Access-Control-Allow-Origin: *');
+
     // check if "resource" param exists
     if (!array_key_exists('resource', $wp->query_vars) ||
         empty($wp->query_vars['resource'])) {
@@ -79,6 +81,9 @@ class WebFingerPlugin {
     }
 
     do_action('webfinger_render', $webfinger);
+
+    // stop exactly here!
+    exit;
   }
 
   /**
@@ -87,11 +92,10 @@ class WebFingerPlugin {
    * @param array $webfinger the webfinger data-array
    */
   public static function render_jrd($webfinger) {
-    header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/jrd+json; charset=' . get_bloginfo('charset'), true);
 
     echo json_encode($webfinger);
-    exit();
+    exit;
   }
 
   /**

@@ -252,6 +252,7 @@ class WebFingerPlugin {
         break;
       // check xmpp/jabber schemes
       case "xmpp":
+      case "urn:xmpp":
         $args = array(
           'meta_key'       => 'jabber',
           'meta_value'     => $host,

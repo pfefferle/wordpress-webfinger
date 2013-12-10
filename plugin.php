@@ -250,8 +250,31 @@ class WebFingerPlugin {
           'meta_compare'   => '=',
         );
         break;
-      // check instant messaging schemes
+      // check xmpp/jabber schemes
       case "xmpp":
+        $args = array(
+          'meta_key'       => 'jabber',
+          'meta_value'     => $host,
+          'meta_compare'   => '=',
+        );
+        break;
+      // check Yahoo messenger schemes
+      case "ymsgr":
+        $args = array(
+          'meta_key'       => 'yim',
+          'meta_value'     => $host,
+          'meta_compare'   => '=',
+        );
+        break;
+      // check AOL messenger schemes
+      case "aim":
+        $args = array(
+          'meta_key'       => 'aim',
+          'meta_value'     => $host,
+          'meta_compare'   => '=',
+        );
+        break;
+      // check instant messaging schemes
       case "im":
         $args = array(
           'meta_query' => array(

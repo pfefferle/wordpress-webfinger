@@ -349,6 +349,7 @@ class WebFingerPlugin {
       return array();
     }
 
+    // generate account idenitfier (acct: uri)
     $resources[] = self::get_user_resource($user, true);
     $resources[] = get_author_posts_url($user->ID, $user->user_nicename);
 
@@ -356,13 +357,27 @@ class WebFingerPlugin {
       $resources[] = "mailto:".$user->user_email;
     }
 
+    /*
+     * the IM schemes are based on the "vCard Extensions for Instant Messaging (IM)".
+     * that means that the YahooID for example is represented by ymsgr:identifier
+     * and not by the ymsgr:SendIM?identifier pseudo uri
+     *
+     * @link http://tools.ietf.org/html/rfc4770#section-1
+     */
+    if (get_user_meta($user->ID, "yim", true)) {
+      $resources[] = "ymsgr:".get_user_meta($user->ID, "yim", true);
+    }
+
+    // aim:identifier instead of aim:goim?screenname=identifier
+    if (get_user_meta($user->ID, "aim", true)) {
+      $resources[] = "aim:".get_user_meta($user->ID, "aim", true);
+    }
+
     if (get_user_meta($user->ID, "jabber", true)) {
       $resources[] = "xmpp:".get_user_meta($user->ID, "jabber", true);
     }
 
-    $resources = apply_filters('webfinger_user_resources', $resources, $user);
-
-    return array_unique($resources);
+    return array_unique(apply_filters('webfinger_user_resources', $resources, $user));
   }
 
   /**

@@ -8,6 +8,9 @@ Author: pfefferle
 Author URI: http://notizblog.org/
 */
 
+// initialize plugin
+add_action('init', array( 'WebFingerPlugin', 'init' ));
+
 /**
  * webfinger
  *
@@ -15,6 +18,27 @@ Author URI: http://notizblog.org/
  * @author Will Norris
  */
 class WebFingerPlugin {
+
+  /**
+   * Initialize the plugin, registering WordPess hooks.
+   */
+  public static function init() {
+    register_activation_hook(__FILE__, 'flush_rewrite_rules');
+    register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
+
+    add_action('query_vars', array('WebFingerPlugin', 'query_vars'));
+    add_action('parse_request', array('WebFingerPlugin', 'parse_request'));
+    add_action('generate_rewrite_rules', array('WebFingerPlugin', 'rewrite_rules'));
+
+    add_filter('webfinger_data', array('WebFingerPlugin', 'generate_user_data'), 10, 3);
+    add_filter('webfinger_data', array('WebFingerPlugin', 'filter_by_rel'), 99, 1);
+
+    // default output
+    add_action('webfinger_render', array('WebFingerPlugin', 'render_jrd'));
+
+    // support plugins pre 3.0.0
+    add_filter('webfinger_user_data', array('WebFingerPlugin', 'legacy_filter'), 10, 3);
+  }
 
   /**
    * add query vars
@@ -464,18 +488,3 @@ if (!function_exists('url_to_authorid')) {
     return 0;
   }
 }
-
-add_action('query_vars', array('WebFingerPlugin', 'query_vars'));
-add_action('parse_request', array('WebFingerPlugin', 'parse_request'));
-add_action('generate_rewrite_rules', array('WebFingerPlugin', 'rewrite_rules'));
-
-add_filter('webfinger_data', array('WebFingerPlugin', 'generate_user_data'), 10, 3);
-add_filter('webfinger_data', array('WebFingerPlugin', 'filter_by_rel'), 99, 1);
-
-// support plugins pre 3.0.0
-add_filter('webfinger_user_data', array('WebFingerPlugin', 'legacy_filter'), 10, 3);
-
-add_action('webfinger_render', array('WebFingerPlugin', 'render_jrd'));
-
-register_activation_hook(__FILE__, 'flush_rewrite_rules');
-register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

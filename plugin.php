@@ -20,7 +20,7 @@ add_action('init', array( 'WebFingerPlugin', 'init' ));
 class WebFingerPlugin {
 
   /**
-   * Initialize the plugin, registering WordPess hooks.
+   * Initialize the plugin, registering WordPress hooks.
    */
   public static function init() {
     register_activation_hook(__FILE__, 'flush_rewrite_rules');

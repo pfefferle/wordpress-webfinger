@@ -27,25 +27,42 @@ The JSON object is referred to as the JSON Resource Descriptor (JRD).
 
 ## Frequently Asked Questions ##
 
-### How can I extend WebFinger ###
+### Add resource -> user mappings ###
+
+
+
+### How to extend the JRD file ###
 
 You can add your own links or properties like that:
 
-```
-function oexchange_target_link($array) {
-  $array["links"][] = array("rel" => "http://oexchange.org/spec/0.8/rel/resident-target",
-    "href" => "http://example.com",
-    "type" => "application/xrd+xml");
-  return $array;
-}
-add_filter('webfinger', 'oexchange_target_link');
-```
+    function oexchange_target_link($array) {
+      $array["links"][] = array("rel" => "http://oexchange.org/spec/0.8/rel/resident-target",
+        "href" => "http://example.com",
+        "type" => "application/xrd+xml");
+      return $array;
+    }
+    add_filter('webfinger', 'oexchange_target_link');
 
-### Where can I find the Spec? ###
+### Add alternate file/output formats ###
+
+You can add your own links or properties like that:
+
+    function render_xrd($webfinger) {
+      // set custom header();
+
+      // JRD to XRD code
+
+      exit;
+    }
+    add_action('webfinger_render', 'render_xrd', 5);
+
+You can find a detailed example here <https://github.com/pfefferle/wordpress-webfinger-legacy>
+
+### Link to the spec ###
 
 WebFinger was specified as [RFC 7033](http://tools.ietf.org/html/rfc7033)
 
-### Where can I find out more about WebFinger? ###
+### The WebFinger community page ###
 
 Please visit <http://webfinger.net>
 
@@ -135,4 +152,4 @@ Project maintined on github at
 
 ### 3.0.0 ###
 
-This versions drops classic WebFinger support to keep the plugin short and simple
+This versions drops classic WebFinger support to keep the plugin short and simple. All legacy stuff is bundled in this new plugin <https://github.com/pfefferle/wordpress-webfinger-legacy>

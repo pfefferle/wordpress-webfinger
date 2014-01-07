@@ -27,10 +27,6 @@ The JSON object is referred to as the JSON Resource Descriptor (JRD).
 
 ## Frequently Asked Questions ##
 
-### Add resource -> user mappings ###
-
-
-
 ### How to extend the JRD file ###
 
 You can add your own links or properties like that:
@@ -58,9 +54,9 @@ You can add your own links or properties like that:
 
 You can find a detailed example here <https://github.com/pfefferle/wordpress-webfinger-legacy>
 
-### Link to the spec ###
+### The spec ###
 
-WebFinger was specified as [RFC 7033](http://tools.ietf.org/html/rfc7033)
+WebFinger is specified as [RFC 7033](http://tools.ietf.org/html/rfc7033)
 
 ### The WebFinger community page ###
 

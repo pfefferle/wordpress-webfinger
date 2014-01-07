@@ -25,6 +25,12 @@ About WebFinger:
 
 (quote from the [RFC](http://tools.ietf.org/html/rfc7033))
 
+## Installation ##
+
+1. Upload the `webfinger`-folder to the `/wp-content/plugins/` directory
+2. Activate the plugin through the *Plugins* menu in WordPress
+3. ...and that's it :)
+
 ## Frequently Asked Questions ##
 
 ### How to extend the JRD file ###
@@ -61,6 +67,12 @@ WebFinger is specified as [RFC 7033](http://tools.ietf.org/html/rfc7033)
 ### The WebFinger community page ###
 
 Please visit <http://webfinger.net>
+
+## Upgrade Notice ##
+
+### 3.0.0 ###
+
+This versions drops classic WebFinger support to keep the plugin short and simple. All legacy stuff is bundled in this new plugin <https://github.com/pfefferle/wordpress-webfinger-legacy>
 
 ## Changelog ##
 
@@ -137,15 +149,3 @@ Project maintined on github at
 ### 0.5 ###
 
 * Initial release
-
-## Installation ##
-
-1. Upload the `webfinger`-folder to the `/wp-content/plugins/` directory
-2. Activate the plugin through the *Plugins* menu in WordPress
-3. ...and that's it :)
-
-## Upgrade Notice ##
-
-### 3.0.0 ###
-
-This versions drops classic WebFinger support to keep the plugin short and simple. All legacy stuff is bundled in this new plugin <https://github.com/pfefferle/wordpress-webfinger-legacy>

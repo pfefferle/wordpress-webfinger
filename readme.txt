@@ -4,7 +4,7 @@ Donate link: http://14101978.de
 Tags: well-known, discovery, webfinger, JRD
 Requires at least: 2.7
 Tested up to: 3.6.1
-Stable tag: 2.0.1
+Stable tag: 3.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 

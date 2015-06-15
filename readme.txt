@@ -3,8 +3,8 @@ Contributors: pfefferle, willnorris
 Donate link: http://14101978.de
 Tags: well-known, discovery, webfinger, JRD
 Requires at least: 2.7
-Tested up to: 3.6.1
-Stable tag: 3.0.0
+Tested up to: 4.2.2
+Stable tag: 3.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,13 +37,13 @@ About WebFinger:
 
 You can add your own links or properties like that:
 
-    function oexchange_target_link($array) {
-      $array["links"][] = array("rel" => "http://oexchange.org/spec/0.8/rel/resident-target",
-        "href" => "http://example.com",
-        "type" => "application/xrd+xml");
+    function oexchange_target_link( $array ) {
+      $array["links"][] = array( 'rel' => 'http://oexchange.org/spec/0.8/rel/resident-target',
+        'href' => 'http://example.com',
+        'type' => 'application/xrd+xml' );
       return $array;
     }
-    add_filter('webfinger', 'oexchange_target_link');
+    add_filter( 'webfinger', 'oexchange_target_link' );
 
 = Add alternate file/output formats =
 
@@ -56,7 +56,7 @@ You can add your own links or properties like that:
 
       exit;
     }
-    add_action('webfinger_render', 'render_xrd', 5);
+    add_action( 'webfinger_render', 'render_xrd', 5 );
 
 You can find a detailed example here <https://github.com/pfefferle/wordpress-webfinger-legacy>
 
@@ -76,8 +76,12 @@ This versions drops classic WebFinger support to keep the plugin short and simpl
 
 == Changelog ==
 
-Project maintined on github at
-[pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+
+= 3.0.1 =
+
+* updated version informatsions
+* support the WordPress Coding Standard
 
 = 3.0.0 =
 

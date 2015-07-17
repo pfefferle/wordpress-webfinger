@@ -3,7 +3,7 @@
  Plugin Name: WebFinger
  Plugin URI: http://wordpress.org/extend/plugins/webfinger/
  Description: WebFinger for WordPress
- Version: 3.0.0
+ Version: 3.0.1
  Author: pfefferle
  Author URI: http://notizblog.org/
 */
@@ -75,7 +75,7 @@ class WebFingerPlugin {
 	 * @uses apply_filters() Calls 'webfinger' on webfinger data array
 	 * @uses do_action() Calls 'webfinger_render' to render webfinger data
 	 */
-	public static function parse_request($wp) {
+	public static function parse_request( $wp ) {
 		// check if it is a webfinger request or not
 		if ( ! array_key_exists( 'well-known', $wp->query_vars ) ||
 				'webfinger' != $wp->query_vars['well-known'] ) {
@@ -155,14 +155,14 @@ class WebFingerPlugin {
 			'subject' => self::get_user_resource( $user->ID ),
 			'aliases' => self::get_user_resources( $user->ID ),
 			'links' => array(
-				array( 'rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url),
-				array( 'rel' => 'http://webfinger.net/rel/avatar', 'href' => $photo),
-			)
+				array( 'rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url ),
+				array( 'rel' => 'http://webfinger.net/rel/avatar', 'href' => $photo ),
+			),
 		);
 
 		// add user_url if set
 		if ( isset( $user->user_url ) && ! empty( $user->user_url ) ) {
-			$webfinger['links'][] = array( 'rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $user->user_url);
+			$webfinger['links'][] = array( 'rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $user->user_url );
 		}
 
 		return apply_filters( 'webfinger_user_data', $webfinger, $resource, $user );
@@ -228,7 +228,7 @@ class WebFingerPlugin {
 	 * @uses apply_filters() uses 'webfinger_user' to filter the
 	 *			 user and 'webfinger_user_query' to add custom query-params
 	 */
-	private static function get_user_by_uri( $ur ) {
+	private static function get_user_by_uri( $uri ) {
 		$uri = urldecode( $uri );
 
 		if ( ! preg_match( '/^([a-zA-Z^:]+):(.*)$/i', $uri, $match ) ) {
@@ -321,8 +321,8 @@ class WebFingerPlugin {
 							'key' => 'aim',
 							'value' => $host,
 							'compare' => '=',
-						)
-					)
+						),
+					),
 				);
 				break;
 			default:
@@ -417,9 +417,9 @@ class WebFingerPlugin {
 	 * @see get_userdata_by_various() # DiSo OpenID-Plugin
 	 */
 	public static function get_user_by_various( $id_or_name_or_object = null ) {
-		if ( $id_or_name_or_object === null ) {
+		if ( null === $id_or_name_or_object ) {
 			$user = wp_get_current_user();
-			if ( $user == null ) {
+			if ( null == $user ) {
 				return false;
 			}
 			return $user->data;

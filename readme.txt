@@ -3,12 +3,12 @@ Contributors: pfefferle, willnorris
 Donate link: http://14101978.de
 Tags: well-known, discovery, webfinger, JRD
 Requires at least: 2.7
-Tested up to: 4.2.2
+Tested up to: 4.3
 Stable tag: 3.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-WebFinger for WordPress!
+WebFinger for WordPress
 
 == Description ==
 
@@ -79,66 +79,53 @@ This versions drops classic WebFinger support to keep the plugin short and simpl
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
 
 = 3.0.1 =
-
-* updated version informatsions
+* updated version informations
 * support the WordPress Coding Standard
 
 = 3.0.0 =
-
 * added correct error-responses
 * remove legacy support for XRD and host-meta (props to Will Norris)
 
 = 2.0.1 =
-
 * small bugfix
 
 = 2.0.0 =
-
 * complete refactoring
 * removed simple-web-discovery
 * more filters and actions
 * works without /.well-known/ plugin
 
 = 1.4.0 =
-
 * small fixes
 * added "webfinger" as well-known uri
 
 = 1.3.1 =
-
 * added "rel"-filter (work in progress)
 * added more aliases
 
 = 1.3 =
-
 * added host-meta resource feature (see latest spec)
 
 = 1.2 =
-
 * added 404 http error if user doesn't exist
 * added jrd discovery for host-meta
 
 = 1.1 =
-
 * fixed an odd problem with lower WordPress versions
 * added support for the http://wordpress.org/extend/plugins/extended-profile/ (thanks to Singpolyma)
 
 = 1.0.1 =
-
 * api improvements
 
 = 1.0 =
-
 * basic simple-seb-discovery
 * json support
 * some small improvements
 
 = 0.9.1 =
-
 * some changes to support http://unhosted.org
 
 = 0.9 =
-
 * OStatus improvements
 * Better uri handling
 * Identifier overview (more to come)
@@ -146,10 +133,8 @@ Project maintained on github at [pfefferle/wordpress-webfinger](https://github.c
 * Added functions to get a users webfingers
 
 = 0.7 =
-
 * Added do_action param (for future OStatus plugin)
 * Author-Url as Webfinger-Identifier
 
 = 0.5 =
-
 * Initial release

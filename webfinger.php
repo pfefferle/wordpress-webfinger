@@ -46,7 +46,7 @@ class WebFingerPlugin {
 	 * @param array $vars
 	 * @return array
 	 */
-	public static function query_vars($vars) {
+	public static function query_vars( $vars ) {
 		$vars[] = 'well-known';
 		$vars[] = 'resource';
 		$vars[] = 'rel';
@@ -119,7 +119,7 @@ class WebFingerPlugin {
 	 *
 	 * @param array $webfinger the webfinger data-array
 	 */
-	public static function render_jrd($webfinger) {
+	public static function render_jrd( $webfinger ) {
 		header( 'Content-Type: application/jrd+json; charset=' . get_bloginfo( 'charset' ), true );
 
 		echo json_encode( $webfinger );
@@ -134,7 +134,7 @@ class WebFingerPlugin {
 	 * @param string $resource the resource param
 	 * @return array the enriched webfinger data-array
 	 */
-	public static function generate_user_data($webfinger, $resource) {
+	public static function generate_user_data( $webfinger, $resource ) {
 		// find matching user
 		$user = self::get_user_by_uri( $resource );
 
@@ -177,7 +177,7 @@ class WebFingerPlugin {
 	 * @param array $queries
 	 * @return array
 	 */
-	public static function filter_by_rel($webfinger) {
+	public static function filter_by_rel( $webfinger ) {
 		// check if webfinger is empty or if "rel"
 		// is set or if array has any "links"
 		if ( empty( $webfinger ) ||
@@ -457,7 +457,7 @@ if ( ! function_exists( 'url_to_authorid' ) ) {
 	 * @param string $url Permalink to check.
 	 * @return int User ID, or 0 on failure.
 	 */
-	function url_to_authorid($url) {
+	function url_to_authorid( $url ) {
 		global $wp_rewrite;
 
 		// check if url hase the same host

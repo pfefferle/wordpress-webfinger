@@ -2,9 +2,9 @@
 Contributors: pfefferle, willnorris
 Donate link: http://14101978.de
 Tags: well-known, discovery, webfinger, JRD
-Requires at least: 2.7
-Tested up to: 4.3
-Stable tag: 3.0.1
+Requires at least: 4.2
+Tested up to: 4.3.1
+Stable tag: 3.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,6 +69,12 @@ WebFinger is specified as [RFC 7033](http://tools.ietf.org/html/rfc7033)
 Please visit <http://webfinger.net>
 
 == Upgrade Notice ==
+
+= 3.0.2 =
+
+* `get_avatar_url` instead of custom code
+* some small code improvements
+* nicer PHP-docs
 
 = 3.0.0 =
 

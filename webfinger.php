@@ -1,18 +1,24 @@
 <?php
-/*
- Plugin Name: WebFinger
- Plugin URI: http://wordpress.org/extend/plugins/webfinger/
- Description: WebFinger for WordPress
- Version: 3.0.1
- Author: pfefferle
- Author URI: http://notizblog.org/
-*/
+/**
+ * Plugin Name: WebFinger
+ * Plugin URI: http://wordpress.org/extend/plugins/webfinger/
+ * Description: WebFinger for WordPress
+ * Version: 3.0.2
+ * Author: pfefferle
+ * Author URI: http://notizblog.org/
+ * License: GPLv2 or later
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
+ */
+
+// flush rewrite rules
+register_activation_hook( __FILE__, array( 'WebFingerPlugin', 'flush_rewrite_rules' ) );
+register_deactivation_hook( __FILE__, array( 'WebFingerPlugin', 'flush_rewrite_rules' ) );
 
 // initialize plugin
 add_action( 'init', array( 'WebFingerPlugin', 'init' ) );
 
 /**
- * webfinger
+ * WebFinger
  *
  * @author Matthias Pfefferle
  * @author Will Norris
@@ -23,9 +29,6 @@ class WebFingerPlugin {
 	 * Initialize the plugin, registering WordPress hooks.
 	 */
 	public static function init() {
-		register_activation_hook( __FILE__, 'flush_rewrite_rules' );
-		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
-
 		add_action( 'query_vars', array( 'WebFingerPlugin', 'query_vars' ) );
 		add_action( 'parse_request', array( 'WebFingerPlugin', 'parse_request' ) );
 		add_action( 'generate_rewrite_rules', array( 'WebFingerPlugin', 'rewrite_rules' ) );
@@ -41,9 +44,10 @@ class WebFingerPlugin {
 	}
 
 	/**
-	 * add query vars
+	 * Add query vars
 	 *
 	 * @param array $vars
+	 *
 	 * @return array
 	 */
 	public static function query_vars( $vars ) {
@@ -55,7 +59,7 @@ class WebFingerPlugin {
 	}
 
 	/**
-	 * add rewrite rules
+	 * Add rewrite rules
 	 *
 	 * @param WP_Rewrite
 	 */
@@ -68,7 +72,7 @@ class WebFingerPlugin {
 	}
 
 	/**
-	 * parse the webfinger request and render the document.
+	 * Parse the WebFinger request and render the document.
 	 *
 	 * @param WP $wp WordPress request context
 	 *
@@ -95,7 +99,7 @@ class WebFingerPlugin {
 			exit;
 		}
 
-		// filter webfinger array
+		// filter WebFinger array
 		$webfinger = apply_filters( 'webfinger_data', array(), $wp->query_vars['resource'] );
 
 		// check if "user" exists
@@ -115,9 +119,9 @@ class WebFingerPlugin {
 	}
 
 	/**
-	 * render the JRD representation of the webfinger resource.
+	 * Render the JRD representation of the webfinger resource.
 	 *
-	 * @param array $webfinger the webfinger data-array
+	 * @param array $webfinger the WebFinger data-array
 	 */
 	public static function render_jrd( $webfinger ) {
 		header( 'Content-Type: application/jrd+json; charset=' . get_bloginfo( 'charset' ), true );
@@ -127,11 +131,12 @@ class WebFingerPlugin {
 	}
 
 	/**
-	 * generates the webfinger base array
+	 * Generates the WebFinger base array
 	 *
-	 * @param array $webfinger the webfinger data-array
-	 * @param stdClass $user the WordPress user
-	 * @param string $resource the resource param
+	 * @param array		$webfinger	the WebFinger data-array
+	 * @param stdClass	$user		the WordPress user
+	 * @param string	$resource	the resource param
+	 *
 	 * @return array the enriched webfinger data-array
 	 */
 	public static function generate_user_data( $webfinger, $resource ) {
@@ -144,41 +149,41 @@ class WebFingerPlugin {
 
 		// generate "profile" url
 		$url = get_author_posts_url( $user->ID, $user->user_nicename );
+
 		// generate default photo-url
-		$photo = get_user_meta( $user->ID, 'photo', true );
-		if ( ! $photo ) {
-			$photo = 'http://www.gravatar.com/avatar/' . md5( $user->user_email );
-		}
+		$photo = get_avatar_url( $user->ID );
 
 		// generate default array
 		$webfinger = array(
 			'subject' => self::get_user_resource( $user->ID ),
 			'aliases' => self::get_user_resources( $user->ID ),
 			'links' => array(
-				array( 'rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $url ),
+				array( 'rel' => 'http://webfinger.net/rel/profile-page', 'href' => $url, 'type' => 'text/html' ),
 				array( 'rel' => 'http://webfinger.net/rel/avatar', 'href' => $photo ),
 			),
 		);
 
 		// add user_url if set
 		if ( isset( $user->user_url ) && ! empty( $user->user_url ) ) {
-			$webfinger['links'][] = array( 'rel' => 'http://webfinger.net/rel/profile-page', 'type' => 'text/html', 'href' => $user->user_url );
+			$webfinger['links'][] = array( 'rel' => 'http://webfinger.net/rel/profile-page', 'href' => $user->user_url, 'type' => 'text/html' );
 		}
 
 		return apply_filters( 'webfinger_user_data', $webfinger, $resource, $user );
 	}
 
 	/**
-	 * filters the webfinger array by request params like "rel"
+	 * Filters the WebFinger array by request params like "rel"
 	 *
 	 * @link http://tools.ietf.org/html/rfc7033#section-4.3
-	 * @param array $array
-	 * @param stdClass $user
-	 * @param array $queries
+	 *
+	 * @param array		$array
+	 * @param stdClass	$user
+	 * @param array		$queries
+	 *
 	 * @return array
 	 */
 	public static function filter_by_rel( $webfinger ) {
-		// check if webfinger is empty or if "rel"
+		// check if WebFinger is empty or if "rel"
 		// is set or if array has any "links"
 		if ( empty( $webfinger ) ||
 				! array_key_exists( 'rel', $_GET ) ||
@@ -207,7 +212,7 @@ class WebFingerPlugin {
 			return $webfinger;
 		}
 
-		// filter webfinger-array
+		// filter WebFinger-array
 		$links = array();
 		foreach ( $webfinger['links'] as $link ) {
 			if ( in_array( $link['rel'], $rels ) ) {
@@ -221,12 +226,14 @@ class WebFingerPlugin {
 	}
 
 	/**
-	 * returns a Userobject
+	 * Returns a Userobject
 	 *
 	 * @param string $uri
+	 *
 	 * @return WP_User
+	 *
 	 * @uses apply_filters() uses 'webfinger_user' to filter the
-	 *			 user and 'webfinger_user_query' to add custom query-params
+	 *       user and 'webfinger_user_query' to add custom query-params
 	 */
 	private static function get_user_by_uri( $uri ) {
 		$uri = urldecode( $uri );
@@ -242,8 +249,7 @@ class WebFingerPlugin {
 		$host = $match[2];
 
 		switch ( $scheme ) {
-			// check urls
-			case 'http':
+			case 'http': // check urls
 			case 'https':
 				// check if is the author url
 				if ( $author_id = url_to_authorid( $uri ) ) {
@@ -262,10 +268,14 @@ class WebFingerPlugin {
 				}
 
 				break;
-			// check acct scheme
-			case 'acct':
+			case 'acct': // check acct scheme
 				// get the identifier at the left of the '@'
 				$parts = explode( '@', $host );
+
+				// check domain
+				if ( ! isset( $parts[1] ) || parse_url( home_url(), PHP_URL_HOST ) !== $parts[1] ) {
+					return null;
+				}
 
 				$args = array(
 					'search' => $parts[0],
@@ -273,8 +283,7 @@ class WebFingerPlugin {
 					'meta_compare' => '=',
 				);
 				break;
-			// check mailto scheme
-			case 'mailto':
+			case 'mailto': // check mailto scheme
 				$args = array(
 					'search' => $host,
 					'search_columns' => array( 'user_email' ),
@@ -346,27 +355,29 @@ class WebFingerPlugin {
 	}
 
 	/**
-	 * returns a users default webfinger
+	 * Returns a users default WebFinger
 	 *
 	 * @param mixed $id_or_name_or_object
+	 *
 	 * @return string|null
 	 */
 	public static function get_user_resource( $id_or_name_or_object ) {
 		$user = self::get_user_by_various( $id_or_name_or_object );
 
-		if ( $user ) {
-			$resource = $user->user_login . '@' . parse_url( home_url(), PHP_URL_HOST );
+		$resource = null;
 
-			return apply_filters( 'webfinger_user_resource', 'acct:' . $resource, $user );
-		} else {
-			return null;
+		if ( $user ) {
+			$resource = 'acct:' . $user->user_login . '@' . parse_url( home_url(), PHP_URL_HOST );
 		}
+
+		return apply_filters( 'webfinger_user_resource', $resource, $user );
 	}
 
 	/**
-	 * returns all webfinger "resources"
+	 * Returns all WebFinger "resources"
 	 *
 	 * @param mixed $id_or_name_or_object
+	 *
 	 * @return array
 	 */
 	public static function get_user_resources( $id_or_name_or_object ) {
@@ -408,12 +419,14 @@ class WebFingerPlugin {
 	}
 
 	/**
-	 * convenience method to get user data by ID, username, object or from current user.
+	 * Convenience method to get user data by ID, username, object or from current user.
 	 *
 	 * @param mixed $id_or_name_or_object the username, ID or object. If not provided, the current user will be used.
+	 *
 	 * @return bool|object False on failure, User DB row object
 	 *
 	 * @author Will Norris
+	 *
 	 * @see get_userdata_by_various() # DiSo OpenID-Plugin
 	 */
 	public static function get_user_by_various( $id_or_name_or_object = null ) {
@@ -433,17 +446,18 @@ class WebFingerPlugin {
 	}
 
 	/**
-	 * backwards compatibility for old versions. please don't use!
+	 * Backwards compatibility for old versions. please don't use!
 	 *
 	 * @deprecated
 	 *
-	 * @param array $webfinger
-	 * @param string $resource
-	 * @param WP_User $user
+	 * @param array		$webfinger
+	 * @param string	$resource
+	 * @param WP_User	$user
+	 *
 	 * @return array
 	 */
 	public static function legacy_filter( $webfinger, $resource, $user ) {
-		// filter webfinger array
+		// filter WebFinger array
 		return apply_filters( 'webfinger', $webfinger, $user, $resource, $_GET );
 	}
 }
@@ -455,6 +469,7 @@ if ( ! function_exists( 'url_to_authorid' ) ) {
 	 * Checks are supposedly from the hosted site blog.
 	 *
 	 * @param string $url Permalink to check.
+	 *
 	 * @return int User ID, or 0 on failure.
 	 */
 	function url_to_authorid( $url ) {
@@ -465,7 +480,7 @@ if ( ! function_exists( 'url_to_authorid' ) ) {
 			return 0;
 		}
 
-		// First, check to see if there is a 'author=N' to match against
+		// first, check to see if there is a 'author=N' to match against
 		if ( preg_match( '/[?&]author=(\d+)/i', $url, $values ) ) {
 			$id = absint( $values[1] );
 			if ( $id ) {
@@ -473,10 +488,10 @@ if ( ! function_exists( 'url_to_authorid' ) ) {
 			}
 		}
 
-		// Check to see if we are using rewrite rules
+		// check to see if we are using rewrite rules
 		$rewrite = $wp_rewrite->wp_rewrite_rules();
 
-		// Not using rewrite rules, and 'author=N' method failed, so we're out of options
+		// not using rewrite rules, and 'author=N' method failed, so we're out of options
 		if ( empty( $rewrite ) ) {
 			return 0;
 		}

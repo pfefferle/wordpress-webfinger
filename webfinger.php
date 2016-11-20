@@ -436,9 +436,9 @@ class WebFingerPlugin {
 				return false;
 			}
 			return $user->data;
-		} else if ( is_object( $id_or_name_or_object ) ) {
+		} elseif ( is_object( $id_or_name_or_object ) ) {
 			return $id_or_name_or_object;
-		} else if ( is_numeric( $id_or_name_or_object ) ) {
+		} elseif ( is_numeric( $id_or_name_or_object ) ) {
 			return get_userdata( $id_or_name_or_object );
 		} else {
 			return get_userdatabylogin( $id_or_name_or_object );

@@ -3,10 +3,10 @@ Contributors: pfefferle, willnorris
 Donate link: http://14101978.de
 Tags: well-known, discovery, webfinger, JRD
 Requires at least: 4.2
-Tested up to: 4.6.1
-Stable tag: 3.0.2
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tested up to: 4.7.2
+Stable tag: 3.0.3
+License: MIT
+License URI: https://opensource.org/licenses/MIT
 
 WebFinger for WordPress
 
@@ -70,12 +70,6 @@ Please visit <http://webfinger.net>
 
 == Upgrade Notice ==
 
-= 3.0.2 =
-
-* `get_avatar_url` instead of custom code
-* some small code improvements
-* nicer PHP-docs
-
 = 3.0.0 =
 
 This versions drops classic WebFinger support to keep the plugin short and simple. All legacy stuff is bundled in this new plugin <https://github.com/pfefferle/wordpress-webfinger-legacy>
@@ -83,6 +77,17 @@ This versions drops classic WebFinger support to keep the plugin short and simpl
 == Changelog ==
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+
+= 3.0.3 =
+
+* composer support
+* compatibility updates
+
+= 3.0.2 =
+
+* `get_avatar_url` instead of custom code
+* some small code improvements
+* nicer PHP-docs
 
 = 3.0.1 =
 * updated version informations

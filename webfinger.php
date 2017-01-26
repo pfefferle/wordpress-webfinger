@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: WebFinger
- * Plugin URI: http://wordpress.org/extend/plugins/webfinger/
+ * Plugin URI: https://github.com/pfefferle/wordpress-webmention
  * Description: WebFinger for WordPress
- * Version: 3.0.2
+ * Version: 3.0.3
  * Author: pfefferle
- * Author URI: http://notizblog.org/
- * License: GPLv2 or later
- * License URI: http://www.gnu.org/licenses/gpl-2.0.html
+ * Author URI: http://notiz.blog/
+ * License: MIT
+ * License URI: https://opensource.org/licenses/MIT
  */
 
 // flush rewrite rules
@@ -89,8 +89,10 @@ class WebFingerPlugin {
 		header( 'Access-Control-Allow-Origin: *' );
 
 		// check if "resource" param exists
-		if ( ! array_key_exists( 'resource', $wp->query_vars ) ||
-				empty( $wp->query_vars['resource'] ) ) {
+		if (
+			! array_key_exists( 'resource', $wp->query_vars ) ||
+			empty( $wp->query_vars['resource'] )
+		) {
 			status_header( 400 );
 			header( 'Content-Type: text/plain; charset=' . get_bloginfo( 'charset' ), true );
 
@@ -158,14 +160,25 @@ class WebFingerPlugin {
 			'subject' => self::get_user_resource( $user->ID ),
 			'aliases' => self::get_user_resources( $user->ID ),
 			'links' => array(
-				array( 'rel' => 'http://webfinger.net/rel/profile-page', 'href' => $url, 'type' => 'text/html' ),
-				array( 'rel' => 'http://webfinger.net/rel/avatar', 'href' => $photo ),
+				array(
+					'rel' => 'http://webfinger.net/rel/profile-page',
+					'href' => $url,
+					'type' => 'text/html',
+				),
+				array(
+					'rel' => 'http://webfinger.net/rel/avatar',
+					'href' => $photo,
+				),
 			),
 		);
 
 		// add user_url if set
 		if ( isset( $user->user_url ) && ! empty( $user->user_url ) ) {
-			$webfinger['links'][] = array( 'rel' => 'http://webfinger.net/rel/profile-page', 'href' => $user->user_url, 'type' => 'text/html' );
+			$webfinger['links'][] = array(
+				'rel' => 'http://webfinger.net/rel/profile-page',
+				'href' => $user->user_url,
+				'type' => 'text/html',
+			);
 		}
 
 		return apply_filters( 'webfinger_user_data', $webfinger, $resource, $user );
@@ -185,9 +198,11 @@ class WebFingerPlugin {
 	public static function filter_by_rel( $webfinger ) {
 		// check if WebFinger is empty or if "rel"
 		// is set or if array has any "links"
-		if ( empty( $webfinger ) ||
-				! array_key_exists( 'rel', $_GET ) ||
-				! isset( $webfinger['links'] ) ) {
+		if (
+			empty( $webfinger ) ||
+			! array_key_exists( 'rel', $_GET ) ||
+			! isset( $webfinger['links'] )
+		) {
 			return $webfinger;
 		}
 
@@ -273,13 +288,20 @@ class WebFingerPlugin {
 				$parts = explode( '@', $host );
 
 				// check domain
-				if ( ! isset( $parts[1] ) || parse_url( home_url(), PHP_URL_HOST ) !== $parts[1] ) {
+				if (
+					! isset( $parts[1] ) ||
+					parse_url( home_url(), PHP_URL_HOST ) !== $parts[1]
+				) {
 					return null;
 				}
 
 				$args = array(
 					'search' => $parts[0],
-					'search_columns' => array( 'user_name', 'display_name', 'user_login' ),
+					'search_columns' => array(
+						'user_name',
+						'display_name',
+						'user_login',
+					),
 					'meta_compare' => '=',
 				);
 				break;

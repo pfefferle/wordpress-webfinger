@@ -1,6 +1,5 @@
 {
   "name": "wordpress-webfinger",
-  "version": "3.0.2",
   "description": "WebFinger for WordPress!",
   "devDependencies": {
     "grunt": "^0.4.5",
@@ -17,7 +16,7 @@
     "JRD"
   ],
   "author": "Matthias Pfefferle",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/pfefferle/wordpress-webfinger/issues"
   },

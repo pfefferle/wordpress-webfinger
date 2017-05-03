@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WebFinger
- * Plugin URI: https://github.com/pfefferle/wordpress-webmention
+ * Plugin URI: https://github.com/pfefferle/wordpress-webfinger
  * Description: WebFinger for WordPress
  * Version: 3.0.3
  * Author: pfefferle

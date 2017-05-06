@@ -1,10 +1,10 @@
 === WebFinger ===
 Contributors: pfefferle, willnorris
 Donate link: http://14101978.de
-Tags: well-known, discovery, webfinger, JRD
+Tags: well-known, discovery, webfinger, JRD, ostatus
 Requires at least: 4.2
-Tested up to: 4.7.2
-Stable tag: 3.0.3
+Tested up to: 4.7.4
+Stable tag: 3.0.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -16,12 +16,7 @@ Enables WebFinger ([RFC 7033](http://tools.ietf.org/html/rfc7033)) support for W
 
 About WebFinger:
 
-> WebFinger is used to discover information about people or other
-> entities on the Internet that are identified by a URI using
-> standard Hypertext Transfer Protocol (HTTP) methods over a secure
-> transport.  A WebFinger resource returns a JavaScript Object
-> Notation (JSON) object describing the entity that is queried.
-> The JSON object is referred to as the JSON Resource Descriptor (JRD).
+> WebFinger is used to discover information about people or other entities on the Internet that are identified by a URI using standard Hypertext Transfer Protocol (HTTP) methods over a secure transport.  A WebFinger resource returns a JavaScript Object Notation (JSON) object describing the entity that is queried. The JSON object is referred to as the JSON Resource Descriptor (JRD).
 
 (quote from the [RFC](http://tools.ietf.org/html/rfc7033))
 

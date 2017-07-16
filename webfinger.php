@@ -227,6 +227,8 @@ class WebFinger_Plugin {
 				array( 'rel' => 'shortlink', 'type' => 'text/html', 'href' => wp_get_shortlink( $post ) ),
 				array( 'rel' => 'canonical', 'type' => 'text/html', 'href' => get_permalink( $post->ID ) ),
 				array( 'rel' => 'author',    'type' => 'text/html', 'href' => get_author_posts_url( $author->ID, $author->nicename ) ),
+				array( 'rel' => 'alternate', 'type' => 'application/rss+xml', 'href' => get_post_comments_feed_link( $post->ID, 'rss2' ) ),
+				array( 'rel' => 'alternate', 'type' => 'application/atom+xml', 'href' => get_post_comments_feed_link( $post->ID, 'atom' ) ),
 			),
 		);
 

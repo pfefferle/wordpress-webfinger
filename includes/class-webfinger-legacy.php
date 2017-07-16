@@ -140,17 +140,23 @@ class WebFinger_Legacy {
 	public static function jrd_to_xrd( $webfinger ) {
 		$xrd = null;
 
+		// supported protocols
+		$protocols = array_merge(
+			array( 'aim', 'ymsgr', 'acct' ),
+			wp_allowed_protocols()
+		);
+
 		foreach ( $webfinger as $type => $content ) {
 			// print subject
 			if ( 'subject' == $type ) {
-				$xrd .= '<Subject>' . $content . '</Subject>';
+				$xrd .= '<Subject>' . esc_url( $content, $protocols ) . '</Subject>';
 				continue;
 			}
 
 			// print aliases
 			if ( 'aliases' == $type ) {
 				foreach ( $content as $uri ) {
-					$xrd .= '<Alias>' . esc_url( $uri ) . '</Alias>';
+					$xrd .= '<Alias>' . esc_url( $uri, $protocols ) . '</Alias>';
 				}
 				continue;
 			}
@@ -158,7 +164,7 @@ class WebFinger_Legacy {
 			// print properties
 			if ( 'properties' == $type ) {
 				foreach ( $content as $type => $uri ) {
-					$xrd .= '<Property type="' . esc_attr( $type ) . '">' . wp_specialchars( $uri ) . '</Property>';
+					$xrd .= '<Property type="' . esc_attr( $type ) . '">' . esc_html( $uri ) . '</Property>';
 				}
 				continue;
 			}
@@ -169,7 +175,7 @@ class WebFinger_Legacy {
 					if ( 'default' == $key ) {
 						$xrd .= '<Title>' . esc_html( $value ) . '</Title>';
 					} else {
-						$xrd .= '<Title xml:lang="' . esc_attr( $key ) . '">' . wp_specialchars( $value ) . '</Title>';
+						$xrd .= '<Title xml:lang="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</Title>';
 					}
 				}
 				continue;

@@ -11,8 +11,8 @@
  */
 
 // flush rewrite rules
-register_activation_hook( __FILE__, array( 'WebFinger_Plugin', 'flush_rewrite_rules' ) );
-register_deactivation_hook( __FILE__, array( 'WebFinger_Plugin', 'flush_rewrite_rules' ) );
+register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
 defined( 'WEBFINGER_LEGACY' ) || define( 'WEBFINGER_LEGACY', false );
 

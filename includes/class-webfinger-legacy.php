@@ -46,15 +46,19 @@ class WebFinger_Legacy {
 	public static function render_xrd( $webfinger ) {
 		global $wp;
 
-		// interpret accept header
-		if ( $pos = stripos( $_SERVER['HTTP_ACCEPT'], ';' ) ) {
-			$accept_header = substr( $_SERVER['HTTP_ACCEPT'], 0, $pos );
-		} else {
-			$accept_header = $_SERVER['HTTP_ACCEPT'];
-		}
+		$accept = array();
 
-		// accept header as an array
-		$accept = explode( ',', trim( $accept_header ) );
+		if ( isset( $_SERVER['HTTP_ACCEPT'] ) ) {
+			// interpret accept header
+			if ( $pos = stripos( $_SERVER['HTTP_ACCEPT'], ';' ) ) {
+				$accept_header = substr( $_SERVER['HTTP_ACCEPT'], 0, $pos );
+			} else {
+				$accept_header = $_SERVER['HTTP_ACCEPT'];
+			}
+
+			// accept header as an array
+			$accept = explode( ',', trim( $accept_header ) );
+		}
 
 		$format = null;
 		if ( array_key_exists( 'format', $wp->query_vars ) ) {
@@ -146,7 +150,7 @@ class WebFinger_Legacy {
 			// print aliases
 			if ( 'aliases' == $type ) {
 				foreach ( $content as $uri ) {
-					$xrd .= '<Alias>' . wp_specialchars( $uri ) . '</Alias>';
+					$xrd .= '<Alias>' . esc_url( $uri ) . '</Alias>';
 				}
 				continue;
 			}
@@ -154,7 +158,7 @@ class WebFinger_Legacy {
 			// print properties
 			if ( 'properties' == $type ) {
 				foreach ( $content as $type => $uri ) {
-					$xrd .= '<Property type="' . wp_specialchars( $type ) . '">' . wp_specialchars( $uri ) . '</Property>';
+					$xrd .= '<Property type="' . esc_attr( $type ) . '">' . wp_specialchars( $uri ) . '</Property>';
 				}
 				continue;
 			}
@@ -163,9 +167,9 @@ class WebFinger_Legacy {
 			if ( 'titles' == $type ) {
 				foreach ( $content as $key => $value ) {
 					if ( 'default' == $key ) {
-						$xrd .= '<Title>' . wp_specialchars( $value ) . '</Title>';
+						$xrd .= '<Title>' . esc_html( $value ) . '</Title>';
 					} else {
-						$xrd .= '<Title xml:lang="' . wp_specialchars( $key ) . '">' . wp_specialchars( $value ) . '</Title>';
+						$xrd .= '<Title xml:lang="' . esc_attr( $key ) . '">' . wp_specialchars( $value ) . '</Title>';
 					}
 				}
 				continue;
@@ -183,7 +187,7 @@ class WebFinger_Legacy {
 							$temp[ $key ] = $value;
 							$cascaded = true;
 						} else {
-							$xrd .= wp_specialchars( $key ) . '="' . wp_specialchars( $value ) . '" ';
+							$xrd .= esc_attr( $key ) . '="' . esc_attr( $value ) . '" ';
 						}
 					}
 					if ( $cascaded ) {

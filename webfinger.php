@@ -5,7 +5,7 @@
  * Description: WebFinger for WordPress
  * Version: 3.1.1
  * Author: Matthias Pfefferle
- * Author URI: http://notiz.blog/
+ * Author URI: https://notiz.blog/
  * License: MIT
  * License URI: https://opensource.org/licenses/MIT
  */

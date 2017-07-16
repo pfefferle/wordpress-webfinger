@@ -4,7 +4,7 @@
 **Tags:** well-known, discovery, webfinger, JRD, ostatus  
 **Requires at least:** 4.2  
 **Tested up to:** 4.8  
-**Stable tag:** 3.1.0  
+**Stable tag:** 3.1.1  
 **License:** MIT  
 **License URI:** https://opensource.org/licenses/MIT  
 
@@ -72,6 +72,10 @@ This versions drops classic WebFinger support to keep the plugin short and simpl
 ## Changelog ##
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+
+### 3.1.1 ###
+
+* fixed 'get_user_by_various' function
 
 ### 3.1.0 ###
 

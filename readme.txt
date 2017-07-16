@@ -75,8 +75,7 @@ Project maintained on github at [pfefferle/wordpress-webfinger](https://github.c
 
 = 3.1.1 =
 
-* Added WebFinger legacy plugin, because the legacy version is still very popular and used by for example OStatus (Mastodon, Status.NET and GNU Social)
-* Added Webfinger for posts support
+* fixed 'get_user_by_various' function
 
 = 3.1.0 =
 

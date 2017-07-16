@@ -3,7 +3,7 @@
  * Plugin Name: WebFinger
  * Plugin URI: https://github.com/pfefferle/wordpress-webfinger
  * Description: WebFinger for WordPress
- * Version: 3.1.0
+ * Version: 3.1.1
  * Author: Matthias Pfefferle
  * Author URI: http://notiz.blog/
  * License: MIT
@@ -433,7 +433,7 @@ class WebFinger_Plugin {
 	 * @return string|null
 	 */
 	public static function get_user_resource( $id_or_name_or_object ) {
-		$user = get_userdata_by_various( $id_or_name_or_object );
+		$user = get_user_by_various( $id_or_name_or_object );
 
 		$resource = null;
 
@@ -452,14 +452,14 @@ class WebFinger_Plugin {
 	 * @return array
 	 */
 	public static function get_user_resources( $id_or_name_or_object ) {
-		$user = get_userdata_by_various( $id_or_name_or_object );
+		$user = get_user_by_various( $id_or_name_or_object );
 
 		if ( ! $user ) {
 			return array();
 		}
 
 		// generate account idenitfier (acct: uri)
-		$resources[] = self::get_user_resource( $user, true );
+		$resources[] = self::get_user_resource( $user );
 		$resources[] = get_author_posts_url( $user->ID, $user->user_nicename );
 
 		if ( $user->user_email ) {

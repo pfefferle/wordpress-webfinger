@@ -48,7 +48,7 @@ if ( ! function_exists( 'url_to_authorid' ) ) :
 	}
 endif;
 
-if ( ! function_exists( 'get_userdata_by_various' ) ) :
+if ( ! function_exists( 'get_user_by_various' ) ) :
 	/**
 	 * Convenience method to get user data by ID, username, object or from current user.
 	 *
@@ -58,21 +58,21 @@ if ( ! function_exists( 'get_userdata_by_various' ) ) :
 	 *
 	 * @author Will Norris
 	 *
-	 * @see get_userdata_by_various() # DiSo OpenID-Plugin
+	 * @see get_user_by_various() # DiSo OpenID-Plugin
 	 */
-	function get_userdata_by_various( $id_or_name_or_object = null ) {
+	function get_user_by_various( $id_or_name_or_object = null ) {
 		if ( null === $id_or_name_or_object ) {
 			$user = wp_get_current_user();
 			if ( null == $user ) {
 				return false;
 			}
-			return $user->data;
+			return $user;
 		} elseif ( is_object( $id_or_name_or_object ) ) {
 			return $id_or_name_or_object;
 		} elseif ( is_numeric( $id_or_name_or_object ) ) {
-			return get_userdata( $id_or_name_or_object );
+			return get_user_by( 'id', $id_or_name_or_object );
 		} else {
-			return get_userdatabylogin( $id_or_name_or_object );
+			return get_user_by( 'login', $id_or_name_or_object );
 		}
 	}
 endif;

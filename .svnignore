@@ -23,6 +23,7 @@ node_modules
 npm-debug.log
 phpcs.xml
 package.json
+package-lock.json
 phpunit.xml
 phpunit.xml.dist
 tests

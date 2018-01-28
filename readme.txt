@@ -1,10 +1,10 @@
 === WebFinger ===
 Contributors: pfefferle, willnorris
-Donate link: http://14101978.de
+Donate link: https://notiz.blog/donate/
 Tags: well-known, discovery, webfinger, JRD, ostatus
 Requires at least: 4.2
-Tested up to: 4.8
-Stable tag: 3.1.3
+Tested up to: 4.9.2
+Stable tag: 3.1.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -72,6 +72,10 @@ This versions drops classic WebFinger support to keep the plugin short and simpl
 == Changelog ==
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+
+= 3.1.4 =
+
+* updated requirements
 
 = 3.1.3 =
 

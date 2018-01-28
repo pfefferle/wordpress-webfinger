@@ -5,7 +5,7 @@
   "license": "MIT",
   "authors": [{
     "name": "Matthias Pfefferle",
-    "homepage": "http://notiz.blog/"
+    "homepage": "https://notiz.blog/"
   }],
   "require": {
     "php": ">=5.6.0",

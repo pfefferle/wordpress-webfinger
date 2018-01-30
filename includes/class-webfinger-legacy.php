@@ -92,7 +92,7 @@ class WebFinger_Legacy {
 	 *
 	 * @param array $query
 	 */
-	public function render_host_meta( $format, $host_meta, $query ) {
+	public static function render_host_meta( $format, $host_meta, $query ) {
 		if ( ! array_key_exists( 'resource' , $query ) ) {
 			return;
 		}

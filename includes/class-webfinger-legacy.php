@@ -50,7 +50,7 @@ class WebFinger_Legacy {
 
 		if ( isset( $_SERVER['HTTP_ACCEPT'] ) ) {
 			// interpret accept header
-			$pos = stripos( $_SERVER['HTTP_ACCEPT'], ';' )
+			$pos = stripos( $_SERVER['HTTP_ACCEPT'], ';' );
 			if ( $pos ) {
 				$accept_header = substr( $_SERVER['HTTP_ACCEPT'], 0, $pos );
 			} else {

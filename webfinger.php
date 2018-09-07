@@ -339,7 +339,7 @@ class WebFinger_Plugin {
 			case 'http': // check urls
 			case 'https':
 				// check if is the author url
-				$author_id = url_to_authorid( $uri )
+				$author_id = url_to_authorid( $uri );
 				if ( $author_id ) {
 					$args = array(
 						'search' => $author_id,

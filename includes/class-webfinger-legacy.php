@@ -50,7 +50,8 @@ class WebFinger_Legacy {
 
 		if ( isset( $_SERVER['HTTP_ACCEPT'] ) ) {
 			// interpret accept header
-			if ( $pos = stripos( $_SERVER['HTTP_ACCEPT'], ';' ) ) {
+			$pos = stripos( $_SERVER['HTTP_ACCEPT'], ';' )
+			if ( $pos ) {
 				$accept_header = substr( $_SERVER['HTTP_ACCEPT'], 0, $pos );
 			} else {
 				$accept_header = $_SERVER['HTTP_ACCEPT'];
@@ -93,7 +94,7 @@ class WebFinger_Legacy {
 	 * @param array $query
 	 */
 	public static function render_host_meta( $format, $host_meta, $query ) {
-		if ( ! array_key_exists( 'resource' , $query ) ) {
+		if ( ! array_key_exists( 'resource', $query ) ) {
 			return;
 		}
 
@@ -123,9 +124,21 @@ class WebFinger_Legacy {
 	 * add the host meta information
 	 */
 	public static function host_meta_discovery( $array ) {
-		$array['links'][] = array( 'rel' => 'lrdd', 'template' => site_url( '/?well-known=webfinger&resource={uri}&format=xrd' ), 'type' => 'application/xrd+xml' );
-		$array['links'][] = array( 'rel' => 'lrdd', 'template' => site_url( '/?well-known=webfinger&resource={uri}' ), 'type' => 'application/jrd+xml' );
-		$array['links'][] = array( 'rel' => 'lrdd', 'template' => site_url( '/?well-known=webfinger&resource={uri}' ), 'type' => 'application/json' );
+		$array['links'][] = array(
+			'rel' => 'lrdd',
+			'template' => site_url( '/?well-known=webfinger&resource={uri}&format=xrd' ),
+			'type' => 'application/xrd+xml',
+		);
+		$array['links'][] = array(
+			'rel' => 'lrdd',
+			'template' => site_url( '/?well-known=webfinger&resource={uri}' ),
+			'type' => 'application/jrd+xml',
+		);
+		$array['links'][] = array(
+			'rel' => 'lrdd',
+			'template' => site_url( '/?well-known=webfinger&resource={uri}' ),
+			'type' => 'application/json',
+		);
 
 		return $array;
 	}
@@ -216,9 +229,9 @@ class WebFinger_Legacy {
 	 *
 	 * @deprecated
 	 *
-	 * @param array		$webfinger
-	 * @param string	$resource
-	 * @param WP_User	$user
+	 * @param array   $webfinger
+	 * @param string  $resource
+	 * @param WP_User $user
 	 *
 	 * @return array
 	 */

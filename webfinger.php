@@ -3,7 +3,7 @@
  * Plugin Name: WebFinger
  * Plugin URI: https://github.com/pfefferle/wordpress-webfinger
  * Description: WebFinger for WordPress
- * Version: 3.1.5
+ * Version: 3.1.6
  * Author: Matthias Pfefferle
  * Author URI: https://notiz.blog/
  * License: MIT
@@ -144,9 +144,9 @@ class WebFinger_Plugin {
 	/**
 	 * Generates the WebFinger base array
 	 *
-	 * @param array		$webfinger	the WebFinger data-array
-	 * @param stdClass	$user		the WordPress user
-	 * @param string	$resource	the resource param
+	 * @param array    $webfinger   the WebFinger data-array
+	 * @param stdClass $user        the WordPress user
+	 * @param string   $resource    the resource param
 	 *
 	 * @return array the enriched webfinger data-array
 	 */
@@ -196,8 +196,9 @@ class WebFinger_Plugin {
 	/**
 	 * generates the webfinger base array
 	 *
-	 * @param array $webfinger the webfinger data-array
+	 * @param array  $webfinger the webfinger data-array
 	 * @param string $resource the resource param
+	 *
 	 * @return array the enriched webfinger data-array
 	 */
 	public static function generate_post_data( $webfinger, $resource ) {
@@ -224,11 +225,31 @@ class WebFinger_Plugin {
 			'subject' => get_permalink( $post->ID ),
 			'aliases' => apply_filters( 'webfinger_post_resource', array( home_url( '?p=' . $post->ID ), get_permalink( $post->ID ) ), $post ),
 			'links' => array(
-				array( 'rel' => 'shortlink', 'type' => 'text/html', 'href' => wp_get_shortlink( $post ) ),
-				array( 'rel' => 'canonical', 'type' => 'text/html', 'href' => get_permalink( $post->ID ) ),
-				array( 'rel' => 'author',    'type' => 'text/html', 'href' => get_author_posts_url( $author->ID, $author->nicename ) ),
-				array( 'rel' => 'alternate', 'type' => 'application/rss+xml', 'href' => get_post_comments_feed_link( $post->ID, 'rss2' ) ),
-				array( 'rel' => 'alternate', 'type' => 'application/atom+xml', 'href' => get_post_comments_feed_link( $post->ID, 'atom' ) ),
+				array(
+					'rel'  => 'shortlink',
+					'type' => 'text/html',
+					'href' => wp_get_shortlink( $post ),
+				),
+				array(
+					'rel'  => 'canonical',
+					'type' => 'text/html',
+					'href' => get_permalink( $post->ID ),
+				),
+				array(
+					'rel'  => 'author',
+					'type' => 'text/html',
+					'href' => get_author_posts_url( $author->ID, $author->nicename ),
+				),
+				array(
+					'rel'  => 'alternate',
+					'type' => 'application/rss+xml',
+					'href' => get_post_comments_feed_link( $post->ID, 'rss2' ),
+				),
+				array(
+					'rel'  => 'alternate',
+					'type' => 'application/atom+xml',
+					'href' => get_post_comments_feed_link( $post->ID, 'atom' ),
+				),
 			),
 		);
 
@@ -240,9 +261,9 @@ class WebFinger_Plugin {
 	 *
 	 * @link http://tools.ietf.org/html/rfc7033#section-4.3
 	 *
-	 * @param array		$array
-	 * @param stdClass	$user
-	 * @param array		$queries
+	 * @param array     $array
+	 * @param stdClass  $user
+	 * @param array     $queries
 	 *
 	 * @return array
 	 */
@@ -318,7 +339,8 @@ class WebFinger_Plugin {
 			case 'http': // check urls
 			case 'https':
 				// check if is the author url
-				if ( $author_id = url_to_authorid( $uri ) ) {
+				$author_id = url_to_authorid( $uri )
+				if ( $author_id ) {
 					$args = array(
 						'search' => $author_id,
 						'search_columns' => array( 'ID' ),
@@ -349,8 +371,7 @@ class WebFinger_Plugin {
 				$args = array(
 					'search' => $parts[0],
 					'search_columns' => array(
-						'user_name',
-						'display_name',
+						'user_nicename',
 						'user_login',
 					),
 					'meta_compare' => '=',

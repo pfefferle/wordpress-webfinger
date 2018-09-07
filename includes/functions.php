@@ -39,7 +39,7 @@ if ( ! function_exists( 'url_to_authorid' ) ) :
 
 		// match the rewrite rule with the passed url
 		if ( preg_match( '/https?:\/\/(.+)' . preg_quote( $author_regexp, '/' ) . '([^\/]+)/i', $url, $match ) ) {
-			$user = get_user_by( 'slug', $match[2] )
+			$user = get_user_by( 'slug', $match[2] );
 			if ( $user ) {
 				return $user->ID;
 			}

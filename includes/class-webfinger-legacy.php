@@ -4,25 +4,7 @@
  *
  * @author Matthias Pfefferle
  */
-class WebFinger_Legacy {
-
-	/**
-	 * Initialize the plugin, registering WordPress hooks.
-	 */
-	public static function init() {
-		add_action( 'query_vars', array( 'WebFinger_Legacy', 'query_vars' ) );
-		add_filter( 'host_meta', array( 'WebFinger_Legacy', 'host_meta_discovery' ) );
-
-		// host-meta recource
-		add_action( 'host_meta_render', array( 'WebFinger_Legacy', 'render_host_meta' ), -1, 3 );
-
-		// XRD output
-		add_action( 'webfinger_render', array( 'WebFinger_Legacy', 'render_xrd' ), 5 );
-
-		// support plugins pre 3.0.0
-		add_filter( 'webfinger_user_data', array( 'WebFinger_Legacy', 'legacy_filter' ), 10, 3 );
-	}
-
+class Webfinger_Legacy {
 	/**
 	 * add query vars
 	 *
@@ -126,17 +108,23 @@ class WebFinger_Legacy {
 	public static function host_meta_discovery( $array ) {
 		$array['links'][] = array(
 			'rel' => 'lrdd',
-			'template' => site_url( '/?well-known=webfinger&resource={uri}&format=xrd' ),
+			'template' => add_query_arg(
+				array(
+					'resource' => '{uri}',
+					'format' => 'xrd',
+				),
+				get_webfinger_endpoint()
+			),
 			'type' => 'application/xrd+xml',
 		);
 		$array['links'][] = array(
 			'rel' => 'lrdd',
-			'template' => site_url( '/?well-known=webfinger&resource={uri}' ),
+			'template' => add_query_arg( 'resource', '{uri}', get_webfinger_endpoint() ),
 			'type' => 'application/jrd+xml',
 		);
 		$array['links'][] = array(
 			'rel' => 'lrdd',
-			'template' => site_url( '/?well-known=webfinger&resource={uri}' ),
+			'template' => add_query_arg( 'resource', '{uri}', get_webfinger_endpoint() ),
 			'type' => 'application/json',
 		);
 

@@ -2,8 +2,9 @@
   "name": "wordpress-webfinger",
   "description": "WebFinger for WordPress!",
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-wp-readme-to-markdown": "^0.8.0"
+    "grunt": "^1.0.3",
+    "grunt-wp-readme-to-markdown": "^2.0.1",
+    "grunt-wp-i18n": "^1.0.2"
   },
   "repository": {
     "type": "git",

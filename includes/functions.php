@@ -77,3 +77,32 @@ if ( ! function_exists( 'get_user_by_various' ) ) :
 		}
 	}
 endif;
+
+/**
+ * Build WebFinger endpoint
+ *
+ * @return string The WebFinger URL
+ */
+function get_webfinger_endpoint() {
+	global $wp_rewrite;
+
+	$permalink = $wp_rewrite->get_feed_permastruct();
+	if ( '' != $permalink ) {
+		$url = home_url( '/.well-kown/webfinger' );
+	} else {
+		$url = add_query_arg( 'well-kown', 'webfinger', home_url( '/' ) );
+	}
+
+	return $url;
+}
+
+/**
+ * Returns all WebFinger "resources"
+ *
+ * @param mixed $id_or_name_or_object
+ *
+ * @return string The user-resource
+ */
+function get_webfinger_resources( $id_or_name_or_object ) {
+	return Webfinger::get_user_resource( $id_or_name_or_object );
+}

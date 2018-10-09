@@ -103,6 +103,6 @@ function get_webfinger_endpoint() {
  *
  * @return string The user-resource
  */
-function get_webfinger_resource( $id_or_name_or_object ) {
-	return Webfinger::get_user_resource( $id_or_name_or_object );
+function get_webfinger_resource( $id_or_name_or_object, $with_protocol = true ) {
+	return Webfinger::get_user_resource( $id_or_name_or_object, $with_protocol );
 }

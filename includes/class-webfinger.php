@@ -410,12 +410,16 @@ class Webfinger {
 	 *
 	 * @return string|null
 	 */
-	public static function get_user_resource( $id_or_name_or_object ) {
+	public static function get_user_resource( $id_or_name_or_object, $with_protocol = false ) {
 		$user = get_user_by_various( $id_or_name_or_object );
 		$resource = null;
 
 		if ( $user ) {
-			$resource = 'acct:' . $user->user_login . '@' . parse_url( home_url(), PHP_URL_HOST );
+			$resource = $user->user_login . '@' . parse_url( home_url(), PHP_URL_HOST );
+
+			if ( $with_protocol ) {
+				'acct:' . $resource;
+			}
 		}
 
 		return apply_filters( 'webfinger_user_resource', $resource, $user );

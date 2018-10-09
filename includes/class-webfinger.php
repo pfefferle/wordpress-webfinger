@@ -410,7 +410,7 @@ class Webfinger {
 	 *
 	 * @return string|null
 	 */
-	public static function get_user_resource( $id_or_name_or_object, $with_protocol = false ) {
+	public static function get_user_resource( $id_or_name_or_object, $with_protocol = true ) {
 		$user = get_user_by_various( $id_or_name_or_object );
 		$resource = null;
 

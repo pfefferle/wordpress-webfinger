@@ -279,16 +279,19 @@ class Webfinger {
 	 */
 	private static function get_user_by_uri( $uri ) {
 		$uri = urldecode( $uri );
+		$match = array();
 
-		if ( ! preg_match( '/^([a-zA-Z^:]+):(.*)$/i', $uri, $match ) ) {
-			// no valid scheme provided
-			return null;
+		// try to extract the scheme and the host
+		if ( preg_match( '/^([a-zA-Z^:]+):(.*)$/i', $uri, $match ) ) {
+			// extract the scheme
+			$scheme = $match[1];
+			// extract the "host"
+			$host = $match[2];
+		} else { // fallback to 'acct' as default theme
+			$scheme = 'acct';
+			// extract the "host"
+			$host = $uri;
 		}
-
-		// extract the scheme
-		$scheme = $match[1];
-		// extract the "host"
-		$host = $match[2];
 
 		switch ( $scheme ) {
 			case 'http': // check urls

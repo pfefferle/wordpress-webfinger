@@ -4,7 +4,7 @@ Donate link: https://notiz.blog/donate/
 Tags: well-known, discovery, webfinger, JRD, ostatus, activitypub
 Requires at least: 4.2
 Tested up to: 4.9.8
-Stable tag: 3.2.1
+Stable tag: 3.2.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -19,12 +19,6 @@ About WebFinger:
 > WebFinger is used to discover information about people or other entities on the Internet that are identified by a URI using standard Hypertext Transfer Protocol (HTTP) methods over a secure transport.  A WebFinger resource returns a JavaScript Object Notation (JSON) object describing the entity that is queried. The JSON object is referred to as the JSON Resource Descriptor (JRD).
 
 (quote from the [RFC](http://tools.ietf.org/html/rfc7033))
-
-== Installation ==
-
-1. Upload the `webfinger`-folder to the `/wp-content/plugins/` directory
-2. Activate the plugin through the *Plugins* menu in WordPress
-3. ...and that's it :)
 
 == Frequently Asked Questions ==
 
@@ -72,6 +66,11 @@ This versions drops classic WebFinger support to keep the plugin short and simpl
 == Changelog ==
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+
+= 3.2.2 =
+
+* fixed typo (thanks @ivucica)
+* use `acct` as default scheme
 
 = 3.2.1 =
 
@@ -124,53 +123,66 @@ Project maintained on github at [pfefferle/wordpress-webfinger](https://github.c
 * nicer PHP-docs
 
 = 3.0.1 =
+
 * updated version informations
 * support the WordPress Coding Standard
 
 = 3.0.0 =
+
 * added correct error-responses
 * remove legacy support for XRD and host-meta (props to Will Norris)
 
 = 2.0.1 =
+
 * small bugfix
 
 = 2.0.0 =
+
 * complete refactoring
 * removed simple-web-discovery
 * more filters and actions
 * works without /.well-known/ plugin
 
 = 1.4.0 =
+
 * small fixes
 * added "webfinger" as well-known uri
 
 = 1.3.1 =
+
 * added "rel"-filter (work in progress)
 * added more aliases
 
 = 1.3 =
+
 * added host-meta resource feature (see latest spec)
 
 = 1.2 =
+
 * added 404 http error if user doesn't exist
 * added jrd discovery for host-meta
 
 = 1.1 =
+
 * fixed an odd problem with lower WordPress versions
 * added support for the http://wordpress.org/extend/plugins/extended-profile/ (thanks to Singpolyma)
 
 = 1.0.1 =
+
 * api improvements
 
 = 1.0 =
+
 * basic simple-seb-discovery
 * json support
 * some small improvements
 
 = 0.9.1 =
+
 * some changes to support http://unhosted.org
 
 = 0.9 =
+
 * OStatus improvements
 * Better uri handling
 * Identifier overview (more to come)
@@ -178,8 +190,48 @@ Project maintained on github at [pfefferle/wordpress-webfinger](https://github.c
 * Added functions to get a users webfingers
 
 = 0.7 =
+
 * Added do_action param (for future OStatus plugin)
 * Author-Url as Webfinger-Identifier
 
 = 0.5 =
+
 * Initial release
+
+== Installation ==
+
+Follow the normal instructions for [installing WordPress plugins](https://codex.wordpress.org/Managing_Plugins#Installing_Plugins).
+
+= Automatic Plugin Installation =
+
+To add a WordPress Plugin using the [built-in plugin installer](https://codex.wordpress.org/Administration_Screens#Add_New_Plugins):
+
+1. Go to [Plugins](https://codex.wordpress.org/Administration_Screens#Plugins) > [Add New](https://codex.wordpress.org/Plugins_Add_New_Screen).
+1. Type "`webfinger`" into the **Search Plugins** box.
+1. Find the WordPress Plugin you wish to install.
+    1. Click **Details** for more information about the Plugin and instructions you may wish to print or save to help setup the Plugin.
+    1. Click **Install Now** to install the WordPress Plugin.
+1. The resulting installation screen will list the installation as successful or note any problems during the install.
+1. If successful, click **Activate Plugin** to activate it, or **Return to Plugin Installer** for further actions.
+
+= Manual Plugin Installation =
+
+There are a few cases when manually installing a WordPress Plugin is appropriate.
+
+* If you wish to control the placement and the process of installing a WordPress Plugin.
+* If your server does not permit automatic installation of a WordPress Plugin.
+* If you want to try the [latest development version](https://github.com/pfefferle/wordpress-webfinger).
+
+Installation of a WordPress Plugin manually requires FTP familiarity and the awareness that you may put your site at risk if you install a WordPress Plugin incompatible with the current version or from an unreliable source.
+
+Backup your site completely before proceeding.
+
+To install a WordPress Plugin manually:
+
+* Download your WordPress Plugin to your desktop.
+    * Download from [the WordPress directory](https://wordpress.org/plugins/webfinger/)
+    * Download from [GitHub](https://github.com/pfefferle/wordpress-webfinger/releases)
+* If downloaded as a zip archive, extract the Plugin folder to your desktop.
+* With your FTP program, upload the Plugin folder to the `wp-content/plugins` folder in your WordPress directory online.
+* Go to [Plugins screen](https://codex.wordpress.org/Administration_Screens#Plugins) and find the newly uploaded Plugin in the list.
+* Click **Activate** to activate it.

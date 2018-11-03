@@ -88,9 +88,9 @@ function get_webfinger_endpoint() {
 
 	$permalink = $wp_rewrite->get_feed_permastruct();
 	if ( '' != $permalink ) {
-		$url = home_url( '/.well-kown/webfinger' );
+		$url = home_url( '/.well-known/webfinger' );
 	} else {
-		$url = add_query_arg( 'well-kown', 'webfinger', home_url( '/' ) );
+		$url = add_query_arg( 'well-known', 'webfinger', home_url( '/' ) );
 	}
 
 	return $url;

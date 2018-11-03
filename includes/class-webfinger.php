@@ -421,7 +421,7 @@ class Webfinger {
 			$resource = $user->user_login . '@' . parse_url( home_url(), PHP_URL_HOST );
 
 			if ( $with_protocol ) {
-				'acct:' . $resource;
+				$resource = 'acct:' . $resource;
 			}
 		}
 

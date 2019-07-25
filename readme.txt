@@ -3,8 +3,8 @@ Contributors: pfefferle, willnorris
 Donate link: https://notiz.blog/donate/
 Tags: well-known, discovery, webfinger, JRD, ostatus, activitypub
 Requires at least: 4.2
-Tested up to: 4.9.8
-Stable tag: 3.2.3
+Tested up to: 5.2.2
+Stable tag: 3.2.4
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -66,6 +66,10 @@ This versions drops classic WebFinger support to keep the plugin short and simpl
 == Changelog ==
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+
+= 3.2.4 =
+
+* update requirements
 
 = 3.2.3 =
 

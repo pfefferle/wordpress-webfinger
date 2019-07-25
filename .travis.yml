@@ -13,12 +13,15 @@ env:
     - WP_VERSION=nightly WP_MULTISITE=0
 
   global:
+    - WP_TRAVISCI=travis:phpunit
     - SVN_REPO: https://plugins.svn.wordpress.org/webfinger/
     - GH_REF: https://github.com/pfefferle/wordpress-webfinger.git
     - secure: "HtEtJ9LL6lmM3SmxBXpSDGslJXHFJ/OvrDH7bKFs3E54s4VzY/82V//wCtLm+wG4ynQu9QN8ufQqjVZm3uZZl3vgnEVXaLs8nMQP7BWBVykEGpROBwA+c3K5XiiO2kFea74V5nZD+W5/DplcY9SSdYML/5Ph3U9o0A0TjHuzh01GmxhzNWEs1S/fw7YsH/8QnzWC2YAnidilf1ouNRCPDxD4NbCi4ZtMjvU2OCPKm2tGhwqZ/7CaVNVi6Zu2jHF6Ofcfu2pZG/irkOQuOnTyVBjktxZL9ipdHKwSCPxSrXywgCDnykPfMVWA+sWsS/WxN/bO/jaEz53y/ZB12b6aO3t93ya16iwFZInQR/wPEZQC9a5AUsIhO9h9/uuJJkNHo0lEnp8o/t4xd6tHiVBiBWAnlHV7ss2ZhhWPGKjLhSH2nHEVkHOl57K81hWMtBeoZry0jHq382NRKBkY/DfYwxAguNpmvxdc5eVcxGDFuJPNb4bUWG4N40JUQB+Fgw5uUT88Dwm1qQuPcwkXwxul8aw422ZqXq29pSm6M07TGgw+AAacdJhfaWlxHpkT0NWqlzjIGGjfsJDKW/IyBhhhf++i+T3x1SG0A+5fF5LjMzupKrVfh6fktrmZkZdaI/vhAVlvidMG0ymfEBOnY/UsWp2lXT15D9BoAmuny7bqJRE="
 
 matrix:
   include:
+    - php: 7.3
+    - php: 7.2
     - php: 7.1
     - php: 7.0
     - php: 5.6

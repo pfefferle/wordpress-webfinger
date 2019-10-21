@@ -4,6 +4,7 @@
 .gitignore
 .travis.yml
 .codeclimate.yml
+.github
 .data
 Gruntfile.js
 LINGUAS

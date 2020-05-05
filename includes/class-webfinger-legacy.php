@@ -49,9 +49,9 @@ class Webfinger_Legacy {
 		}
 
 		if (
-			! in_array( 'application/xrd+xml', $accept ) &&
-			! in_array( 'application/xml+xrd', $accept ) &&
-			'xrd' != $format
+			! in_array( 'application/xrd+xml', $accept, true ) &&
+			! in_array( 'application/xml+xrd', $accept, true ) &&
+			'xrd' !== $format
 		) {
 			return $webfinger;
 		}
@@ -149,13 +149,13 @@ class Webfinger_Legacy {
 
 		foreach ( $webfinger as $type => $content ) {
 			// print subject
-			if ( 'subject' == $type ) {
+			if ( 'subject' === $type ) {
 				$xrd .= '<Subject>' . esc_url( $content, $protocols ) . '</Subject>';
 				continue;
 			}
 
 			// print aliases
-			if ( 'aliases' == $type ) {
+			if ( 'aliases' === $type ) {
 				foreach ( $content as $uri ) {
 					$xrd .= '<Alias>' . esc_url( $uri, $protocols ) . '</Alias>';
 				}
@@ -163,7 +163,7 @@ class Webfinger_Legacy {
 			}
 
 			// print properties
-			if ( 'properties' == $type ) {
+			if ( 'properties' === $type ) {
 				foreach ( $content as $type => $uri ) {
 					$xrd .= '<Property type="' . esc_attr( $type ) . '">' . esc_html( $uri ) . '</Property>';
 				}
@@ -171,9 +171,9 @@ class Webfinger_Legacy {
 			}
 
 			// print titles
-			if ( 'titles' == $type ) {
+			if ( 'titles' === $type ) {
 				foreach ( $content as $key => $value ) {
-					if ( 'default' == $key ) {
+					if ( 'default' === $key ) {
 						$xrd .= '<Title>' . esc_html( $value ) . '</Title>';
 					} else {
 						$xrd .= '<Title xml:lang="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</Title>';
@@ -183,7 +183,7 @@ class Webfinger_Legacy {
 			}
 
 			// print links
-			if ( 'links' == $type ) {
+			if ( 'links' === $type ) {
 				foreach ( $content as $links ) {
 					$temp = array();
 					$cascaded = false;
@@ -199,7 +199,7 @@ class Webfinger_Legacy {
 					}
 					if ( $cascaded ) {
 						$xrd .= '>';
-						$xrd .= WebfingerPlugin::jrd_to_xrd( $temp );
+						$xrd .= Webfinger_Legacy::jrd_to_xrd( $temp );
 						$xrd .= '</Link>';
 					} else {
 						$xrd .= ' />';

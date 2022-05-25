@@ -3,7 +3,7 @@
 **Donate link:** https://notiz.blog/donate/  
 **Tags:** well-known, discovery, webfinger, JRD, ostatus, activitypub  
 **Requires at least:** 4.2  
-**Tested up to:** 5.9  
+**Tested up to:** 6.0  
 **Stable tag:** 3.2.5  
 **License:** MIT  
 **License URI:** https://opensource.org/licenses/MIT  

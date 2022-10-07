@@ -1,12 +1,33 @@
 <?php
+
+namespace Webfinger;
+
 /**
- * WebFinger Legacy
+ * WebFinger Legacy.
  *
  * @author Matthias Pfefferle
  */
-class Webfinger_Legacy {
+class Legacy {
+
 	/**
-	 * add query vars
+	 * Initialize the class, registering WordPress hooks.
+	 */
+	public static function init() {
+		add_action( 'query_vars', array( static::class, 'query_vars' ) );
+		add_filter( 'host_meta', array( static::class, 'host_meta_discovery' ) );
+
+		// host-meta recource
+		add_action( 'host_meta_render', array( static::class, 'render_host_meta' ), -1, 3 );
+
+		// XRD output
+		add_action( 'webfinger_render', array( static::class, 'render_xrd' ), 5 );
+
+		// support plugins pre 3.0.0
+		add_filter( 'webfinger_user_data', array( static::class, 'legacy_filter' ), 10, 3 );
+	}
+
+	/**
+	 * Add query vars.
 	 *
 	 * @param array $vars
 	 *
@@ -21,9 +42,9 @@ class Webfinger_Legacy {
 	}
 
 	/**
-	 * render the XRD representation of the WordPress resource.
+	 * Render the XRD representation of the WordPress resource.
 	 *
-	 * @param array $webfinger the WordPress data-array
+	 * @param array $webfinger The WordPress data-array.
 	 */
 	public static function render_xrd( $webfinger ) {
 		global $wp;
@@ -70,8 +91,8 @@ class Webfinger_Legacy {
 		exit;
 	}
 
-	/*
-	 * host-meta resource feature
+	/**
+	 * host-meta resource feature.
 	 *
 	 * @param array $query
 	 */
@@ -89,7 +110,7 @@ class Webfinger_Legacy {
 		if ( empty( $webfinger ) ) {
 			status_header( 404 );
 			header( 'Content-Type: text/plain; charset=' . get_bloginfo( 'charset' ), true );
-			echo 'no data for resource "' . $query['resource'] . '" found';
+			echo 'no data for resource "' . esc_html( $query['resource'] ) . '" found';
 			exit;
 		}
 
@@ -103,7 +124,7 @@ class Webfinger_Legacy {
 	}
 
 	/**
-	 * add the host meta information
+	 * Add the host-meta information.
 	 */
 	public static function host_meta_discovery( $array ) {
 		$array['links'][] = array(
@@ -132,7 +153,7 @@ class Webfinger_Legacy {
 	}
 
 	/**
-	 * recursive helper to generade the xrd-xml from the jrd array
+	 * Recursive helper to generade the xrd-xml from the jrd array.
 	 *
 	 * @param string $host_meta
 	 *
@@ -199,7 +220,7 @@ class Webfinger_Legacy {
 					}
 					if ( $cascaded ) {
 						$xrd .= '>';
-						$xrd .= Webfinger_Legacy::jrd_to_xrd( $temp );
+						$xrd .= Legacy::jrd_to_xrd( $temp );
 						$xrd .= '</Link>';
 					} else {
 						$xrd .= ' />';

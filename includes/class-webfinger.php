@@ -1,4 +1,9 @@
 <?php
+
+namespace Webfinger;
+
+use WP_User_Query;
+
 /**
  * WebFinger
  *
@@ -8,7 +13,24 @@
 class Webfinger {
 
 	/**
-	 * Add query vars
+	 * Initialize the class, registering WordPress hooks.
+	 */
+	public static function init() {
+		add_action( 'query_vars', array( static::class, 'query_vars' ) );
+		add_action( 'parse_request', array( static::class, 'parse_request' ) );
+
+		add_action( 'init', array( static::class, 'generate_rewrite_rules' ) );
+
+		add_filter( 'webfinger_data', array( static::class, 'generate_user_data' ), 10, 3 );
+		add_filter( 'webfinger_data', array( static::class, 'generate_post_data' ), 10, 3 );
+		add_filter( 'webfinger_data', array( static::class, 'filter_by_rel' ), 99, 1 );
+
+		// default output
+		add_action( 'webfinger_render', array( static::class, 'render_jrd' ) );
+	}
+
+	/**
+	 * Add query vars.
 	 *
 	 * @param array $vars
 	 *
@@ -23,7 +45,7 @@ class Webfinger {
 	}
 
 	/**
-	 * Add rewrite rules
+	 * Add rewrite rules.
 	 *
 	 * @param WP_Rewrite
 	 */
@@ -34,16 +56,16 @@ class Webfinger {
 	/**
 	 * Parse the WebFinger request and render the document.
 	 *
-	 * @param WP $wp WordPress request context
+	 * @param WP $wp WordPress request context.
 	 *
-	 * @uses apply_filters() Calls 'webfinger' on webfinger data array
-	 * @uses do_action() Calls 'webfinger_render' to render webfinger data
+	 * @uses apply_filters() Calls 'webfinger' on webfinger data array.
+	 * @uses do_action()     Calls 'webfinger_render' to render webfinger data.
 	 */
 	public static function parse_request( $wp ) {
 		// check if it is a webfinger request or not
 		if (
 			! array_key_exists( 'well-known', $wp->query_vars ) ||
-			'webfinger' != $wp->query_vars['well-known']
+			'webfinger' !== $wp->query_vars['well-known']
 		) {
 			return;
 		}
@@ -71,7 +93,7 @@ class Webfinger {
 			status_header( 404 );
 			header( 'Content-Type: text/plain; charset=' . get_bloginfo( 'charset' ), true );
 
-			echo 'no data for resource "' . $wp->query_vars['resource'] . '" found';
+			echo 'no data for resource "' . esc_html( $wp->query_vars['resource'] ) . '" found';
 
 			exit;
 		}
@@ -83,9 +105,9 @@ class Webfinger {
 	}
 
 	/**
-	 * Render the JRD representation of the webfinger resource.
+	 * Render the JRD representation of the WebFinger resource.
 	 *
-	 * @param array $webfinger the WebFinger data-array
+	 * @param array $webfinger The WebFinger data-array.
 	 */
 	public static function render_jrd( $webfinger ) {
 		header( 'Content-Type: application/jrd+json; charset=' . get_bloginfo( 'charset' ), true );
@@ -95,13 +117,13 @@ class Webfinger {
 	}
 
 	/**
-	 * Generates the WebFinger base array
+	 * Generates the WebFinger base array.
 	 *
-	 * @param array    $webfinger   the WebFinger data-array
-	 * @param stdClass $user        the WordPress user
-	 * @param string   $resource    the resource param
+	 * @param array    $webfinger The WebFinger data-array.
+	 * @param stdClass $user      The WordPress user.
+	 * @param string   $resource  The resource param.
 	 *
-	 * @return array the enriched webfinger data-array
+	 * @return array The enriched WebFinger data-array.
 	 */
 	public static function generate_user_data( $webfinger, $resource ) {
 		// find matching user
@@ -135,7 +157,11 @@ class Webfinger {
 		);
 
 		// add user_url if set
-		if ( isset( $user->user_url ) && ! empty( $user->user_url ) ) {
+		if (
+			isset( $user->user_url ) &&
+			! empty( $user->user_url ) // &&
+			//self::is_same_host( $user->user_url )
+		) {
 			$webfinger['links'][] = array(
 				'rel' => 'http://webfinger.net/rel/profile-page',
 				'href' => $user->user_url,
@@ -147,12 +173,12 @@ class Webfinger {
 	}
 
 	/**
-	 * generates the webfinger base array
+	 * Generates the WebFinger base array.
 	 *
-	 * @param array  $webfinger the webfinger data-array
-	 * @param string $resource the resource param
+	 * @param array  $webfinger The WebFinger data-array.
+	 * @param string $resource  The resource param.
 	 *
-	 * @return array the enriched webfinger data-array
+	 * @return array The enriched WebFinger data-array.
 	 */
 	public static function generate_post_data( $webfinger, $resource ) {
 		// find matching post
@@ -210,7 +236,7 @@ class Webfinger {
 	}
 
 	/**
-	 * Filters the WebFinger array by request params like "rel"
+	 * Filters the WebFinger array by request params like "rel".
 	 *
 	 * @link http://tools.ietf.org/html/rfc7033#section-4.3
 	 *
@@ -242,7 +268,7 @@ class Webfinger {
 			// check if query-string is valid and if it is a 'rel'
 			if (
 				isset( $param[0], $param[1] ) &&
-				'rel' == $param[0] &&
+				'rel' === $param[0] &&
 				! empty( $param[1] )
 			) {
 				$rels[] = urldecode( trim( $param[1] ) );
@@ -257,7 +283,7 @@ class Webfinger {
 		// filter WebFinger-array
 		$links = array();
 		foreach ( $webfinger['links'] as $link ) {
-			if ( in_array( $link['rel'], $rels ) ) {
+			if ( in_array( $link['rel'], $rels, true ) ) {
 				$links[] = $link;
 			}
 		}
@@ -268,7 +294,7 @@ class Webfinger {
 	}
 
 	/**
-	 * Returns a Userobject
+	 * Returns a Userobject.
 	 *
 	 * @param string $uri
 	 *
@@ -278,19 +304,21 @@ class Webfinger {
 	 *       user and 'webfinger_user_query' to add custom query-params
 	 */
 	private static function get_user_by_uri( $uri ) {
-		$uri = urldecode( $uri );
-		$match = array();
+		$uri    = urldecode( $uri );
+		$match  = array();
+		$scheme = 'acct';
+		$host   = $uri;
+
+		if ( ! self::is_same_host( $uri ) ) {
+			return;
+		}
 
 		// try to extract the scheme and the host
 		if ( preg_match( '/^([a-zA-Z^:]+):(.*)$/i', $uri, $match ) ) {
 			// extract the scheme
-			$scheme = $match[1];
+			$scheme = sanitize_key( $match[1] );
 			// extract the "host"
 			$host = $match[2];
-		} else { // fallback to 'acct' as default theme
-			$scheme = 'acct';
-			// extract the "host"
-			$host = $uri;
 		}
 
 		switch ( $scheme ) {
@@ -316,24 +344,17 @@ class Webfinger {
 				break;
 			case 'acct': // check acct scheme
 				// get the identifier at the left of the '@'
-				$parts = explode( '@', $host );
-
-				// check domain
-				if (
-					! isset( $parts[1] ) ||
-					parse_url( home_url(), PHP_URL_HOST ) !== $parts[1]
-				) {
-					return null;
-				}
+				$id = substr( $host, 0, strrpos( $host, '@' ) );
 
 				$args = array(
-					'search' => $parts[0],
+					'search' => sanitize_email( $id ),
 					'search_columns' => array(
 						'user_nicename',
 						'user_login',
 					),
 					'meta_compare' => '=',
 				);
+
 				break;
 			case 'mailto': // check mailto scheme
 				$args = array(
@@ -407,7 +428,7 @@ class Webfinger {
 	}
 
 	/**
-	 * Returns a users default WebFinger
+	 * Returns a users default WebFinger.
 	 *
 	 * @param mixed $id_or_name_or_object
 	 *
@@ -417,19 +438,21 @@ class Webfinger {
 		$user = get_user_by_various( $id_or_name_or_object );
 		$resource = null;
 
-		if ( $user ) {
-			$resource = $user->user_login . '@' . parse_url( home_url(), PHP_URL_HOST );
+		if ( ! $user ) {
+			return apply_filters( 'webfinger_user_resource', $resource, $user );
+		}
 
-			if ( $with_protocol ) {
-				$resource = 'acct:' . $resource;
-			}
+		$resource = $user->user_login . '@' . parse_url( home_url(), PHP_URL_HOST );
+
+		if ( $with_protocol ) {
+			$resource = 'acct:' . $resource;
 		}
 
 		return apply_filters( 'webfinger_user_resource', $resource, $user );
 	}
 
 	/**
-	 * Returns all WebFinger "resources"
+	 * Returns all WebFinger "resources".
 	 *
 	 * @param mixed $id_or_name_or_object
 	 *
@@ -446,30 +469,36 @@ class Webfinger {
 		$resources[] = self::get_user_resource( $user );
 		$resources[] = get_author_posts_url( $user->ID, $user->user_nicename );
 
-		if ( $user->user_email ) {
+		if ( $user->user_email && self::is_same_host( $user->user_email ) ) {
 			$resources[] = 'mailto:' . $user->user_email;
 		}
 
-		/*
-		 * the IM schemes are based on the "vCard Extensions for Instant Messaging (IM)".
-		 * that means that the YahooID for example is represented by ymsgr:identifier
-		 * and not by the ymsgr:SendIM?identifier pseudo uri
-		 *
-		 * @link http://tools.ietf.org/html/rfc4770#section-1
-		 */
-		if ( get_user_meta( $user->ID, 'yim', true ) ) {
-			$resources[] = 'ymsgr:' . get_user_meta( $user->ID, 'yim', true );
-		}
-
-		// aim:identifier instead of aim:goim?screenname=identifier
-		if ( get_user_meta( $user->ID, 'aim', true ) ) {
-			$resources[] = 'aim:' . get_user_meta( $user->ID, 'aim', true );
-		}
-
-		if ( get_user_meta( $user->ID, 'jabber', true ) ) {
-			$resources[] = 'xmpp:' . get_user_meta( $user->ID, 'jabber', true );
+		$xmpp = get_user_meta( $user->ID, 'jabber', true );
+		if ( $xmpp && self::is_same_host( $xmpp ) ) {
+			$resources[] = 'xmpp:' . $xmpp;
 		}
 
 		return array_unique( apply_filters( 'webfinger_user_resources', $resources, $user ) );
+	}
+
+	/**
+	 * Check if a passed URI has the same domain as the Blog.
+	 *
+	 * @param string $uri The URI to check.
+	 *
+	 * @return boolean
+	 */
+	public static function is_same_host( $uri ) {
+		$blog_host = parse_url( home_url(), PHP_URL_HOST );
+
+		if ( filter_var( $uri, FILTER_VALIDATE_URL ) ) { // check if $uri is a valid URL
+			return parse_url( $uri, PHP_URL_HOST ) === $blog_host;
+		} elseif ( str_contains( $uri, '@' ) ) { // check if $uri is a valid E-Mail
+			$host = substr( strrchr( $uri, '@' ), 1 );
+
+			return $host === $blog_host;
+		}
+
+		return false;
 	}
 }

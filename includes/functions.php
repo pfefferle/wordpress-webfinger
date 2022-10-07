@@ -13,7 +13,7 @@ if ( ! function_exists( 'url_to_authorid' ) ) :
 		global $wp_rewrite;
 
 		// check if url hase the same host
-		if ( parse_url( site_url(), PHP_URL_HOST ) != parse_url( $url, PHP_URL_HOST ) ) {
+		if ( parse_url( site_url(), PHP_URL_HOST ) !== parse_url( $url, PHP_URL_HOST ) ) {
 			return 0;
 		}
 
@@ -64,7 +64,7 @@ if ( ! function_exists( 'get_user_by_various' ) ) :
 	function get_user_by_various( $id_or_name_or_object = null ) {
 		if ( null === $id_or_name_or_object ) {
 			$user = wp_get_current_user();
-			if ( null == $user ) {
+			if ( null === $user ) {
 				return false;
 			}
 			return $user;
@@ -87,7 +87,7 @@ function get_webfinger_endpoint() {
 	global $wp_rewrite;
 
 	$permalink = $wp_rewrite->get_feed_permastruct();
-	if ( '' != $permalink ) {
+	if ( '' !== $permalink ) {
 		$url = home_url( '/.well-known/webfinger' );
 	} else {
 		$url = add_query_arg( 'well-known', 'webfinger', home_url( '/' ) );
@@ -104,5 +104,5 @@ function get_webfinger_endpoint() {
  * @return string The user-resource
  */
 function get_webfinger_resource( $id_or_name_or_object, $with_protocol = true ) {
-	return Webfinger::get_user_resource( $id_or_name_or_object, $with_protocol );
+	return \Webfinger\Webfinger::get_user_resource( $id_or_name_or_object, $with_protocol );
 }

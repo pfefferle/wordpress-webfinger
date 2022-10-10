@@ -1,6 +1,7 @@
 version: '2'
 services:
   db:
+    platform: linux/amd64
     image: mysql:5.7
     restart: always
     environment:
@@ -10,6 +11,7 @@ services:
       MYSQL_PASSWORD: wordpress
 
   wordpress:
+    platform: linux/amd64
     depends_on:
       - db
     image: wordpress:latest

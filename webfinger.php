@@ -3,7 +3,7 @@
  * Plugin Name: WebFinger
  * Plugin URI: https://github.com/pfefferle/wordpress-webfinger
  * Description: WebFinger for WordPress
- * Version: 3.2.5
+ * Version: 4.0.0
  * Author: Matthias Pfefferle
  * Author URI: https://notiz.blog/
  * License: MIT
@@ -21,6 +21,8 @@ function init() {
 	// list of various public helper functions
 	require_once( dirname( __FILE__ ) . '/includes/functions.php' );
 	require_once( dirname( __FILE__ ) . '/includes/deprecated.php' );
+
+	require_once( dirname( __FILE__ ) . '/includes/class-user.php' );
 
 	require_once( dirname( __FILE__ ) . '/includes/class-webfinger.php' );
 	Webfinger::init();

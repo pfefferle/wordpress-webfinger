@@ -104,5 +104,16 @@ function get_webfinger_endpoint() {
  * @return string The user-resource
  */
 function get_webfinger_resource( $id_or_name_or_object, $with_protocol = true ) {
-	return \Webfinger\Webfinger::get_user_resource( $id_or_name_or_object, $with_protocol );
+	return \Webfinger\User::get_resource( $id_or_name_or_object, $with_protocol );
+}
+
+/**
+ * Returns a WebFinger "username" (the part before the "@")
+ *
+ * @param mixed $id_or_name_or_object
+ *
+ * @return string The username
+ */
+function get_webfinger_username( $id_or_name_or_object ) {
+	return \Webfinger\User::get_username( $id_or_name_or_object );
 }

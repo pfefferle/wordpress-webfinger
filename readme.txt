@@ -32,7 +32,7 @@ You can add your own links or properties like that:
         'type' => 'application/xrd+xml' );
       return $array;
     }
-    add_filter( 'webfinger', 'oexchange_target_link' );
+    add_filter( 'webfinger_data', 'oexchange_target_link' );
 
 = Add alternate file/output formats =
 

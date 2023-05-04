@@ -206,7 +206,7 @@ class Webfinger {
 				'webfinger_post_resource',
 				array(
 					home_url( '?p=' . $post->ID ),
-					get_permalink( $post->ID )
+					get_permalink( $post->ID ),
 				),
 				$post
 			),

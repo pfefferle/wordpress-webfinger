@@ -446,10 +446,6 @@ class Webfinger {
 		$resources[] = self::get_user_resource( $user );
 		$resources[] = get_author_posts_url( $user->ID, $user->user_nicename );
 
-		if ( $user->user_email ) {
-			$resources[] = 'mailto:' . $user->user_email;
-		}
-
 		/*
 		 * the IM schemes are based on the "vCard Extensions for Instant Messaging (IM)".
 		 * that means that the YahooID for example is represented by ymsgr:identifier

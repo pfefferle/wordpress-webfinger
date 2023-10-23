@@ -4,7 +4,7 @@
 **Tags:** well-known, discovery, webfinger, JRD, ostatus, activitypub  
 **Requires at least:** 4.2  
 **Tested up to:** 6.1  
-**Stable tag:** 3.2.5  
+**Stable tag:** 3.2.6  
 **License:** MIT  
 **License URI:** https://opensource.org/licenses/MIT  
 
@@ -66,6 +66,10 @@ This versions drops classic WebFinger support to keep the plugin short and simpl
 ## Changelog ##
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+
+### 3.2.6 ###
+
+* remove E-Mail address
 
 ### 3.2.5 ###
 

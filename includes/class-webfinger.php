@@ -63,15 +63,17 @@ class Webfinger {
 			exit;
 		}
 
+		$resource = esc_html( $wp->query_vars['resource'] );
+
 		// filter WebFinger array
-		$webfinger = apply_filters( 'webfinger_data', array(), $wp->query_vars['resource'] );
+		$webfinger = apply_filters( 'webfinger_data', array(), $resource );
 
 		// check if "user" exists
 		if ( empty( $webfinger ) ) {
 			status_header( 404 );
 			header( 'Content-Type: text/plain; charset=' . get_bloginfo( 'charset' ), true );
 
-			echo 'no data for resource "' . $wp->query_vars['resource'] . '" found';
+			printf( 'no data for resource "%s" found', $resource );
 
 			exit;
 		}
@@ -124,12 +126,12 @@ class Webfinger {
 			'links' => array(
 				array(
 					'rel' => 'http://webfinger.net/rel/profile-page',
-					'href' => $url,
+					'href' => esc_url( $url ),
 					'type' => 'text/html',
 				),
 				array(
 					'rel' => 'http://webfinger.net/rel/avatar',
-					'href' => $photo,
+					'href' => esc_url( $photo ),
 				),
 			),
 		);
@@ -138,7 +140,7 @@ class Webfinger {
 		if ( isset( $user->user_url ) && ! empty( $user->user_url ) ) {
 			$webfinger['links'][] = array(
 				'rel' => 'http://webfinger.net/rel/profile-page',
-				'href' => $user->user_url,
+				'href' => esc_url( $user->user_url ),
 				'type' => 'text/html',
 			);
 		}
@@ -278,19 +280,25 @@ class Webfinger {
 	 *       user and 'webfinger_user_query' to add custom query-params
 	 */
 	private static function get_user_by_uri( $uri ) {
-		$uri = urldecode( $uri );
+		$uri   = urldecode( $uri );
+		$uri   = str_replace( array( '*', '%' ), '', $uri );
 		$match = array();
 
 		// try to extract the scheme and the host
 		if ( preg_match( '/^([a-zA-Z^:]+):(.*)$/i', $uri, $match ) ) {
 			// extract the scheme
-			$scheme = $match[1];
+			$scheme = esc_attr( $match[1] );
 			// extract the "host"
-			$host = $match[2];
+			$host = sanitize_text_field( $match[2] );
 		} else { // fallback to 'acct' as default theme
 			$scheme = 'acct';
 			// extract the "host"
 			$host = $uri;
+		}
+
+		// check if $host and $uri are set
+		if ( ! $host || ! $uri ) {
+			return null;
 		}
 
 		switch ( $scheme ) {
@@ -302,14 +310,12 @@ class Webfinger {
 					$args = array(
 						'search' => $author_id,
 						'search_columns' => array( 'ID' ),
-						'meta_compare' => '=',
 					);
 				} else { // check other urls
 					// search url in user_url
 					$args = array(
 						'search' => $uri,
 						'search_columns' => array( 'user_url' ),
-						'meta_compare' => '=',
 					);
 				}
 
@@ -317,6 +323,10 @@ class Webfinger {
 			case 'acct': // check acct scheme
 				// get the identifier at the left of the '@'
 				$parts = explode( '@', $host );
+
+				if ( ! $parts[0] ) {
+					return null;
+				}
 
 				// check domain
 				if (
@@ -332,58 +342,21 @@ class Webfinger {
 						'user_nicename',
 						'user_login',
 					),
-					'meta_compare' => '=',
 				);
 				break;
 			case 'mailto': // check mailto scheme
 				$args = array(
 					'search' => $host,
 					'search_columns' => array( 'user_email' ),
-					'meta_compare' => '=',
 				);
 				break;
 			case 'xmpp': // check xmpp/jabber schemes
 			case 'urn:xmpp':
+			case 'im':
 				$args = array(
 					'meta_key' => 'jabber',
 					'meta_value' => $host,
 					'meta_compare' => '=',
-				);
-				break;
-			case 'ymsgr': // check Yahoo messenger schemes
-				$args = array(
-					'meta_key' => 'yim',
-					'meta_value' => $host,
-					'meta_compare' => '=',
-				);
-				break;
-			case 'aim': // check AOL messenger schemes
-				$args = array(
-					'meta_key'  => 'aim',
-					'meta_value' => $host,
-					'meta_compare' => '=',
-				);
-				break;
-			case 'im': // check instant messaging schemes
-				$args = array(
-					'meta_query' => array(
-						'relation' => 'OR',
-						array(
-							'key' => 'jabber',
-							'value' => $host,
-							'compare' => '=',
-						),
-						array(
-							'key' => 'yim',
-							'value' => $host,
-							'compare' => '=',
-						),
-						array(
-							'key' => 'aim',
-							'value' => $host,
-							'compare' => '=',
-						),
-					),
 				);
 				break;
 			default:

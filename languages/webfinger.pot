@@ -18,6 +18,24 @@ msgstr ""
 msgid "WebFinger"
 msgstr ""
 
+#: templates/profile-settings.php:2
+msgid ""
+"WebFinger is a way to attach information to an email address, or other "
+"online resource."
+msgstr ""
+
+#: templates/profile-settings.php:7
+msgid "WebFinger resource"
+msgstr ""
+
+#: templates/profile-settings.php:14
+msgid "Your main WebFinger resource"
+msgstr ""
+
+#: templates/profile-settings.php:20
+msgid "WebFinger aliases"
+msgstr ""
+
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/pfefferle/wordpress-webfinger"
 msgstr ""

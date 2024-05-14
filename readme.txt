@@ -1,7 +1,7 @@
 === WebFinger ===
 Contributors: pfefferle, willnorris
 Donate link: https://notiz.blog/donate/
-Tags: well-known, discovery, webfinger, JRD, ostatus, activitypub
+Tags: discovery, webfinger, JRD, ostatus, activitypub
 Requires at least: 4.2
 Tested up to: 6.5
 Stable tag: 3.2.7

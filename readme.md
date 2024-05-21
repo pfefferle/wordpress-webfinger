@@ -1,9 +1,9 @@
 # WebFinger #
 **Contributors:** [pfefferle](https://profiles.wordpress.org/pfefferle/), [willnorris](https://profiles.wordpress.org/willnorris/)  
 **Donate link:** https://notiz.blog/donate/  
-**Tags:** well-known, discovery, webfinger, JRD, ostatus, activitypub  
+**Tags:** discovery, webfinger, JRD, ostatus, activitypub  
 **Requires at least:** 4.2  
-**Tested up to:** 6.4  
+**Tested up to:** 6.5  
 **Stable tag:** 4.0.0  
 **License:** MIT  
 **License URI:** https://opensource.org/licenses/MIT  

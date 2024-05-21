@@ -1,4 +1,9 @@
 <?php
+
+namespace Webfinger;
+
+use WP_User_Query;
+
 /**
  * WebFinger
  *
@@ -8,7 +13,24 @@
 class Webfinger {
 
 	/**
-	 * Add query vars
+	 * Initialize the class, registering WordPress hooks.
+	 */
+	public static function init() {
+		add_action( 'query_vars', array( static::class, 'query_vars' ) );
+		add_action( 'parse_request', array( static::class, 'parse_request' ) );
+
+		add_action( 'init', array( static::class, 'generate_rewrite_rules' ) );
+
+		add_filter( 'webfinger_data', array( static::class, 'generate_user_data' ), 10, 3 );
+		add_filter( 'webfinger_data', array( static::class, 'generate_post_data' ), 10, 3 );
+		add_filter( 'webfinger_data', array( static::class, 'filter_by_rel' ), 99, 1 );
+
+		// default output
+		add_action( 'webfinger_render', array( static::class, 'render_jrd' ) );
+	}
+
+	/**
+	 * Add query vars.
 	 *
 	 * @param array $vars
 	 *
@@ -23,7 +45,7 @@ class Webfinger {
 	}
 
 	/**
-	 * Add rewrite rules
+	 * Add rewrite rules.
 	 *
 	 * @param WP_Rewrite
 	 */
@@ -34,16 +56,16 @@ class Webfinger {
 	/**
 	 * Parse the WebFinger request and render the document.
 	 *
-	 * @param WP $wp WordPress request context
+	 * @param WP $wp WordPress request context.
 	 *
-	 * @uses apply_filters() Calls 'webfinger' on webfinger data array
-	 * @uses do_action() Calls 'webfinger_render' to render webfinger data
+	 * @uses apply_filters() Calls 'webfinger' on webfinger data array.
+	 * @uses do_action()     Calls 'webfinger_render' to render webfinger data.
 	 */
 	public static function parse_request( $wp ) {
 		// check if it is a webfinger request or not
 		if (
 			! array_key_exists( 'well-known', $wp->query_vars ) ||
-			'webfinger' != $wp->query_vars['well-known']
+			'webfinger' !== $wp->query_vars['well-known']
 		) {
 			return;
 		}
@@ -85,9 +107,9 @@ class Webfinger {
 	}
 
 	/**
-	 * Render the JRD representation of the webfinger resource.
+	 * Render the JRD representation of the WebFinger resource.
 	 *
-	 * @param array $webfinger the WebFinger data-array
+	 * @param array $webfinger The WebFinger data-array.
 	 */
 	public static function render_jrd( $webfinger ) {
 		header( 'Content-Type: application/jrd+json; charset=' . get_bloginfo( 'charset' ), true );
@@ -97,17 +119,17 @@ class Webfinger {
 	}
 
 	/**
-	 * Generates the WebFinger base array
+	 * Generates the WebFinger base array.
 	 *
-	 * @param array    $webfinger   the WebFinger data-array
-	 * @param stdClass $user        the WordPress user
-	 * @param string   $resource    the resource param
+	 * @param array    $webfinger The WebFinger data-array.
+	 * @param stdClass $user      The WordPress user.
+	 * @param string   $resource  The resource param.
 	 *
-	 * @return array the enriched webfinger data-array
+	 * @return array The enriched WebFinger data-array.
 	 */
 	public static function generate_user_data( $webfinger, $resource ) {
 		// find matching user
-		$user = self::get_user_by_uri( $resource );
+		$user = User::get_user_by_uri( $resource );
 
 		if ( ! $user ) {
 			return $webfinger;
@@ -121,8 +143,8 @@ class Webfinger {
 
 		// generate default array
 		$webfinger = array(
-			'subject' => self::get_user_resource( $user->ID ),
-			'aliases' => self::get_user_resources( $user->ID ),
+			'subject' => User::get_resource( $user->ID ),
+			'aliases' => User::get_resources( $user->ID ),
 			'links' => array(
 				array(
 					'rel' => 'http://webfinger.net/rel/profile-page',
@@ -137,7 +159,11 @@ class Webfinger {
 		);
 
 		// add user_url if set
-		if ( isset( $user->user_url ) && ! empty( $user->user_url ) ) {
+		if (
+			isset( $user->user_url ) &&
+			! empty( $user->user_url ) // &&
+			//self::is_same_host( $user->user_url )
+		) {
 			$webfinger['links'][] = array(
 				'rel' => 'http://webfinger.net/rel/profile-page',
 				'href' => esc_url( $user->user_url ),
@@ -149,12 +175,12 @@ class Webfinger {
 	}
 
 	/**
-	 * generates the webfinger base array
+	 * Generates the WebFinger base array.
 	 *
-	 * @param array  $webfinger the webfinger data-array
-	 * @param string $resource the resource param
+	 * @param array  $webfinger The WebFinger data-array.
+	 * @param string $resource  The resource param.
 	 *
-	 * @return array the enriched webfinger data-array
+	 * @return array The enriched WebFinger data-array.
 	 */
 	public static function generate_post_data( $webfinger, $resource ) {
 		// find matching post
@@ -178,7 +204,14 @@ class Webfinger {
 		// default webfinger array for posts
 		$webfinger = array(
 			'subject' => get_permalink( $post->ID ),
-			'aliases' => apply_filters( 'webfinger_post_resource', array( home_url( '?p=' . $post->ID ), get_permalink( $post->ID ) ), $post ),
+			'aliases' => apply_filters(
+				'webfinger_post_resource',
+				array(
+					home_url( '?p=' . $post->ID ),
+					get_permalink( $post->ID ),
+				),
+				$post
+			),
 			'links' => array(
 				array(
 					'rel'  => 'shortlink',
@@ -212,13 +245,13 @@ class Webfinger {
 	}
 
 	/**
-	 * Filters the WebFinger array by request params like "rel"
+	 * Filters the WebFinger array by request params like "rel".
 	 *
 	 * @link http://tools.ietf.org/html/rfc7033#section-4.3
 	 *
-	 * @param array     $array
-	 * @param stdClass  $user
-	 * @param array     $queries
+	 * @param array    $array
+	 * @param stdClass $user
+	 * @param array    $queries
 	 *
 	 * @return array
 	 */
@@ -244,7 +277,7 @@ class Webfinger {
 			// check if query-string is valid and if it is a 'rel'
 			if (
 				isset( $param[0], $param[1] ) &&
-				'rel' == $param[0] &&
+				'rel' === $param[0] &&
 				! empty( $param[1] )
 			) {
 				$rels[] = urldecode( trim( $param[1] ) );
@@ -259,7 +292,7 @@ class Webfinger {
 		// filter WebFinger-array
 		$links = array();
 		foreach ( $webfinger['links'] as $link ) {
-			if ( in_array( $link['rel'], $rels ) ) {
+			if ( in_array( $link['rel'], $rels, true ) ) {
 				$links[] = $link;
 			}
 		}

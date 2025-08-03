@@ -101,7 +101,7 @@ class Admin {
 	 */
 	public static function maybe_show_errors( $errors, $update, $user ) {
 		// Verify nonce for CSRF protection
-		if ( ! isset( $_POST['webfinger_profile_nonce'] ) || ! wp_verify_nonce( $_POST['webfinger_profile_nonce'], 'webfinger_profile_update' ) ) {
+		if ( ! isset( $_POST['webfinger_profile_nonce'] ) || ! wp_verify_nonce( $_POST['webfinger_profile_nonce'], 'webfinger_profile_settings' ) ) {
 			return $errors;
 		}
 		if ( ! isset( $_POST ) || ! isset( $_POST['webfinger_resource'] ) ) {

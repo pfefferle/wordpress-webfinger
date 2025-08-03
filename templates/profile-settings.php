@@ -8,6 +8,7 @@
 			</th>
 			<td>
 				<p>
+					<?php wp_nonce_field( 'webfinger_profile_settings', 'webfinger_profile_settings_nonce' ); ?>
 					<input name="webfinger_resource" id="webfinger_resource" type="text" style="text-align: right;" value="<?php echo esc_textarea( get_webfinger_username( $args['user']->ID ) ); ?>" />@<?php echo esc_html( parse_url( home_url(), PHP_URL_HOST ) ); ?>
 				</p>
 				<p class="description">

@@ -93,6 +93,10 @@ class Admin {
 	 * @return array Updated list of errors
 	 */
 	public static function maybe_show_errors( $errors, $update, $user ) {
+		// Verify nonce for CSRF protection
+		if ( ! isset( $_POST['webfinger_profile_nonce'] ) || ! wp_verify_nonce( $_POST['webfinger_profile_nonce'], 'webfinger_profile_update' ) ) {
+			return $errors;
+		}
 		if ( ! isset( $_POST ) || ! isset( $_POST['webfinger_resource'] ) ) {
 			return $errors;
 		}

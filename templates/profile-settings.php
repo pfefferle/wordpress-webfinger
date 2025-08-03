@@ -8,7 +8,7 @@
 			</th>
 			<td>
 				<p>
-					<input name="webfinger_resource" id="webfinger_resource" type="text" style="text-align: right;" value="<?php echo esc_textarea( get_webfinger_username( $args['user']->ID ) ); ?>" />@<?php echo parse_url( home_url(), PHP_URL_HOST ); ?>
+					<input name="webfinger_resource" id="webfinger_resource" type="text" style="text-align: right;" value="<?php echo esc_textarea( get_webfinger_username( $args['user']->ID ) ); ?>" />@<?php echo esc_html( parse_url( home_url(), PHP_URL_HOST ) ); ?>
 				</p>
 				<p class="description">
 					<?php esc_html_e( 'Your main WebFinger resource', 'webfinger' ); ?>

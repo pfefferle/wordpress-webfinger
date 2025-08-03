@@ -59,7 +59,7 @@ class Admin {
 		// Verify nonce to prevent CSRF
 		if (
 			! isset( $_POST['webfinger_profile_nonce'] ) ||
-			! wp_verify_nonce( $_POST['webfinger_profile_nonce'], 'webfinger_profile_update' )
+			! wp_verify_nonce( $_POST['webfinger_profile_nonce'], 'webfinger_profile_settings' )
 		) {
 			return false;
 		}

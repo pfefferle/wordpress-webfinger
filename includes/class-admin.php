@@ -56,10 +56,17 @@ class Admin {
 			return false;
 		}
 
-		if ( ! isset( $_POST ) || ! isset( $_POST['webfinger_resource'] ) ) {
+		// Verify nonce to prevent CSRF
+		if (
+			! isset( $_POST['webfinger_profile_nonce'] ) ||
+			! wp_verify_nonce( $_POST['webfinger_profile_nonce'], 'webfinger_profile_update' )
+		) {
 			return false;
 		}
 
+		if ( ! isset( $_POST['webfinger_resource'] ) ) {
+			return false;
+		}
 		if ( empty( $_POST['webfinger_resource'] ) ) {
 			delete_user_meta( $user_id, 'webfinger_resource' );
 			return false;

@@ -128,6 +128,6 @@ class Admin {
 		$user_query = new WP_User_Query( $args );
 		$results    = $user_query->get_results();
 
-		return empty( $result );
+		return empty( $results );
 	}
 }

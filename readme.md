@@ -1,16 +1,17 @@
-# WebFinger #
-**Contributors:** [pfefferle](https://profiles.wordpress.org/pfefferle/), [willnorris](https://profiles.wordpress.org/willnorris/)  
-**Donate link:** https://notiz.blog/donate/  
-**Tags:** discovery, webfinger, JRD, ostatus, activitypub  
-**Requires at least:** 4.2  
-**Tested up to:** 6.7
-**Stable tag:** 4.0.0  
-**License:** MIT  
-**License URI:** https://opensource.org/licenses/MIT  
+# WebFinger
+
+- Contributors: pfefferle, willnorris
+- Donate link: https://notiz.blog/donate/
+- Tags: discovery, webfinger, JRD, ostatus, activitypub
+- Requires at least: 4.2
+- Tested up to: 6.9
+- Stable tag: 4.0.0
+- License: MIT
+- License URI: https://opensource.org/licenses/MIT
 
 WebFinger for WordPress
 
-## Description ##
+## Description
 
 Enables WebFinger ([RFC 7033](http://tools.ietf.org/html/rfc7033)) support for WordPress.
 
@@ -20,9 +21,9 @@ About WebFinger:
 
 (quote from the [RFC](http://tools.ietf.org/html/rfc7033))
 
-## Frequently Asked Questions ##
+## Frequently Asked Questions
 
-### How to extend the JRD file ###
+### How to extend the JRD file
 
 You can add your own links or properties like that:
 
@@ -34,7 +35,7 @@ You can add your own links or properties like that:
     }
     add_filter( 'webfinger_data', 'oexchange_target_link' );
 
-### Add alternate file/output formats ###
+### Add alternate file/output formats
 
 You can add your own links or properties like that:
 
@@ -49,160 +50,160 @@ You can add your own links or properties like that:
 
 You can find a detailed example here <https://github.com/pfefferle/wordpress-webfinger-legacy>
 
-### The spec ###
+### The spec
 
 WebFinger is specified as [RFC 7033](http://tools.ietf.org/html/rfc7033)
 
-### The WebFinger community page ###
+### The WebFinger community page
 
 Please visit <http://webfinger.net>
 
-## Upgrade Notice ##
+## Upgrade Notice
 
-### 3.0.0 ###
+### 3.0.0
 
 This versions drops classic WebFinger support to keep the plugin short and simple. All legacy stuff is bundled in this new plugin <https://github.com/pfefferle/wordpress-webfinger-legacy>
 
-## Changelog ##
+## Changelog
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
 
-### 3.2.7 ###
+### 3.2.7
 
 * Added: better output escaping
 * Fixed: stricter queries
 
-### 3.2.6 ###
+### 3.2.6
 
 * remove E-Mail address
 
-### 3.2.5 ###
+### 3.2.5
 
 * fix typo
 
-### 3.2.4 ###
+### 3.2.4
 
 * update requirements
 
-### 3.2.3 ###
+### 3.2.3
 
 * fixed `acct` scheme for discovery
 
-### 3.2.2 ###
+### 3.2.2
 
 * fixed typo (thanks @ivucica)
 * use `acct` as default scheme
 
-### 3.2.1 ###
+### 3.2.1
 
 * make `acct` protocol optional
 
-### 3.2.0 ###
+### 3.2.0
 
 * global refactoring
 
-### 3.1.6 ###
+### 3.1.6
 
 * added `user_nicename` as resource
 * fixed WordPress coding standard issues
 
-### 3.1.5 ###
+### 3.1.5
 
 * fixed PHP warning
 
-### 3.1.4 ###
+### 3.1.4
 
 * updated requirements
 
-### 3.1.3 ###
+### 3.1.3
 
 * add support for the 'aim', 'ymsgr' and 'acct' protocol
 
-### 3.1.2 ###
+### 3.1.2
 
 * fixed the legacy code
 * added feeds
 
-### 3.1.1 ###
+### 3.1.1
 
 * fixed 'get_user_by_various' function
 
-### 3.1.0 ###
+### 3.1.0
 
 * Added WebFinger legacy plugin, because the legacy version is still very popular and used by for example OStatus (Mastodon, Status.NET and GNU Social)
 * Added Webfinger for posts support
 
-### 3.0.3 ###
+### 3.0.3
 
 * composer support
 * compatibility updates
 
-### 3.0.2 ###
+### 3.0.2
 
 * `get_avatar_url` instead of custom code
 * some small code improvements
 * nicer PHP-docs
 
-### 3.0.1 ###
+### 3.0.1
 
 * updated version informations
 * support the WordPress Coding Standard
 
-### 3.0.0 ###
+### 3.0.0
 
 * added correct error-responses
 * remove legacy support for XRD and host-meta (props to Will Norris)
 
-### 2.0.1 ###
+### 2.0.1
 
 * small bugfix
 
-### 2.0.0 ###
+### 2.0.0
 
 * complete refactoring
 * removed simple-web-discovery
 * more filters and actions
 * works without /.well-known/ plugin
 
-### 1.4.0 ###
+### 1.4.0
 
 * small fixes
 * added "webfinger" as well-known uri
 
-### 1.3.1 ###
+### 1.3.1
 
 * added "rel"-filter (work in progress)
 * added more aliases
 
-### 1.3 ###
+### 1.3
 
 * added host-meta resource feature (see latest spec)
 
-### 1.2 ###
+### 1.2
 
 * added 404 http error if user doesn't exist
 * added jrd discovery for host-meta
 
-### 1.1 ###
+### 1.1
 
 * fixed an odd problem with lower WordPress versions
 * added support for the http://wordpress.org/extend/plugins/extended-profile/ (thanks to Singpolyma)
 
-### 1.0.1 ###
+### 1.0.1
 
 * api improvements
 
-### 1.0 ###
+### 1.0
 
 * basic simple-seb-discovery
 * json support
 * some small improvements
 
-### 0.9.1 ###
+### 0.9.1
 
 * some changes to support http://unhosted.org
 
-### 0.9 ###
+### 0.9
 
 * OStatus improvements
 * Better uri handling
@@ -210,20 +211,20 @@ Project maintained on github at [pfefferle/wordpress-webfinger](https://github.c
 * Added filters
 * Added functions to get a users webfingers
 
-### 0.7 ###
+### 0.7
 
 * Added do_action param (for future OStatus plugin)
 * Author-Url as Webfinger-Identifier
 
-### 0.5 ###
+### 0.5
 
 * Initial release
 
-## Installation ##
+## Installation
 
 Follow the normal instructions for [installing WordPress plugins](https://codex.wordpress.org/Managing_Plugins#Installing_Plugins).
 
-### Automatic Plugin Installation ###
+### Automatic Plugin Installation
 
 To add a WordPress Plugin using the [built-in plugin installer](https://codex.wordpress.org/Administration_Screens#Add_New_Plugins):
 
@@ -235,7 +236,7 @@ To add a WordPress Plugin using the [built-in plugin installer](https://codex.wo
 1. The resulting installation screen will list the installation as successful or note any problems during the install.
 1. If successful, click **Activate Plugin** to activate it, or **Return to Plugin Installer** for further actions.
 
-### Manual Plugin Installation ###
+### Manual Plugin Installation
 
 There are a few cases when manually installing a WordPress Plugin is appropriate.
 

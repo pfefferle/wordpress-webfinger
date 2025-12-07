@@ -65,10 +65,8 @@ class Admin {
 		}
 
 		// Verify nonce to prevent CSRF
-		if (
-			! isset( $_POST['webfinger_profile_nonce'] ) ||
-			! wp_verify_nonce( $_POST['webfinger_profile_nonce'], 'webfinger_profile_settings' )
-		) {
+		$nonce = isset( $_POST['webfinger_profile_nonce'] ) ? sanitize_text_field( $_POST['webfinger_profile_nonce'] ) : '';
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'webfinger_profile_settings' ) ) {
 			return false;
 		}
 
@@ -80,13 +78,12 @@ class Admin {
 			return false;
 		}
 
-		$valid = self::is_valid_webfinger_resource( $_POST['webfinger_resource'], $user_id );
+		$webfinger = sanitize_title( $_POST['webfinger_resource'] );
+		$valid     = self::is_valid_webfinger_resource( $webfinger, $user_id );
 
 		if ( ! $valid ) {
-			return;
+			return false;
 		}
-
-		$webfinger = sanitize_title( $_POST['webfinger_resource'], true );
 
 		// create/update user meta for the $user_id
 		update_user_meta(
@@ -109,15 +106,16 @@ class Admin {
 	 */
 	public static function maybe_show_errors( $errors, $update, $user ) {
 		// Verify nonce for CSRF protection
-		if ( ! isset( $_POST['webfinger_profile_nonce'] ) || ! wp_verify_nonce( $_POST['webfinger_profile_nonce'], 'webfinger_profile_settings' ) ) {
+		$nonce = isset( $_POST['webfinger_profile_nonce'] ) ? sanitize_text_field( $_POST['webfinger_profile_nonce'] ) : '';
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'webfinger_profile_settings' ) ) {
 			return $errors;
 		}
-		if ( ! isset( $_POST ) || ! isset( $_POST['webfinger_resource'] ) ) {
+		if ( ! isset( $_POST['webfinger_resource'] ) ) {
 			return $errors;
 		}
 
 		$webfinger_resource = sanitize_text_field( $_POST['webfinger_resource'] );
-		$valid = self::is_valid_webfinger_resource( $webfinger_resource, $user->ID );
+		$valid              = self::is_valid_webfinger_resource( $webfinger_resource, $user->ID );
 
 		if ( ! $valid ) {
 			$errors->add( 'webfinger_resource', __( 'WebFinger resource is already in use by a different user', 'webfinger' ) );

@@ -51,14 +51,12 @@ class User {
 					$args = array(
 						'search' => $author_id,
 						'search_columns' => array( 'ID' ),
-						'meta_compare' => '=',
 					);
 				} else { // check other urls
 					// search url in user_url
 					$args = array(
 						'search' => $uri,
 						'search_columns' => array( 'user_url' ),
-						'meta_compare' => '=',
 					);
 				}
 
@@ -91,7 +89,6 @@ class User {
 						'user_nicename',
 						'user_login',
 					),
-					'meta_compare' => '=',
 				);
 
 				break;
@@ -105,12 +102,11 @@ class User {
 				$args = array(
 					'search' => $email,
 					'search_columns' => array( 'user_email' ),
-					'meta_compare' => '=',
 				);
 				break;
 			case 'xmpp': // check xmpp/jabber schemes
 			case 'urn:xmpp':
-				_deprecated_function( 'xmpp:user@host.tld', '4.0.0' );
+				_deprecated_function( 'xmpp:user@host.tld', '4.0.0', 'acct:user@host.tld' );
 				$args = array(
 					'meta_key' => 'jabber',
 					'meta_value' => $host,
@@ -118,7 +114,7 @@ class User {
 				);
 				break;
 			case 'ymsgr': // check Yahoo messenger schemes
-				_deprecated_function( 'ymsgr:user@host.tld', '4.0.0' );
+				_deprecated_function( 'ymsgr:user@host.tld', '4.0.0', 'acct:user@host.tld' );
 				$args = array(
 					'meta_key' => 'yim',
 					'meta_value' => $host,
@@ -126,7 +122,7 @@ class User {
 				);
 				break;
 			case 'aim': // check AOL messenger schemes
-				_deprecated_function( 'aim:user@host.tld', '4.0.0' );
+				_deprecated_function( 'aim:user@host.tld', '4.0.0', 'acct:user@host.tld' );
 				$args = array(
 					'meta_key'  => 'aim',
 					'meta_value' => $host,

@@ -72,6 +72,19 @@ class User {
 					return;
 				}
 
+				// First check for custom webfinger_resource meta
+				$meta_args = array(
+					'meta_key'     => 'webfinger_resource',
+					'meta_value'   => $id,
+					'meta_compare' => '=',
+				);
+
+				$meta_query = new WP_User_Query( $meta_args );
+				if ( ! empty( $meta_query->get_results() ) ) {
+					return $meta_query->results[0];
+				}
+
+				// Fall back to searching user_nicename and user_login
 				$args = array(
 					'search' => $id,
 					'search_columns' => array(
@@ -172,6 +185,10 @@ class User {
 	public static function get_username( $id_or_name_or_object ) {
 		$user = get_user_by_various( $id_or_name_or_object );
 
+		if ( ! $user ) {
+			return null;
+		}
+
 		$resource = $user->user_login;
 
 		$custom_resource = get_user_meta( $user->ID, 'webfinger_resource', true );
@@ -255,7 +272,7 @@ class User {
 	 */
 	public static function is_same_host( $uri ) {
 		$blog_host = parse_url( home_url(), PHP_URL_HOST );
-		return true;
+
 		if ( filter_var( $uri, FILTER_VALIDATE_URL ) ) { // check if $uri is a valid URL
 			return parse_url( $uri, PHP_URL_HOST ) === $blog_host;
 		} elseif ( str_contains( $uri, '@' ) ) { // check if $uri is a valid E-Mail

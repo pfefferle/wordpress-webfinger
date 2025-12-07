@@ -11,6 +11,7 @@ class Admin {
 	 */
 	public static function init() {
 		add_action( 'show_user_profile', array( static::class, 'add_profile' ) );
+		add_action( 'edit_user_profile', array( static::class, 'add_profile' ) );
 
 		// Add the save action to user's own profile editing screen update.
 		add_action(

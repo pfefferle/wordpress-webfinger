@@ -246,7 +246,7 @@ class User {
 			return array();
 		}
 
-		// generate account idenitfier (acct: uri)
+		// generate account identifier (acct: uri)
 		$resources[] = self::get_resource( $user );
 		$resources[] = 'acct:' . $user->user_login . '@' . parse_url( home_url(), PHP_URL_HOST );
 		$resources[] = get_author_posts_url( $user->ID, $user->user_nicename );

@@ -159,8 +159,8 @@ class Webfinger {
 		// add user_url if set
 		if (
 			isset( $user->user_url ) &&
-			! empty( $user->user_url ) // &&
-			//self::is_same_host( $user->user_url )
+			! empty( $user->user_url ) &&
+			is_same_host( $user->user_url )
 		) {
 			$webfinger['links'][] = array(
 				'rel' => 'http://webfinger.net/rel/profile-page',
@@ -299,5 +299,4 @@ class Webfinger {
 		// return only "links" with the matching rel-values
 		return $webfinger;
 	}
-
 }

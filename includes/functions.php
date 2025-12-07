@@ -117,3 +117,24 @@ function get_webfinger_resource( $id_or_name_or_object, $with_protocol = true ) 
 function get_webfinger_username( $id_or_name_or_object ) {
 	return \Webfinger\User::get_username( $id_or_name_or_object );
 }
+
+/**
+ * Check if a passed URI has the same domain as the blog.
+ *
+ * @param string $uri The URI to check.
+ *
+ * @return boolean
+ */
+function is_same_host( $uri ) {
+	$blog_host = parse_url( home_url(), PHP_URL_HOST );
+
+	if ( filter_var( $uri, FILTER_VALIDATE_URL ) ) { // check if $uri is a valid URL
+		return parse_url( $uri, PHP_URL_HOST ) === $blog_host;
+	} elseif ( str_contains( $uri, '@' ) ) { // check if $uri is a valid E-Mail
+		$host = substr( strrchr( $uri, '@' ), 1 );
+
+		return $host === $blog_host;
+	}
+
+	return false;
+}

@@ -26,7 +26,7 @@ class User {
 		$scheme = 'acct';
 		$host   = $uri;
 
-		if ( ! self::is_same_host( $uri ) ) {
+		if ( ! is_same_host( $uri ) ) {
 			return;
 		}
 
@@ -251,36 +251,15 @@ class User {
 		$resources[] = 'acct:' . $user->user_login . '@' . parse_url( home_url(), PHP_URL_HOST );
 		$resources[] = get_author_posts_url( $user->ID, $user->user_nicename );
 
-		if ( $user->user_email && self::is_same_host( $user->user_email ) ) {
+		if ( $user->user_email && is_same_host( $user->user_email ) ) {
 			$resources[] = 'mailto:' . $user->user_email;
 		}
 
 		$xmpp = get_user_meta( $user->ID, 'jabber', true );
-		if ( $xmpp && self::is_same_host( $xmpp ) ) {
+		if ( $xmpp && is_same_host( $xmpp ) ) {
 			$resources[] = 'xmpp:' . $xmpp;
 		}
 
 		return array_values( array_unique( apply_filters( 'webfinger_user_resources', $resources, $user ) ) );
-	}
-
-	/**
-	 * Check if a passed URI has the same domain as the Blog.
-	 *
-	 * @param string $uri The URI to check.
-	 *
-	 * @return boolean
-	 */
-	public static function is_same_host( $uri ) {
-		$blog_host = parse_url( home_url(), PHP_URL_HOST );
-
-		if ( filter_var( $uri, FILTER_VALIDATE_URL ) ) { // check if $uri is a valid URL
-			return parse_url( $uri, PHP_URL_HOST ) === $blog_host;
-		} elseif ( str_contains( $uri, '@' ) ) { // check if $uri is a valid E-Mail
-			$host = substr( strrchr( $uri, '@' ), 1 );
-
-			return $host === $blog_host;
-		}
-
-		return false;
 	}
 }

@@ -7,7 +7,6 @@
 /vendor
 /tests
 /config
-readme.md
 package.json
 composer.json
 composer.lock
@@ -16,8 +15,7 @@ push.sh
 phpunit.xml
 phpunit.xml.dist
 phpcs.xml
-README.md
-readme.md
+readme.txt
 .travis.yml
 .distignore
 .gitignore

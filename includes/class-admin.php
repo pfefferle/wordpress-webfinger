@@ -41,7 +41,7 @@ class Admin {
 	 * @return void
 	 */
 	public static function add_profile( $user ) {
-		load_template( dirname( __FILE__ ) . '/../templates/profile-settings.php', true, array( 'user' => $user ) );
+		load_template( WEBFINGER_PLUGIN_DIR . 'templates/profile-settings.php', true, array( 'user' => $user ) );
 	}
 
 	/**

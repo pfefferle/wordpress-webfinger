@@ -4,6 +4,13 @@ namespace Webfinger;
 
 use WP_User_Query;
 
+/**
+ * Handles the registration of WordPress hooks and user profile settings
+ * for the Webfinger plugin admin functionality.
+ *
+ * This class adds custom fields to user profiles, manages their saving,
+ * and validates user meta related to Webfinger resources.
+ */
 class Admin {
 
 	/**

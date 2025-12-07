@@ -109,7 +109,8 @@ class Admin {
 			return $errors;
 		}
 
-		$valid = self::is_valid_webfinger_resource( $_POST['webfinger_resource'], $user->ID );
+		$webfinger_resource = sanitize_text_field( $_POST['webfinger_resource'] );
+		$valid = self::is_valid_webfinger_resource( $webfinger_resource, $user->ID );
 
 		if ( ! $valid ) {
 			$errors->add( 'webfinger_resource', __( 'WebFinger resource is already in use by a different user', 'webfinger' ) );

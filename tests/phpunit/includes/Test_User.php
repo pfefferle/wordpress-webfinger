@@ -223,4 +223,138 @@ class Test_User extends \WP_UnitTestCase {
 
 		\delete_user_meta( self::$user_id, 'webfinger_resource' );
 	}
+
+	/**
+	 * Test get_user_by_uri strips SQL wildcard percent character.
+	 *
+	 * @covers ::get_user_by_uri
+	 */
+	public function test_get_user_by_uri_strips_percent_wildcard() {
+		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+
+		// Attempt SQL LIKE injection with % wildcard.
+		$uri = 'acct:%@' . $host;
+
+		$user = User::get_user_by_uri( $uri );
+
+		// Should return null, not match any user via LIKE query.
+		$this->assertNull( $user );
+	}
+
+	/**
+	 * Test get_user_by_uri strips SQL wildcard asterisk character.
+	 *
+	 * @covers ::get_user_by_uri
+	 */
+	public function test_get_user_by_uri_strips_asterisk_wildcard() {
+		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+
+		// Attempt injection with * wildcard.
+		$uri = 'acct:*@' . $host;
+
+		$user = User::get_user_by_uri( $uri );
+
+		// Should return null, not match any user.
+		$this->assertNull( $user );
+	}
+
+	/**
+	 * Test get_user_by_uri with wildcard in username does not match all users.
+	 *
+	 * @covers ::get_user_by_uri
+	 */
+	public function test_get_user_by_uri_wildcard_does_not_match_all() {
+		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+
+		// Attempt to match all users with wildcards.
+		$uri = 'acct:test%user@' . $host;
+
+		$user = User::get_user_by_uri( $uri );
+
+		// Should return null because % is stripped, leaving "testuser" which should match.
+		// Actually after stripping %, it becomes "testuser" which is a valid user.
+		// Let's test with a pattern that won't match after stripping.
+		$uri2 = 'acct:%test%@' . $host;
+
+		$user2 = User::get_user_by_uri( $uri2 );
+
+		// After stripping %, becomes "test" which is not our user.
+		$this->assertNull( $user2 );
+	}
+
+	/**
+	 * Test get_user_by_uri with malicious scheme is sanitized.
+	 *
+	 * @covers ::get_user_by_uri
+	 */
+	public function test_get_user_by_uri_sanitizes_scheme() {
+		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+
+		// Attempt XSS in scheme (should be sanitized by esc_attr).
+		$uri = '<script>alert(1)</script>:testuser@' . $host;
+
+		$user = User::get_user_by_uri( $uri );
+
+		// Should return null due to invalid scheme/host mismatch.
+		$this->assertNull( $user );
+	}
+
+	/**
+	 * Test get_user_by_uri with malicious host is sanitized.
+	 *
+	 * @covers ::get_user_by_uri
+	 */
+	public function test_get_user_by_uri_sanitizes_host() {
+		// Attempt injection in host part.
+		$uri = 'acct:testuser@<script>alert(1)</script>';
+
+		$user = User::get_user_by_uri( $uri );
+
+		// Should return null due to host not matching blog host.
+		$this->assertNull( $user );
+	}
+
+	/**
+	 * Test get_user_by_uri with empty URI after sanitization.
+	 *
+	 * @covers ::get_user_by_uri
+	 */
+	public function test_get_user_by_uri_empty_after_sanitization() {
+		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+
+		// URI that becomes empty after stripping wildcards.
+		$uri = 'acct:%%%@' . $host;
+
+		$user = User::get_user_by_uri( $uri );
+
+		// Should return null.
+		$this->assertNull( $user );
+	}
+
+	/**
+	 * Test get_user_by_uri with URL-encoded wildcards.
+	 *
+	 * @covers ::get_user_by_uri
+	 */
+	public function test_get_user_by_uri_strips_encoded_wildcards() {
+		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+
+		// URL-encoded % is %25, after urldecode becomes %.
+		$uri = 'acct:%25@' . $host;
+
+		$user = User::get_user_by_uri( $uri );
+
+		// Should return null after decoding and stripping.
+		$this->assertNull( $user );
+	}
+
+	/**
+	 * Test get_user_by_uri handles null/empty input gracefully.
+	 *
+	 * @covers ::get_user_by_uri
+	 */
+	public function test_get_user_by_uri_handles_empty_input() {
+		$this->assertNull( User::get_user_by_uri( '' ) );
+		$this->assertNull( User::get_user_by_uri( null ) );
+	}
 }

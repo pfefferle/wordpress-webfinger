@@ -36,6 +36,7 @@ function init() {
 
 	Webfinger::init();
 	Admin::init();
+	Health_Check::init();
 
 	// Add legacy WebFinger class.
 	if ( WEBFINGER_LEGACY && ! \class_exists( '\WebFingerLegacy_Plugin' ) ) {

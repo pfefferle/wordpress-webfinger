@@ -27,6 +27,9 @@ class User {
 	public static function get_user_by_uri( $uri ) {
 		$uri = \urldecode( $uri );
 
+		// Remove wildcards to prevent SQL injection via LIKE queries.
+		$uri = \str_replace( array( '*', '%' ), '', $uri );
+
 		if ( ! $uri || ! is_same_host( $uri ) ) {
 			return null;
 		}
@@ -37,11 +40,11 @@ class User {
 
 		// Try to extract the scheme and the host.
 		if ( \preg_match( '/^([a-zA-Z][a-zA-Z0-9+.-]*):(.+)$/i', $uri, $match ) ) {
-			$scheme = \strtolower( $match[1] );
-			$host   = $match[2];
+			$scheme = \esc_attr( \strtolower( $match[1] ) );
+			$host   = \sanitize_text_field( $match[2] );
 		}
 
-		if ( ! $host ) {
+		if ( ! $host || ! $uri ) {
 			return null;
 		}
 

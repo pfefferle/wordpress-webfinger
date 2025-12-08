@@ -66,47 +66,42 @@ class Webfinger {
 	 */
 	public static function parse_request( $wp ) {
 		// Check if it is a webfinger request or not.
-		if (
-			! \array_key_exists( 'well-known', $wp->query_vars ) ||
-			'webfinger' !== $wp->query_vars['well-known']
-		) {
+		if ( ! isset( $wp->query_vars['well-known'] ) || 'webfinger' !== $wp->query_vars['well-known'] ) {
 			return;
 		}
 
 		\header( 'Access-Control-Allow-Origin: *' );
 
 		// Check if "resource" param exists.
-		if (
-			! \array_key_exists( 'resource', $wp->query_vars ) ||
-			empty( $wp->query_vars['resource'] )
-		) {
-			\status_header( 400 );
-			\header( 'Content-Type: text/plain; charset=' . \get_bloginfo( 'charset' ), true );
-
-			echo 'missing "resource" parameter';
-
-			exit;
+		if ( empty( $wp->query_vars['resource'] ) ) {
+			self::send_error( 400, 'missing "resource" parameter' );
 		}
 
-		$resource = \esc_html( $wp->query_vars['resource'] );
+		$resource = $wp->query_vars['resource'];
 
 		// Filter WebFinger array.
 		$webfinger = \apply_filters( 'webfinger_data', array(), $resource );
 
-		// Check if "user" exists.
+		// Check if data exists.
 		if ( empty( $webfinger ) ) {
-			\status_header( 404 );
-			\header( 'Content-Type: text/plain; charset=' . \get_bloginfo( 'charset' ), true );
-
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $resource is already escaped above.
-			\printf( 'no data for resource "%s" found', $resource );
-
-			exit;
+			self::send_error( 404, \sprintf( 'no data for resource "%s" found', \esc_html( $resource ) ) );
 		}
 
 		\do_action( 'webfinger_render', $webfinger );
 
-		// Stop exactly here!
+		exit;
+	}
+
+	/**
+	 * Send an error response and exit.
+	 *
+	 * @param int    $status  HTTP status code.
+	 * @param string $message Error message.
+	 */
+	private static function send_error( $status, $message ) {
+		\status_header( $status );
+		\header( 'Content-Type: text/plain; charset=' . \get_bloginfo( 'charset' ), true );
+		echo \esc_html( $message );
 		exit;
 	}
 
@@ -204,6 +199,10 @@ class Webfinger {
 
 		$author = \get_user_by( 'id', $post->post_author );
 
+		if ( ! $author ) {
+			return $webfinger;
+		}
+
 		// Default webfinger array for posts.
 		$webfinger = array(
 			'subject' => \get_permalink( $post->ID ),
@@ -229,7 +228,7 @@ class Webfinger {
 				array(
 					'rel'  => 'author',
 					'type' => 'text/html',
-					'href' => \get_author_posts_url( $author->ID, $author->nicename ),
+					'href' => \get_author_posts_url( $author->ID, $author->user_nicename ),
 				),
 				array(
 					'rel'  => 'alternate',
@@ -257,49 +256,55 @@ class Webfinger {
 	 * @return array The filtered WebFinger data-array.
 	 */
 	public static function filter_by_rel( $webfinger ) {
-		// Check if WebFinger is empty or if "rel" is set or if array has any "links".
-		if (
-			empty( $webfinger ) ||
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- This is a public WebFinger endpoint.
-			! \array_key_exists( 'rel', $_GET ) ||
-			! isset( $webfinger['links'] )
-		) {
+		// Check if WebFinger is empty or has no links.
+		if ( empty( $webfinger ) || ! isset( $webfinger['links'] ) ) {
 			return $webfinger;
 		}
 
-		// Explode the query-string by hand because PHP does not support multiple queries with the same name.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- We sanitize below.
-		$query = isset( $_SERVER['QUERY_STRING'] ) ? \explode( '&', $_SERVER['QUERY_STRING'] ) : array();
-		$rels  = array();
-
-		foreach ( $query as $param ) {
-			$param = \explode( '=', $param );
-
-			// Check if query-string is valid and if it is a 'rel'.
-			if (
-				isset( $param[0], $param[1] ) &&
-				'rel' === $param[0] &&
-				! empty( $param[1] )
-			) {
-				$rels[] = \sanitize_text_field( \wp_unslash( \urldecode( \trim( $param[1] ) ) ) );
-			}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public WebFinger endpoint.
+		if ( ! isset( $_GET['rel'] ) ) {
+			return $webfinger;
 		}
 
-		// Check if there is something to filter.
+		$rels = self::get_rel_params();
+
 		if ( empty( $rels ) ) {
 			return $webfinger;
 		}
 
-		// Filter WebFinger-array.
-		$links = array();
-		foreach ( $webfinger['links'] as $link ) {
-			if ( \in_array( $link['rel'], $rels, true ) ) {
-				$links[] = $link;
+		$webfinger['links'] = \array_values(
+			\array_filter(
+				$webfinger['links'],
+				function ( $link ) use ( $rels ) {
+					return isset( $link['rel'] ) && \in_array( $link['rel'], $rels, true );
+				}
+			)
+		);
+
+		return $webfinger;
+	}
+
+	/**
+	 * Parse rel parameters from query string.
+	 *
+	 * PHP does not support multiple query params with the same name,
+	 * so we parse the query string manually.
+	 *
+	 * @return array List of rel values.
+	 */
+	private static function get_rel_params() {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- We sanitize below.
+		$query_string = $_SERVER['QUERY_STRING'] ?? '';
+		$rels         = array();
+
+		foreach ( \explode( '&', $query_string ) as $param ) {
+			$parts = \explode( '=', $param, 2 );
+
+			if ( 2 === \count( $parts ) && 'rel' === $parts[0] && '' !== $parts[1] ) {
+				$rels[] = \sanitize_text_field( \urldecode( $parts[1] ) );
 			}
 		}
-		$webfinger['links'] = $links;
 
-		// Return only "links" with the matching rel-values.
-		return $webfinger;
+		return $rels;
 	}
 }

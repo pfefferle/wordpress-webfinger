@@ -33,7 +33,7 @@
 				<?php foreach ( \Webfinger\User::get_resources( $args['user']->ID ) as $resource ) { ?>
 					<li>
 						<?php echo \esc_html( $resource ); ?>
-						<small>(<a href="https://webfinger.net/lookup/?resource=<?php echo \esc_url( \rawurlencode( $resource ) ); ?>" target="_blank" rel="noopener noreferrer">verify</a>)</small>
+						<small>(<a href="<?php echo \esc_url( 'https://webfinger.net/lookup/?resource=' . \rawurlencode( $resource ) ); ?>" target="_blank" rel="noopener noreferrer">verify</a>)</small>
 					</li>
 				<?php } ?>
 				</ul>

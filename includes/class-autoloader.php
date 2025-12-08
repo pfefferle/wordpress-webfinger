@@ -13,6 +13,7 @@ namespace Webfinger;
  * Handles autoloading of plugin classes following WordPress naming conventions.
  */
 class Autoloader {
+
 	/**
 	 * Namespace prefix.
 	 *
@@ -28,14 +29,19 @@ class Autoloader {
 	private $path;
 
 	/**
+	 * File type prefixes to search.
+	 */
+	private const TYPE_PREFIXES = array( 'class', 'interface', 'trait' );
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $prefix The namespace prefix.
 	 * @param string $path   The path to the classes directory.
 	 */
-	public function __construct( $prefix, $path ) {
+	public function __construct( string $prefix, string $path ) {
 		$this->prefix = $prefix;
-		$this->path   = $path;
+		$this->path   = \rtrim( $path, '/' ) . '/';
 	}
 
 	/**
@@ -44,7 +50,7 @@ class Autoloader {
 	 * @param string $prefix The namespace prefix.
 	 * @param string $path   The path to the classes directory.
 	 */
-	public static function register_path( $prefix, $path ) {
+	public static function register_path( string $prefix, string $path ): void {
 		$autoloader = new self( $prefix, $path );
 		\spl_autoload_register( array( $autoloader, 'load' ) );
 	}
@@ -56,33 +62,29 @@ class Autoloader {
 	 *
 	 * @return bool True if the file was loaded, false otherwise.
 	 */
-	public function load( $class_name ) {
+	public function load( string $class_name ): bool {
 		// Check if the class is in our namespace.
 		if ( 0 !== \strpos( $class_name, $this->prefix ) ) {
 			return false;
 		}
 
-		// Remove the namespace prefix.
+		// Remove the namespace prefix and convert to file path format.
 		$relative_class = \substr( $class_name, \strlen( $this->prefix ) );
+		$relative_class = \strtolower( \str_replace( array( '\\', '_' ), array( '/', '-' ), $relative_class ) );
 
-		// Convert namespace separators to directory separators.
-		$relative_class = \str_replace( '\\', '/', $relative_class );
+		// Split into path and class name.
+		$last_slash = \strrpos( $relative_class, '/' );
+		if ( false !== $last_slash ) {
+			$sub_path   = \substr( $relative_class, 0, $last_slash + 1 );
+			$class_file = \substr( $relative_class, $last_slash + 1 );
+		} else {
+			$sub_path   = '';
+			$class_file = $relative_class;
+		}
 
-		// Convert to lowercase and replace underscores with hyphens.
-		$relative_class = \strtolower( $relative_class );
-		$relative_class = \str_replace( '_', '-', $relative_class );
-
-		// Get the class name without the path.
-		$parts      = \explode( '/', $relative_class );
-		$class_name = \array_pop( $parts );
-		$sub_path   = \implode( '/', $parts );
-
-		// Build the file path with different prefixes.
-		$prefixes = array( 'class', 'interface', 'trait' );
-
-		foreach ( $prefixes as $prefix ) {
-			$file = $this->path . $sub_path . '/' . $prefix . '-' . $class_name . '.php';
-			$file = \str_replace( '//', '/', $file );
+		// Try each type prefix.
+		foreach ( self::TYPE_PREFIXES as $type ) {
+			$file = $this->path . $sub_path . $type . '-' . $class_file . '.php';
 
 			if ( \file_exists( $file ) ) {
 				require_once $file;

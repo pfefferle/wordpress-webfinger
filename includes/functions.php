@@ -61,7 +61,7 @@ if ( ! function_exists( 'get_user_by_various' ) ) :
 	 *
 	 * @param mixed $id_or_name_or_object The username, ID or object. If not provided, the current user will be used.
 	 *
-	 * @return bool|object False on failure, User DB row object.
+	 * @return \WP_User|false WP_User on success, false on failure.
 	 *
 	 * @author Will Norris
 	 *
@@ -70,17 +70,18 @@ if ( ! function_exists( 'get_user_by_various' ) ) :
 	function get_user_by_various( $id_or_name_or_object = null ) {
 		if ( null === $id_or_name_or_object ) {
 			$user = \wp_get_current_user();
-			if ( null === $user ) {
-				return false;
-			}
-			return $user;
-		} elseif ( \is_object( $id_or_name_or_object ) ) {
-			return $id_or_name_or_object;
-		} elseif ( \is_numeric( $id_or_name_or_object ) ) {
-			return \get_user_by( 'id', $id_or_name_or_object );
-		} else {
-			return \get_user_by( 'login', $id_or_name_or_object );
+			return $user->exists() ? $user : false;
 		}
+
+		if ( $id_or_name_or_object instanceof \WP_User ) {
+			return $id_or_name_or_object;
+		}
+
+		if ( \is_numeric( $id_or_name_or_object ) ) {
+			return \get_user_by( 'id', $id_or_name_or_object );
+		}
+
+		return \get_user_by( 'login', $id_or_name_or_object );
 	}
 endif;
 
@@ -92,14 +93,11 @@ endif;
 function get_webfinger_endpoint() {
 	global $wp_rewrite;
 
-	$permalink = $wp_rewrite->get_feed_permastruct();
-	if ( '' !== $permalink ) {
-		$url = \home_url( '/.well-known/webfinger' );
-	} else {
-		$url = \add_query_arg( 'well-known', 'webfinger', \home_url( '/' ) );
+	if ( $wp_rewrite->using_permalinks() ) {
+		return \home_url( '/.well-known/webfinger' );
 	}
 
-	return $url;
+	return \add_query_arg( 'well-known', 'webfinger', \home_url( '/' ) );
 }
 
 /**

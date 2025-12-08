@@ -1,9 +1,16 @@
 <?php
+/**
+ * Legacy class file.
+ *
+ * @package Webfinger
+ */
 
 namespace Webfinger;
 
 /**
- * WebFinger Legacy.
+ * WebFinger Legacy class.
+ *
+ * Provides backwards compatibility for older WebFinger implementations.
  *
  * @author Matthias Pfefferle
  */
@@ -13,25 +20,25 @@ class Legacy {
 	 * Initialize the class, registering WordPress hooks.
 	 */
 	public static function init() {
-		add_action( 'query_vars', array( static::class, 'query_vars' ) );
-		add_filter( 'host_meta', array( static::class, 'host_meta_discovery' ) );
+		\add_action( 'query_vars', array( static::class, 'query_vars' ) );
+		\add_filter( 'host_meta', array( static::class, 'host_meta_discovery' ) );
 
-		// host-meta recource
-		add_action( 'host_meta_render', array( static::class, 'render_host_meta' ), -1, 3 );
+		// Host-meta resource.
+		\add_action( 'host_meta_render', array( static::class, 'render_host_meta' ), -1, 3 );
 
-		// XRD output
-		add_action( 'webfinger_render', array( static::class, 'render_xrd' ), 5 );
+		// XRD output.
+		\add_action( 'webfinger_render', array( static::class, 'render_xrd' ), 5 );
 
-		// support plugins pre 3.0.0
-		add_filter( 'webfinger_user_data', array( static::class, 'legacy_filter' ), 10, 3 );
+		// Support plugins pre 3.0.0.
+		\add_filter( 'webfinger_user_data', array( static::class, 'legacy_filter' ), 10, 3 );
 	}
 
 	/**
 	 * Add query vars.
 	 *
-	 * @param array $vars
+	 * @param array $vars The query vars.
 	 *
-	 * @return array
+	 * @return array The modified query vars.
 	 */
 	public static function query_vars( $vars ) {
 		$vars[] = 'format';
@@ -52,65 +59,68 @@ class Legacy {
 		$accept = array();
 
 		if ( isset( $_SERVER['HTTP_ACCEPT'] ) ) {
-			// interpret accept header
-			$pos = stripos( $_SERVER['HTTP_ACCEPT'], ';' );
+			// Interpret accept header.
+			$accept_header = \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_ACCEPT'] ) );
+			$pos           = \stripos( $accept_header, ';' );
 			if ( $pos ) {
-				$accept_header = substr( $_SERVER['HTTP_ACCEPT'], 0, $pos );
-			} else {
-				$accept_header = $_SERVER['HTTP_ACCEPT'];
+				$accept_header = \substr( $accept_header, 0, $pos );
 			}
 
-			// accept header as an array
-			$accept = explode( ',', trim( $accept_header ) );
+			// Accept header as an array.
+			$accept = \explode( ',', \trim( $accept_header ) );
 		}
 
 		$format = null;
-		if ( array_key_exists( 'format', $wp->query_vars ) ) {
+		if ( \array_key_exists( 'format', $wp->query_vars ) ) {
 			$format = $wp->query_vars['format'];
 		}
 
 		if (
-			! in_array( 'application/xrd+xml', $accept, true ) &&
-			! in_array( 'application/xml+xrd', $accept, true ) &&
+			! \in_array( 'application/xrd+xml', $accept, true ) &&
+			! \in_array( 'application/xml+xrd', $accept, true ) &&
 			'xrd' !== $format
 		) {
 			return $webfinger;
 		}
 
-		header( 'Content-Type: application/xrd+xml; charset=' . get_bloginfo( 'charset' ), true );
+		\header( 'Content-Type: application/xrd+xml; charset=' . \get_bloginfo( 'charset' ), true );
 
-		echo '<?xml version="1.0" encoding="' . get_bloginfo( 'charset' ) . '"?>' . PHP_EOL;
-		echo '<XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"' . do_action( 'webfinger_ns' ) . '>' . PHP_EOL;
+		echo '<?xml version="1.0" encoding="' . \esc_attr( \get_bloginfo( 'charset' ) ) . '"?>' . \PHP_EOL;
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_action returns null, XRD content is already escaped.
+		echo '<XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"' . \do_action( 'webfinger_ns' ) . '>' . \PHP_EOL;
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- jrd_to_xrd returns escaped content.
 		echo self::jrd_to_xrd( $webfinger );
-		// add xml-only content
-		do_action( 'webfinger_xrd' );
+		// Add xml-only content.
+		\do_action( 'webfinger_xrd' );
 
-		echo PHP_EOL . '</XRD>';
+		echo \PHP_EOL . '</XRD>';
 
 		exit;
 	}
 
 	/**
-	 * host-meta resource feature.
+	 * Host-meta resource feature.
 	 *
-	 * @param array $query
+	 * @param string $format    The format.
+	 * @param array  $host_meta The host meta.
+	 * @param array  $query     The query.
 	 */
 	public static function render_host_meta( $format, $host_meta, $query ) {
-		if ( ! array_key_exists( 'resource', $query ) ) {
+		if ( ! \array_key_exists( 'resource', $query ) ) {
 			return;
 		}
 
 		global $wp;
 
-		// filter WebFinger array
-		$webfinger = apply_filters( 'webfinger_data', array(), $query['resource'] );
+		// Filter WebFinger array.
+		$webfinger = \apply_filters( 'webfinger_data', array(), $query['resource'] );
 
-		// check if "user" exists
+		// Check if "user" exists.
 		if ( empty( $webfinger ) ) {
-			status_header( 404 );
-			header( 'Content-Type: text/plain; charset=' . get_bloginfo( 'charset' ), true );
-			echo 'no data for resource "' . esc_html( $query['resource'] ) . '" found';
+			\status_header( 404 );
+			\header( 'Content-Type: text/plain; charset=' . \get_bloginfo( 'charset' ), true );
+			echo 'no data for resource "' . \esc_html( $query['resource'] ) . '" found';
 			exit;
 		}
 
@@ -118,109 +128,113 @@ class Legacy {
 			$wp->query_vars['format'] = 'xrd';
 		}
 
-		do_action( 'webfinger_render', $webfinger );
-		// stop exactly here!
+		\do_action( 'webfinger_render', $webfinger );
+		// Stop exactly here!
 		exit;
 	}
 
 	/**
 	 * Add the host-meta information.
+	 *
+	 * @param array $host_meta The host meta array.
+	 *
+	 * @return array The modified host meta array.
 	 */
-	public static function host_meta_discovery( $array ) {
-		$array['links'][] = array(
-			'rel' => 'lrdd',
-			'template' => add_query_arg(
+	public static function host_meta_discovery( $host_meta ) {
+		$host_meta['links'][] = array(
+			'rel'      => 'lrdd',
+			'template' => \add_query_arg(
 				array(
 					'resource' => '{uri}',
-					'format' => 'xrd',
+					'format'   => 'xrd',
 				),
-				get_webfinger_endpoint()
+				\get_webfinger_endpoint()
 			),
-			'type' => 'application/xrd+xml',
+			'type'     => 'application/xrd+xml',
 		);
-		$array['links'][] = array(
-			'rel' => 'lrdd',
-			'template' => add_query_arg( 'resource', '{uri}', get_webfinger_endpoint() ),
-			'type' => 'application/jrd+xml',
+		$host_meta['links'][] = array(
+			'rel'      => 'lrdd',
+			'template' => \add_query_arg( 'resource', '{uri}', \get_webfinger_endpoint() ),
+			'type'     => 'application/jrd+xml',
 		);
-		$array['links'][] = array(
-			'rel' => 'lrdd',
-			'template' => add_query_arg( 'resource', '{uri}', get_webfinger_endpoint() ),
-			'type' => 'application/json',
+		$host_meta['links'][] = array(
+			'rel'      => 'lrdd',
+			'template' => \add_query_arg( 'resource', '{uri}', \get_webfinger_endpoint() ),
+			'type'     => 'application/json',
 		);
 
-		return $array;
+		return $host_meta;
 	}
 
 	/**
-	 * Recursive helper to generade the xrd-xml from the jrd array.
+	 * Recursive helper to generate the xrd-xml from the jrd array.
 	 *
-	 * @param string $host_meta
+	 * @param array $webfinger The webfinger data.
 	 *
-	 * @return string
+	 * @return string The XRD XML string.
 	 */
 	public static function jrd_to_xrd( $webfinger ) {
 		$xrd = null;
 
-		// supported protocols
-		$protocols = array_merge(
+		// Supported protocols.
+		$protocols = \array_merge(
 			array( 'aim', 'ymsgr', 'acct' ),
-			wp_allowed_protocols()
+			\wp_allowed_protocols()
 		);
 
 		foreach ( $webfinger as $type => $content ) {
-			// print subject
+			// Print subject.
 			if ( 'subject' === $type ) {
-				$xrd .= '<Subject>' . esc_url( $content, $protocols ) . '</Subject>';
+				$xrd .= '<Subject>' . \esc_url( $content, $protocols ) . '</Subject>';
 				continue;
 			}
 
-			// print aliases
+			// Print aliases.
 			if ( 'aliases' === $type ) {
 				foreach ( $content as $uri ) {
-					$xrd .= '<Alias>' . esc_url( $uri, $protocols ) . '</Alias>';
+					$xrd .= '<Alias>' . \esc_url( $uri, $protocols ) . '</Alias>';
 				}
 				continue;
 			}
 
-			// print properties
+			// Print properties.
 			if ( 'properties' === $type ) {
-				foreach ( $content as $type => $uri ) {
-					$xrd .= '<Property type="' . esc_attr( $type ) . '">' . esc_html( $uri ) . '</Property>';
+				foreach ( $content as $prop_type => $uri ) {
+					$xrd .= '<Property type="' . \esc_attr( $prop_type ) . '">' . \esc_html( $uri ) . '</Property>';
 				}
 				continue;
 			}
 
-			// print titles
+			// Print titles.
 			if ( 'titles' === $type ) {
 				foreach ( $content as $key => $value ) {
 					if ( 'default' === $key ) {
-						$xrd .= '<Title>' . esc_html( $value ) . '</Title>';
+						$xrd .= '<Title>' . \esc_html( $value ) . '</Title>';
 					} else {
-						$xrd .= '<Title xml:lang="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</Title>';
+						$xrd .= '<Title xml:lang="' . \esc_attr( $key ) . '">' . \esc_html( $value ) . '</Title>';
 					}
 				}
 				continue;
 			}
 
-			// print links
+			// Print links.
 			if ( 'links' === $type ) {
 				foreach ( $content as $links ) {
-					$temp = array();
+					$temp     = array();
 					$cascaded = false;
-					$xrd .= '<Link ';
+					$xrd     .= '<Link ';
 
 					foreach ( $links as $key => $value ) {
-						if ( is_array( $value ) ) {
+						if ( \is_array( $value ) ) {
 							$temp[ $key ] = $value;
-							$cascaded = true;
+							$cascaded     = true;
 						} else {
-							$xrd .= esc_attr( $key ) . '="' . esc_attr( $value ) . '" ';
+							$xrd .= \esc_attr( $key ) . '="' . \esc_attr( $value ) . '" ';
 						}
 					}
 					if ( $cascaded ) {
 						$xrd .= '>';
-						$xrd .= Legacy::jrd_to_xrd( $temp );
+						$xrd .= self::jrd_to_xrd( $temp );
 						$xrd .= '</Link>';
 					} else {
 						$xrd .= ' />';
@@ -234,18 +248,19 @@ class Legacy {
 	}
 
 	/**
-	 * Backwards compatibility for old versions. please don't use!
+	 * Backwards compatibility for old versions. Please don't use!
 	 *
 	 * @deprecated
 	 *
-	 * @param array   $webfinger
-	 * @param string  $resource
-	 * @param WP_User $user
+	 * @param array    $webfinger    The webfinger data.
+	 * @param string   $resource_uri The resource.
+	 * @param \WP_User $user         The user.
 	 *
-	 * @return array
+	 * @return array The filtered webfinger data.
 	 */
-	public static function legacy_filter( $webfinger, $resource, $user ) {
-		// filter WebFinger array
-		return apply_filters( 'webfinger', $webfinger, $user, $resource, $_GET );
+	public static function legacy_filter( $webfinger, $resource_uri, $user ) {
+		// Filter WebFinger array.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- This is a public WebFinger endpoint.
+		return \apply_filters( 'webfinger', $webfinger, $user, $resource_uri, $_GET );
 	}
 }

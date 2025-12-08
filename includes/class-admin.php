@@ -1,10 +1,15 @@
 <?php
+/**
+ * Admin class file.
+ *
+ * @package Webfinger
+ */
 
 namespace Webfinger;
 
-use WP_User_Query;
-
 /**
+ * Admin class.
+ *
  * Handles the registration of WordPress hooks and user profile settings
  * for the Webfinger plugin admin functionality.
  *
@@ -17,22 +22,22 @@ class Admin {
 	 * Initialize the class, registering WordPress hooks.
 	 */
 	public static function init() {
-		add_action( 'show_user_profile', array( static::class, 'add_profile' ) );
-		add_action( 'edit_user_profile', array( static::class, 'add_profile' ) );
+		\add_action( 'show_user_profile', array( static::class, 'add_profile' ) );
+		\add_action( 'edit_user_profile', array( static::class, 'add_profile' ) );
 
 		// Add the save action to user's own profile editing screen update.
-		add_action(
+		\add_action(
 			'personal_options_update',
 			array( static::class, 'update_user_meta' )
 		);
 
 		// Add the save action to user profile editing screen update.
-		add_action(
+		\add_action(
 			'edit_user_profile_update',
 			array( static::class, 'update_user_meta' )
 		);
 
-		add_filter(
+		\add_filter(
 			'user_profile_update_errors',
 			array( static::class, 'maybe_show_errors' ),
 			10,
@@ -41,32 +46,32 @@ class Admin {
 	}
 
 	/**
-	 * Load settings template
+	 * Load settings template.
 	 *
-	 * @param stdClass $user The WordPress user
+	 * @param \WP_User $user The WordPress user.
 	 *
 	 * @return void
 	 */
 	public static function add_profile( $user ) {
-		load_template( WEBFINGER_PLUGIN_DIR . 'templates/profile-settings.php', true, array( 'user' => $user ) );
+		\load_template( WEBFINGER_PLUGIN_DIR . 'templates/profile-settings.php', true, array( 'user' => $user ) );
 	}
 
 	/**
 	 * The save action.
 	 *
-	 * @param int $user_id the ID of the current user.
+	 * @param int $user_id The ID of the current user.
 	 *
-	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 * @return bool|string Meta ID if the key didn't exist, true on successful update, false on failure.
 	 */
 	public static function update_user_meta( $user_id ) {
-		// check that the current user have the capability to edit the $user_id
-		if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		// Check that the current user have the capability to edit the $user_id.
+		if ( ! \current_user_can( 'edit_user', $user_id ) ) {
 			return false;
 		}
 
-		// Verify nonce to prevent CSRF
-		$nonce = isset( $_POST['webfinger_profile_nonce'] ) ? sanitize_text_field( $_POST['webfinger_profile_nonce'] ) : '';
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'webfinger_profile_settings' ) ) {
+		// Verify nonce to prevent CSRF.
+		$nonce = isset( $_POST['webfinger_profile_nonce'] ) ? \sanitize_text_field( \wp_unslash( $_POST['webfinger_profile_nonce'] ) ) : '';
+		if ( empty( $nonce ) || ! \wp_verify_nonce( $nonce, 'webfinger_profile_settings' ) ) {
 			return false;
 		}
 
@@ -74,19 +79,19 @@ class Admin {
 			return false;
 		}
 		if ( empty( $_POST['webfinger_resource'] ) ) {
-			delete_user_meta( $user_id, 'webfinger_resource' );
+			\delete_user_meta( $user_id, 'webfinger_resource' );
 			return false;
 		}
 
-		$webfinger = sanitize_title( $_POST['webfinger_resource'] );
+		$webfinger = \sanitize_title( \wp_unslash( $_POST['webfinger_resource'] ) );
 		$valid     = self::is_valid_webfinger_resource( $webfinger, $user_id );
 
 		if ( ! $valid ) {
 			return false;
 		}
 
-		// create/update user meta for the $user_id
-		update_user_meta(
+		// Create/update user meta for the $user_id.
+		\update_user_meta(
 			$user_id,
 			'webfinger_resource',
 			$webfinger
@@ -96,54 +101,54 @@ class Admin {
 	}
 
 	/**
-	 * Check if an error should be shown
+	 * Check if an error should be shown.
 	 *
-	 * @param WP_Error $errors WP_Error object (passed by reference).
-	 * @param bool     $update Whether this is a user update.
-	 * @param stdClass $user   User object (passed by reference).
+	 * @param \WP_Error $errors WP_Error object (passed by reference).
+	 * @param bool      $update Whether this is a user update.
+	 * @param \WP_User  $user   User object (passed by reference).
 	 *
-	 * @return array Updated list of errors
+	 * @return \WP_Error Updated list of errors.
 	 */
 	public static function maybe_show_errors( $errors, $update, $user ) {
-		// Verify nonce for CSRF protection
-		$nonce = isset( $_POST['webfinger_profile_nonce'] ) ? sanitize_text_field( $_POST['webfinger_profile_nonce'] ) : '';
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'webfinger_profile_settings' ) ) {
+		// Verify nonce for CSRF protection.
+		$nonce = isset( $_POST['webfinger_profile_nonce'] ) ? \sanitize_text_field( \wp_unslash( $_POST['webfinger_profile_nonce'] ) ) : '';
+		if ( empty( $nonce ) || ! \wp_verify_nonce( $nonce, 'webfinger_profile_settings' ) ) {
 			return $errors;
 		}
 		if ( ! isset( $_POST['webfinger_resource'] ) ) {
 			return $errors;
 		}
 
-		$webfinger_resource = sanitize_text_field( $_POST['webfinger_resource'] );
+		$webfinger_resource = \sanitize_text_field( \wp_unslash( $_POST['webfinger_resource'] ) );
 		$valid              = self::is_valid_webfinger_resource( $webfinger_resource, $user->ID );
 
 		if ( ! $valid ) {
-			$errors->add( 'webfinger_resource', __( 'WebFinger resource is already in use by a different user', 'webfinger' ) );
+			$errors->add( 'webfinger_resource', \__( 'WebFinger resource is already in use by a different user', 'webfinger' ) );
 		}
 
 		return $errors;
 	}
 
 	/**
-	 * Check if the WebFinger resource is valid
+	 * Check if the WebFinger resource is valid.
 	 *
-	 * @param string $resource The WebFinger resource
-	 * @param int    $user_id  The user ID
+	 * @param string $webfinger_resource The WebFinger resource.
+	 * @param int    $user_id            The user ID.
 	 *
-	 * @return boolean
+	 * @return bool True if valid, false otherwise.
 	 */
-	public static function is_valid_webfinger_resource( $resource, $user_id ) {
-		$webfinger = sanitize_title( $resource, true );
+	public static function is_valid_webfinger_resource( $webfinger_resource, $user_id ) {
+		$webfinger = \sanitize_title( $webfinger_resource, true );
 
 		$args = array(
-			'meta_key'     => 'webfinger_resource',
-			'meta_value'   => $webfinger,
+			'meta_key'     => 'webfinger_resource', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value'   => $webfinger, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			'meta_compare' => '=',
 			'exclude'      => $user_id,
 		);
 
-		// check if already exists
-		$user_query = new WP_User_Query( $args );
+		// Check if already exists.
+		$user_query = new \WP_User_Query( $args );
 		$results    = $user_query->get_results();
 
 		return empty( $results );

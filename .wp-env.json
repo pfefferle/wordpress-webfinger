@@ -1,0 +1,18 @@
+{
+	"core": null,
+	"plugins": [
+		"."
+	],
+	"port": 8686,
+	"testsPort": 8687,
+	"config": {
+		"WP_DEBUG": true,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": true
+	},
+	"env": {
+		"tests": {
+			"port": 8687
+		}
+	}
+}

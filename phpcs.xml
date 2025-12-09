@@ -1,8 +1,25 @@
 <?xml version="1.0"?>
-<ruleset name="WordPress">
-	<description>WordPress Coding Standard.</description>
-	<rule ref="WordPress-Core">
-		<exclude name="Generic.Formatting.MultipleStatementAlignment.NotSameWarning" />
-		<exclude name="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned" />
+<ruleset name="WordPress WebFinger">
+	<description>WordPress WebFinger Standards</description>
+
+	<file>.</file>
+	<exclude-pattern>.(git|github|vscode|idea|wordpress-org)</exclude-pattern>
+	<exclude-pattern>*\.(inc|css|js|svg)</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*.asset.php</exclude-pattern>
+
+	<arg value="ps"/>
+	<arg name="basepath" value="."/><!-- Strip the file paths down to the relevant bit -->
+	<arg name="colors"/>
+	<arg name="parallel" value="50"/>
+
+	<config name="testVersion" value="7.2-"/>
+	<config name="minimum_supported_wp_version" value="6.5"/>
+	<config name="text_domain" value="webfinger,default"/>
+
+	<rule ref="PHPCompatibilityWP"/>
+	<rule ref="WordPress">
+		<exclude name="Universal.Operators.DisallowShortTernary" />
 	</rule>
 </ruleset>

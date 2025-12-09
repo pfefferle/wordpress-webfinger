@@ -1,10 +1,14 @@
 {
   "name": "wordpress-webfinger",
   "description": "WebFinger for WordPress!",
+  "scripts": {
+    "wp-env": "wp-env",
+    "start": "wp-env start",
+    "stop": "wp-env stop",
+    "destroy": "wp-env destroy"
+  },
   "devDependencies": {
-    "grunt": "^1.0.3",
-    "grunt-wp-readme-to-markdown": "^2.0.1",
-    "grunt-wp-i18n": "^1.0.2"
+    "@wordpress/env": "^10.0.0"
   },
   "repository": {
     "type": "git",

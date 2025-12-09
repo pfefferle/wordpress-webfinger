@@ -7,15 +7,15 @@
 /vendor
 /tests
 /config
+.wp-env.json
 package.json
+package-lock.json
 composer.json
 composer.lock
 Gruntfile.js
 push.sh
 phpunit.xml
-phpunit.xml.dist
 phpcs.xml
-readme.txt
 .travis.yml
 .distignore
 .gitignore

@@ -31,46 +31,61 @@ WebFinger is an open standard ([RFC 7033](http://tools.ietf.org/html/rfc7033)) t
 
 ## Frequently Asked Questions
 
-### How to extend the JRD file
+### How do I customize my WebFinger identifier?
 
-You can add your own links or properties like that:
+Go to **Users → Profile** in your WordPress admin and scroll down to the "WebFinger" section. There you can set a custom identifier (the part before the @) and see all your WebFinger aliases.
 
-    function oexchange_target_link( $array ) {
-      $array["links"][] = array( 'rel' => 'http://oexchange.org/spec/0.8/rel/resident-target',
-        'href' => 'http://example.com',
-        'type' => 'application/xrd+xml' );
-      return $array;
-    }
-    add_filter( 'webfinger_data', 'oexchange_target_link' );
+### How do I check if WebFinger is working?
 
-### Add alternate file/output formats
+Visit **Tools → Site Health** in your WordPress admin. The plugin adds checks that verify your WebFinger endpoint is accessible and properly configured. If there are any issues, you'll see guidance on how to fix them.
 
-You can add your own links or properties like that:
+### Does this work with Mastodon?
 
-    function render_xrd($webfinger) {
-      // set custom header();
+Yes! WebFinger is the standard that Mastodon and other Fediverse platforms use to discover users. When someone searches for `@you@yourdomain.com`, WebFinger tells them where to find your profile.
 
-      // JRD to XRD code
+### Do I need pretty permalinks?
 
+Yes. WebFinger requires pretty permalinks to be enabled. Go to **Settings → Permalinks** and select any option other than "Plain".
+
+### For developers: How do I add custom data to the WebFinger response?
+
+Use the `webfinger_data` filter to add your own links or properties:
+
+    add_filter( 'webfinger_data', function( $data ) {
+      $data['links'][] = array(
+        'rel'  => 'http://example.com/rel/profile',
+        'href' => 'http://example.com/profile',
+        'type' => 'text/html',
+      );
+      return $data;
+    } );
+
+### For developers: How do I add alternate output formats?
+
+Use the `webfinger_render` action to output custom formats (like XRD):
+
+    add_action( 'webfinger_render', function( $webfinger ) {
+      // Set custom headers and output your format
+      // ...
       exit;
-    }
-    add_action( 'webfinger_render', 'render_xrd', 5 );
+    }, 5 );
 
-You can find a detailed example here <https://github.com/pfefferle/wordpress-webfinger-legacy>
+See <https://github.com/pfefferle/wordpress-webfinger-legacy> for a complete example.
 
-### The spec
+### Where can I learn more about WebFinger?
 
-WebFinger is specified as [RFC 7033](http://tools.ietf.org/html/rfc7033)
-
-### The WebFinger community page
-
-Please visit <http://webfinger.net>
+* WebFinger specification: [RFC 7033](http://tools.ietf.org/html/rfc7033)
+* Community resources: <http://webfinger.net>
 
 ## Upgrade Notice
 
+### 4.0.0
+
+This is a major update with new features (Site Health checks, user profile settings) and requires PHP 7.2 or higher. After updating, visit **Tools → Site Health** to verify your WebFinger setup is working correctly.
+
 ### 3.0.0
 
-This versions drops classic WebFinger support to keep the plugin short and simple. All legacy stuff is bundled in this new plugin <https://github.com/pfefferle/wordpress-webfinger-legacy>
+This version drops classic WebFinger (XRD) support to keep the plugin lightweight. If you need legacy XRD format support, install the [WebFinger Legacy](https://github.com/pfefferle/wordpress-webfinger-legacy) plugin.
 
 ## Changelog
 
@@ -240,38 +255,18 @@ Project maintained on github at [pfefferle/wordpress-webfinger](https://github.c
 
 ## Installation
 
-Follow the normal instructions for [installing WordPress plugins](https://codex.wordpress.org/Managing_Plugins#Installing_Plugins).
+### From WordPress.org (recommended)
 
-### Automatic Plugin Installation
+1. Go to **Plugins → Add New** in your WordPress admin
+2. Search for "webfinger"
+3. Click **Install Now**, then **Activate**
+4. Make sure pretty permalinks are enabled (**Settings → Permalinks** — select any option except "Plain")
+5. Visit **Tools → Site Health** to verify everything is working
 
-To add a WordPress Plugin using the [built-in plugin installer](https://codex.wordpress.org/Administration_Screens#Add_New_Plugins):
+### Manual Installation
 
-1. Go to [Plugins](https://codex.wordpress.org/Administration_Screens#Plugins) > [Add New](https://codex.wordpress.org/Plugins_Add_New_Screen).
-1. Type "`webfinger`" into the **Search Plugins** box.
-1. Find the WordPress Plugin you wish to install.
-    1. Click **Details** for more information about the Plugin and instructions you may wish to print or save to help setup the Plugin.
-    1. Click **Install Now** to install the WordPress Plugin.
-1. The resulting installation screen will list the installation as successful or note any problems during the install.
-1. If successful, click **Activate Plugin** to activate it, or **Return to Plugin Installer** for further actions.
-
-### Manual Plugin Installation
-
-There are a few cases when manually installing a WordPress Plugin is appropriate.
-
-* If you wish to control the placement and the process of installing a WordPress Plugin.
-* If your server does not permit automatic installation of a WordPress Plugin.
-* If you want to try the [latest development version](https://github.com/pfefferle/wordpress-webfinger).
-
-Installation of a WordPress Plugin manually requires FTP familiarity and the awareness that you may put your site at risk if you install a WordPress Plugin incompatible with the current version or from an unreliable source.
-
-Backup your site completely before proceeding.
-
-To install a WordPress Plugin manually:
-
-* Download your WordPress Plugin to your desktop.
-    * Download from [the WordPress directory](https://wordpress.org/plugins/webfinger/)
-    * Download from [GitHub](https://github.com/pfefferle/wordpress-webfinger/releases)
-* If downloaded as a zip archive, extract the Plugin folder to your desktop.
-* With your FTP program, upload the Plugin folder to the `wp-content/plugins` folder in your WordPress directory online.
-* Go to [Plugins screen](https://codex.wordpress.org/Administration_Screens#Plugins) and find the newly uploaded Plugin in the list.
-* Click **Activate** to activate it.
+1. Download the plugin from [WordPress.org](https://wordpress.org/plugins/webfinger/) or [GitHub](https://github.com/pfefferle/wordpress-webfinger/releases)
+2. Upload the `webfinger` folder to `/wp-content/plugins/`
+3. Activate the plugin in **Plugins → Installed Plugins**
+4. Enable pretty permalinks if not already active
+5. Check **Tools → Site Health** to confirm the setup

@@ -68,6 +68,16 @@ This versions drops classic WebFinger support to keep the plugin short and simpl
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
 
+### 4.0.0
+
+* Added: Site Health integration to check your WebFinger setup status directly in WordPress
+* Added: User profile settings to customize your WebFinger identifier
+* Added: Verification links to easily test your WebFinger aliases
+* Improved: Security hardening for URI parsing and input validation
+* Improved: Modernized codebase for PHP 7.2+ with namespace support
+* Improved: Better organized code structure with separate classes
+* Updated: Development infrastructure with GitHub Actions for automated testing
+
 ### 3.2.7
 
 * Added: better output escaping

@@ -13,13 +13,21 @@ WebFinger for WordPress
 
 ## Description
 
-Enables WebFinger ([RFC 7033](http://tools.ietf.org/html/rfc7033)) support for WordPress.
+WebFinger allows you to be discovered on the web using an identifier like `you@yourdomain.com` — similar to how email works, but for your online identity.
 
-About WebFinger:
+**Why is this useful?**
 
-> WebFinger is used to discover information about people or other entities on the Internet that are identified by a URI using standard Hypertext Transfer Protocol (HTTP) methods over a secure transport.  A WebFinger resource returns a JavaScript Object Notation (JSON) object describing the entity that is queried. The JSON object is referred to as the JSON Resource Descriptor (JRD).
+* **Fediverse & Mastodon:** WebFinger is essential for federation. It allows Mastodon and other ActivityPub-powered platforms to find and follow your WordPress site.
+* **Decentralized Identity:** People can look you up using your WordPress domain, making your site the canonical source for your online identity.
+* **Works with other plugins:** This plugin provides the foundation that other plugins (like the ActivityPub plugin) build upon.
 
-(quote from the [RFC](http://tools.ietf.org/html/rfc7033))
+**How it works:**
+
+When someone searches for `@you@yourdomain.com` on Mastodon or another federated service, their server asks your WordPress site: "Who is this person?" WebFinger answers that question by providing information about you and links to your profiles.
+
+**Technical details:**
+
+WebFinger is an open standard ([RFC 7033](http://tools.ietf.org/html/rfc7033)) that enables discovery of information about people and resources on the internet. It works by responding to requests at `/.well-known/webfinger` on your domain.
 
 ## Frequently Asked Questions
 

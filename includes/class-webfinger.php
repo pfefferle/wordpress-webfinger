@@ -257,7 +257,7 @@ class Webfinger {
 	 */
 	public static function filter_by_rel( $webfinger ) {
 		// Check if WebFinger is empty or has no links.
-		if ( empty( $webfinger ) || ! isset( $webfinger['links'] ) ) {
+		if ( \is_wp_error( $webfinger ) || empty( $webfinger ) || ! isset( $webfinger['links'] ) ) {
 			return $webfinger;
 		}
 

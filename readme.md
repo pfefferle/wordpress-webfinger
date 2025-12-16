@@ -5,7 +5,7 @@
 - Tags: discovery, webfinger, JRD, ostatus, activitypub
 - Requires at least: 4.2
 - Tested up to: 6.9
-- Stable tag: 4.0.0
+- Stable tag: 4.0.1
 - License: MIT
 - License URI: https://opensource.org/licenses/MIT
 
@@ -90,6 +90,10 @@ This version drops classic WebFinger (XRD) support to keep the plugin lightweigh
 ## Changelog
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+
+### 4.0.1
+
+* Fixed: Handle WP_Error objects in `filter_by_rel` to prevent errors when WebFinger lookup fails
 
 ### 4.0.0
 

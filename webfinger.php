@@ -3,7 +3,7 @@
  * Plugin Name: WebFinger
  * Plugin URI: https://github.com/pfefferle/wordpress-webfinger
  * Description: WebFinger for WordPress
- * Version: 4.0.0
+ * Version: 4.0.1
  * Author: Matthias Pfefferle
  * Author URI: https://notiz.blog/
  * License: MIT

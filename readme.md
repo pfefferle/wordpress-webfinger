@@ -4,8 +4,9 @@
 - Donate link: https://notiz.blog/donate/
 - Tags: discovery, webfinger, JRD, ostatus, activitypub
 - Requires at least: 4.2
-- Tested up to: 6.9
+- Tested up to: 7.0
 - Stable tag: 4.0.1
+- Requires PHP: 7.4
 - License: MIT
 - License URI: https://opensource.org/licenses/MIT
 

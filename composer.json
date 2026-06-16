@@ -8,7 +8,7 @@
     "homepage": "https://notiz.blog/"
   }],
   "require": {
-    "php": ">=7.2",
+    "php": ">=7.4",
     "composer/installers": "~2.2"
   },
   "require-dev": {

@@ -92,6 +92,11 @@ This version drops classic WebFinger (XRD) support to keep the plugin lightweigh
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
 
+### 4.0.2
+
+* Fixed: The deprecated global classes are now real aliases of their namespaced replacements instead of empty stubs, so `class_exists()` checks and calls to the old static methods keep working
+* Added: Deprecation notices when the legacy class names or the moved `Webfinger::get_user_resource()`/`get_user_resources()` methods are used
+
 ### 4.0.1
 
 * Fixed: Handle WP_Error objects in `filter_by_rel` to prevent errors when WebFinger lookup fails

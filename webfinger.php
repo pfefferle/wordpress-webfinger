@@ -4,6 +4,7 @@
  * Plugin URI: https://github.com/pfefferle/wordpress-webfinger
  * Description: WebFinger for WordPress
  * Version: 4.0.1
+ * Requires at least: 6.4
  * Author: Matthias Pfefferle
  * Author URI: https://notiz.blog/
  * License: MIT

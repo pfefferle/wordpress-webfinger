@@ -27,10 +27,7 @@
 			return;
 		}
 
-		// `_deprecated_class()` requires WordPress 6.4.
-		if ( \function_exists( '_deprecated_class' ) ) {
-			\_deprecated_class( $class_name, '4.0.0', $deprecated[ $class_name ] );
-		}
+		\_deprecated_class( $class_name, '4.0.0', $deprecated[ $class_name ] );
 
 		\class_alias( $deprecated[ $class_name ], $class_name );
 	}

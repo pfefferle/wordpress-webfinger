@@ -3,7 +3,7 @@
 - Contributors: pfefferle, willnorris
 - Donate link: https://notiz.blog/donate/
 - Tags: discovery, webfinger, JRD, ostatus, activitypub
-- Requires at least: 4.2
+- Requires at least: 6.4
 - Tested up to: 7.1
 - Stable tag: 4.0.1
 - Requires PHP: 7.4
@@ -96,6 +96,7 @@ Project maintained on github at [pfefferle/wordpress-webfinger](https://github.c
 
 * Fixed: The deprecated global classes are now real aliases of their namespaced replacements instead of empty stubs, so `class_exists()` checks and calls to the old static methods keep working
 * Added: Deprecation notices when the legacy class names or the moved `Webfinger::get_user_resource()`/`get_user_resources()` methods are used
+* Changed: Raise the minimum required WordPress version to 6.4
 
 ### 4.0.1
 

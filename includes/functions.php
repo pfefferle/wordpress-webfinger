@@ -136,16 +136,21 @@ function is_same_host( $uri ) {
 	}
 
 	$blog_host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
-	$host      = \wp_parse_url( $uri, \PHP_URL_HOST );
+	$parts     = \wp_parse_url( $uri );
+	$host      = $parts['host'] ?? '';
 
 	/*
 	 * Schemes without an authority component -- `acct:` and `mailto:` -- carry
 	 * the host in the path, so `wp_parse_url()` reports no host for them. Fall
-	 * back to the part after the last "@", which also covers bare e-mail
-	 * addresses and bare `user@host` identifiers.
+	 * back to the part after the last "@" of the path, which also covers bare
+	 * e-mail addresses and bare `user@host` identifiers. Reading the path and
+	 * not the whole URI keeps a query or fragment (`mailto:me@example.com
+	 * ?subject=hi`) out of the host.
 	 */
-	if ( ! $host && \str_contains( $uri, '@' ) ) {
-		$host = \substr( \strrchr( $uri, '@' ), 1 );
+	$path = $parts['path'] ?? '';
+
+	if ( ! $host && \str_contains( $path, '@' ) ) {
+		$host = \substr( \strrchr( $path, '@' ), 1 );
 	}
 
 	return (bool) $host && $host === $blog_host;

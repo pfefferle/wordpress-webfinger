@@ -112,18 +112,21 @@ class Test_Functions extends \WP_UnitTestCase {
 	 */
 	public function data_is_same_host() {
 		return array(
-			'same host URL'           => array( 'https://%HOST%/test-path', true ),
-			'same host URL, no path'  => array( 'https://%HOST%', true ),
-			'foreign URL'             => array( 'https://different-domain.com/test-path', false ),
-			'same host e-mail'        => array( 'user@%HOST%', true ),
-			'foreign e-mail'          => array( 'user@different-domain.com', false ),
-			'same host acct: URI'     => array( 'acct:user@%HOST%', true ),
-			'foreign acct: URI'       => array( 'acct:user@different-domain.com', false ),
-			'same host mailto: URI'   => array( 'mailto:user@%HOST%', true ),
-			'foreign mailto: URI'     => array( 'mailto:user@different-domain.com', false ),
-			'blog host only in query' => array( 'https://different-domain.com/?to=@%HOST%', false ),
-			'not a URI'               => array( 'not a uri', false ),
-			'empty string'            => array( '', false ),
+			'same host URL'                  => array( 'https://%HOST%/test-path', true ),
+			'same host URL, no path'         => array( 'https://%HOST%', true ),
+			'foreign URL'                    => array( 'https://different-domain.com/test-path', false ),
+			'same host e-mail'               => array( 'user@%HOST%', true ),
+			'foreign e-mail'                 => array( 'user@different-domain.com', false ),
+			'same host acct: URI'            => array( 'acct:user@%HOST%', true ),
+			'foreign acct: URI'              => array( 'acct:user@different-domain.com', false ),
+			'same host mailto: URI'          => array( 'mailto:user@%HOST%', true ),
+			'foreign mailto: URI'            => array( 'mailto:user@different-domain.com', false ),
+			'blog host only in query'        => array( 'https://different-domain.com/?to=@%HOST%', false ),
+			'mailto: with a subject'         => array( 'mailto:user@%HOST%?subject=hi', true ),
+			'mailto: with a fragment'        => array( 'mailto:user@%HOST%#frag', true ),
+			'foreign mailto: with a subject' => array( 'mailto:user@different-domain.com?subject=hi', false ),
+			'not a URI'                      => array( 'not a uri', false ),
+			'empty string'                   => array( '', false ),
 		);
 	}
 

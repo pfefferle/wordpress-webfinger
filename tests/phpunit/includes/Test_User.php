@@ -38,6 +38,13 @@ class Test_User extends \WP_UnitTestCase {
 	protected static $local_email_user_id;
 
 	/**
+	 * Test user ID for a user whose e-mail is on a different host.
+	 *
+	 * @var int
+	 */
+	protected static $foreign_email_user_id;
+
+	/**
 	 * Set up test fixtures.
 	 *
 	 * @param \WP_UnitTest_Factory $factory The factory instance.
@@ -60,6 +67,15 @@ class Test_User extends \WP_UnitTestCase {
 				'display_name'  => 'Local Mail User',
 			)
 		);
+
+		self::$foreign_email_user_id = $factory->user->create(
+			array(
+				'user_login'    => 'foreignmailuser',
+				'user_email'    => 'hello@different-domain.com',
+				'user_nicename' => 'foreignmailuser',
+				'display_name'  => 'Foreign Mail User',
+			)
+		);
 	}
 
 	/**
@@ -72,6 +88,10 @@ class Test_User extends \WP_UnitTestCase {
 
 		if ( self::$local_email_user_id ) {
 			\wp_delete_user( self::$local_email_user_id );
+		}
+
+		if ( self::$foreign_email_user_id ) {
+			\wp_delete_user( self::$foreign_email_user_id );
 		}
 	}
 
@@ -234,7 +254,9 @@ class Test_User extends \WP_UnitTestCase {
 	 * @covers ::get_resources
 	 */
 	public function test_get_resources_excludes_foreign_mailto_uri() {
-		$resources = User::get_resources( self::$user_id );
+		$this->force_home_host();
+
+		$resources = User::get_resources( self::$foreign_email_user_id );
 
 		foreach ( $resources as $resource ) {
 			$this->assertStringStartsNotWith( 'mailto:', $resource );

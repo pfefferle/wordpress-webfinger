@@ -14,11 +14,35 @@ use Webfinger\User;
  */
 class Test_User extends \WP_UnitTestCase {
 	/**
+	 * Host used for the `mailto:` tests.
+	 *
+	 * The default test host (`localhost`) has no dot, so WordPress rejects it
+	 * as an e-mail domain. Force a real domain instead.
+	 *
+	 * @var string
+	 */
+	const HOME_HOST = 'example.org';
+
+	/**
 	 * Test user ID.
 	 *
 	 * @var int
 	 */
 	protected static $user_id;
+
+	/**
+	 * Test user ID for a user whose e-mail is on the blog host.
+	 *
+	 * @var int
+	 */
+	protected static $local_email_user_id;
+
+	/**
+	 * Test user ID for a user whose e-mail is on a different host.
+	 *
+	 * @var int
+	 */
+	protected static $foreign_email_user_id;
 
 	/**
 	 * Set up test fixtures.
@@ -34,6 +58,24 @@ class Test_User extends \WP_UnitTestCase {
 				'display_name'  => 'Test User',
 			)
 		);
+
+		self::$local_email_user_id = $factory->user->create(
+			array(
+				'user_login'    => 'localmailuser',
+				'user_email'    => 'hello@' . self::HOME_HOST,
+				'user_nicename' => 'localmailuser',
+				'display_name'  => 'Local Mail User',
+			)
+		);
+
+		self::$foreign_email_user_id = $factory->user->create(
+			array(
+				'user_login'    => 'foreignmailuser',
+				'user_email'    => 'hello@different-domain.com',
+				'user_nicename' => 'foreignmailuser',
+				'display_name'  => 'Foreign Mail User',
+			)
+		);
 	}
 
 	/**
@@ -43,6 +85,36 @@ class Test_User extends \WP_UnitTestCase {
 		if ( self::$user_id ) {
 			\wp_delete_user( self::$user_id );
 		}
+
+		if ( self::$local_email_user_id ) {
+			\wp_delete_user( self::$local_email_user_id );
+		}
+
+		if ( self::$foreign_email_user_id ) {
+			\wp_delete_user( self::$foreign_email_user_id );
+		}
+	}
+
+	/**
+	 * Pin `home_url()` and `site_url()` to self::HOME_HOST for the current test.
+	 *
+	 * WP_UnitTestCase restores the hooks after every test.
+	 */
+	private function force_home_host() {
+		$url = 'http://' . self::HOME_HOST;
+
+		\add_filter(
+			'option_home',
+			function () use ( $url ) {
+				return $url;
+			}
+		);
+		\add_filter(
+			'option_siteurl',
+			function () use ( $url ) {
+				return $url;
+			}
+		);
 	}
 
 	/**
@@ -161,6 +233,98 @@ class Test_User extends \WP_UnitTestCase {
 
 		$this->assertIsArray( $resources );
 		$this->assertEmpty( $resources );
+	}
+
+	/**
+	 * Test get_resources advertises the mailto: URI for a same host e-mail.
+	 *
+	 * @covers ::get_resources
+	 */
+	public function test_get_resources_includes_mailto_uri() {
+		$this->force_home_host();
+
+		$resources = User::get_resources( self::$local_email_user_id );
+
+		$this->assertContains( 'mailto:hello@' . self::HOME_HOST, $resources );
+	}
+
+	/**
+	 * Test get_resources does not advertise a mailto: URI for a foreign e-mail.
+	 *
+	 * @covers ::get_resources
+	 */
+	public function test_get_resources_excludes_foreign_mailto_uri() {
+		$this->force_home_host();
+
+		$resources = User::get_resources( self::$foreign_email_user_id );
+
+		foreach ( $resources as $resource ) {
+			$this->assertStringStartsNotWith( 'mailto:', $resource );
+		}
+	}
+
+	/**
+	 * Test every advertised resource resolves back to the same user.
+	 *
+	 * The plugin links every alias on the profile screen for verification, so
+	 * an alias it cannot resolve is a bug.
+	 * See https://github.com/pfefferle/wordpress-webfinger/issues/59.
+	 *
+	 * @covers ::get_resources
+	 * @covers ::get_user_by_uri
+	 */
+	public function test_advertised_resources_all_resolve() {
+		$this->force_home_host();
+
+		$resources = User::get_resources( self::$local_email_user_id );
+
+		$this->assertNotEmpty( $resources );
+
+		foreach ( $resources as $resource ) {
+			$user = User::get_user_by_uri( $resource );
+
+			$this->assertInstanceOf( \WP_User::class, $user, \sprintf( 'Resource "%s" did not resolve.', $resource ) );
+			$this->assertEquals( self::$local_email_user_id, $user->ID, \sprintf( 'Resource "%s" resolved to the wrong user.', $resource ) );
+		}
+	}
+
+	/**
+	 * Test get_user_by_uri with mailto: URIs.
+	 *
+	 * @covers ::get_user_by_uri
+	 *
+	 * @dataProvider data_get_user_by_uri_with_mailto_scheme
+	 *
+	 * @param string $uri           The mailto: URI to look up.
+	 * @param bool   $should_resolve Whether the URI should resolve to the fixture user.
+	 */
+	public function test_get_user_by_uri_with_mailto_scheme( $uri, $should_resolve ) {
+		$this->force_home_host();
+
+		$user = User::get_user_by_uri( $uri );
+
+		if ( ! $should_resolve ) {
+			$this->assertNull( $user );
+
+			return;
+		}
+
+		$this->assertInstanceOf( \WP_User::class, $user );
+		$this->assertEquals( self::$local_email_user_id, $user->ID );
+	}
+
+	/**
+	 * Data provider for test_get_user_by_uri_with_mailto_scheme.
+	 *
+	 * @return array[] Test data.
+	 */
+	public function data_get_user_by_uri_with_mailto_scheme() {
+		return array(
+			'known address'   => array( 'mailto:hello@' . self::HOME_HOST, true ),
+			'url encoded'     => array( 'mailto%3Ahello%40' . self::HOME_HOST, true ),
+			'unknown address' => array( 'mailto:nobody@' . self::HOME_HOST, false ),
+			'foreign host'    => array( 'mailto:hello@different-domain.com', false ),
+		);
 	}
 
 	/**

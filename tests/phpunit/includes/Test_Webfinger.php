@@ -14,6 +14,16 @@ use Webfinger\Webfinger;
  */
 class Test_Webfinger extends \WP_UnitTestCase {
 	/**
+	 * Host used for the `mailto:` tests.
+	 *
+	 * The default test host (`localhost`) has no dot, so WordPress rejects it
+	 * as an e-mail domain. Force a real domain instead.
+	 *
+	 * @var string
+	 */
+	const HOME_HOST = 'example.org';
+
+	/**
 	 * Test user ID.
 	 *
 	 * @var int
@@ -26,6 +36,13 @@ class Test_Webfinger extends \WP_UnitTestCase {
 	 * @var int
 	 */
 	protected static $post_id;
+
+	/**
+	 * Test user ID for a user whose e-mail is on the blog host.
+	 *
+	 * @var int
+	 */
+	protected static $local_email_user_id;
 
 	/**
 	 * Set up test fixtures.
@@ -49,6 +66,15 @@ class Test_Webfinger extends \WP_UnitTestCase {
 				'post_title'  => 'Test Post',
 			)
 		);
+
+		self::$local_email_user_id = $factory->user->create(
+			array(
+				'user_login'    => 'webfingermailuser',
+				'user_email'    => 'hello@' . self::HOME_HOST,
+				'user_nicename' => 'webfingermailuser',
+				'display_name'  => 'WebFinger Mail User',
+			)
+		);
 	}
 
 	/**
@@ -61,6 +87,31 @@ class Test_Webfinger extends \WP_UnitTestCase {
 		if ( self::$user_id ) {
 			\wp_delete_user( self::$user_id );
 		}
+		if ( self::$local_email_user_id ) {
+			\wp_delete_user( self::$local_email_user_id );
+		}
+	}
+
+	/**
+	 * Pin `home_url()` and `site_url()` to self::HOME_HOST for the current test.
+	 *
+	 * WP_UnitTestCase restores the hooks after every test.
+	 */
+	private function force_home_host() {
+		$url = 'http://' . self::HOME_HOST;
+
+		\add_filter(
+			'option_home',
+			function () use ( $url ) {
+				return $url;
+			}
+		);
+		\add_filter(
+			'option_siteurl',
+			function () use ( $url ) {
+				return $url;
+			}
+		);
 	}
 
 	/**
@@ -294,5 +345,88 @@ class Test_Webfinger extends \WP_UnitTestCase {
 		$result = Webfinger::filter_by_rel( $webfinger );
 
 		$this->assertEmpty( $result );
+	}
+
+	/**
+	 * Test a WP_Error returned by a `webfinger_data` filter is discarded.
+	 *
+	 * A WP_Error is not `empty()`, so without this it would be JSON-encoded
+	 * and served as the JRD document with a 200 status.
+	 * See https://github.com/pfefferle/wordpress-webfinger/issues/59.
+	 *
+	 * @covers ::discard_errors
+	 */
+	public function test_wp_error_from_filter_is_discarded() {
+		$callback = function () {
+			return new \WP_Error( 'third_party_error', 'Wrong scheme', array( 'status' => 404 ) );
+		};
+
+		\add_filter( 'webfinger_data', $callback, 1 );
+		$webfinger = \apply_filters( 'webfinger_data', array(), 'mailto:nobody@different-domain.com' );
+		\remove_filter( 'webfinger_data', $callback, 1 );
+
+		$this->assertSame( array(), $webfinger );
+	}
+
+	/**
+	 * Test discard_errors reduces anything that is not a data-array to an empty array.
+	 *
+	 * @covers ::discard_errors
+	 *
+	 * @dataProvider data_discard_errors
+	 *
+	 * @param mixed $webfinger The value handed to the filter.
+	 * @param array $expected  The expected result.
+	 */
+	public function test_discard_errors( $webfinger, $expected ) {
+		$this->assertSame( $expected, Webfinger::discard_errors( $webfinger ) );
+	}
+
+	/**
+	 * Data provider for test_discard_errors.
+	 *
+	 * @return array[] Test data.
+	 */
+	public function data_discard_errors() {
+		return array(
+			'WP_Error'    => array( new \WP_Error( 'activitypub_wrong_scheme', 'Wrong scheme', array( 'status' => 404 ) ), array() ),
+			'string'      => array( 'nonsense', array() ),
+			'null'        => array( null, array() ),
+			'false'       => array( false, array() ),
+			'empty array' => array( array(), array() ),
+			'data array'  => array(
+				array( 'subject' => 'acct:user@example.org' ),
+				array( 'subject' => 'acct:user@example.org' ),
+			),
+		);
+	}
+
+	/**
+	 * Test a mailto: resource still resolves when an early filter errors out.
+	 *
+	 * This mirrors the ActivityPub plugin, which hooks `webfinger_data` at
+	 * priority 1 and returns a WP_Error for schemes it does not know.
+	 * See https://github.com/pfefferle/wordpress-webfinger/issues/59.
+	 *
+	 * @covers ::generate_user_data
+	 * @covers ::discard_errors
+	 */
+	public function test_mailto_resource_resolves_despite_early_filter_error() {
+		$this->force_home_host();
+
+		$resource = 'mailto:hello@' . self::HOME_HOST;
+
+		$callback = function () {
+			return new \WP_Error( 'activitypub_wrong_scheme', 'Wrong scheme', array( 'status' => 404 ) );
+		};
+
+		\add_filter( 'webfinger_data', $callback, 1 );
+		$webfinger = \apply_filters( 'webfinger_data', array(), $resource );
+		\remove_filter( 'webfinger_data', $callback, 1 );
+
+		$this->assertIsArray( $webfinger );
+		$this->assertArrayNotHasKey( 'errors', $webfinger );
+		$this->assertEquals( 'acct:webfingermailuser@' . self::HOME_HOST, $webfinger['subject'] );
+		$this->assertContains( $resource, $webfinger['aliases'] );
 	}
 }

@@ -131,17 +131,27 @@ function get_webfinger_username( $id_or_name_or_object ) {
  * @return bool True if the URI has the same host as the blog, false otherwise.
  */
 function is_same_host( $uri ) {
-	$blog_host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
-
-	// Check if $uri is a valid URL.
-	if ( \filter_var( $uri, \FILTER_VALIDATE_URL ) ) {
-		return \wp_parse_url( $uri, \PHP_URL_HOST ) === $blog_host;
-	} elseif ( \str_contains( $uri, '@' ) ) {
-		// Check if $uri is a valid E-Mail.
-		$host = \substr( \strrchr( $uri, '@' ), 1 );
-
-		return $host === $blog_host;
+	if ( ! $uri || ! \is_string( $uri ) ) {
+		return false;
 	}
 
-	return false;
+	$blog_host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+	$parts     = \wp_parse_url( $uri );
+	$host      = $parts['host'] ?? '';
+
+	/*
+	 * Schemes without an authority component -- `acct:` and `mailto:` -- carry
+	 * the host in the path, so `wp_parse_url()` reports no host for them. Fall
+	 * back to the part after the last "@" of the path, which also covers bare
+	 * e-mail addresses and bare `user@host` identifiers. Reading the path and
+	 * not the whole URI keeps a query or fragment (`mailto:me@example.com
+	 * ?subject=hi`) out of the host.
+	 */
+	$path = $parts['path'] ?? '';
+
+	if ( ! $host && \str_contains( $path, '@' ) ) {
+		$host = \substr( \strrchr( $path, '@' ), 1 );
+	}
+
+	return (bool) $host && $host === $blog_host;
 }

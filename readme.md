@@ -80,6 +80,10 @@ See <https://github.com/pfefferle/wordpress-webfinger-legacy> for a complete exa
 
 ## Upgrade Notice
 
+### Unreleased
+
+This version requires WordPress 6.4 or higher. Older sites will not be offered the update.
+
 ### 4.0.0
 
 This is a major update with new features (Site Health checks, user profile settings) and requires PHP 7.2 or higher. After updating, visit **Tools → Site Health** to verify your WebFinger setup is working correctly.
@@ -94,9 +98,8 @@ Project maintained on github at [pfefferle/wordpress-webfinger](https://github.c
 
 ### Unreleased
 
-* Fixed: The deprecated global classes are now real aliases of their namespaced replacements instead of empty stubs, so `class_exists()` checks and calls to the old static methods keep working
-* Added: Deprecation notices when the legacy class names or the moved `Webfinger::get_user_resource()`/`get_user_resources()` methods are used
-* Changed: Raise the minimum required WordPress version to 6.4
+* Fixed: The deprecated global classes are real aliases again, so the old class names and static methods keep working
+* Changed: Requires WordPress 6.4 or higher
 
 ### 4.0.1
 

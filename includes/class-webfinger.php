@@ -29,6 +29,7 @@ class Webfinger {
 		\add_filter( 'webfinger_data', array( static::class, 'generate_user_data' ), 10, 3 );
 		\add_filter( 'webfinger_data', array( static::class, 'generate_post_data' ), 10, 3 );
 		\add_filter( 'webfinger_data', array( static::class, 'filter_by_rel' ), 99, 1 );
+		\add_filter( 'webfinger_data', array( static::class, 'discard_errors' ), \PHP_INT_MAX, 1 );
 
 		// Default output.
 		\add_action( 'webfinger_render', array( static::class, 'render_jrd' ) );
@@ -280,6 +281,28 @@ class Webfinger {
 				}
 			)
 		);
+
+		return $webfinger;
+	}
+
+	/**
+	 * Discards anything that is not a WebFinger data-array.
+	 *
+	 * Filters may return a `WP_Error` to signal that a resource is not theirs
+	 * -- the ActivityPub plugin does so at priority 1, for example. A
+	 * `WP_Error` is not `empty()`, so it would otherwise pass the data check in
+	 * `parse_request()` and get served as the JRD document with a 200 status.
+	 *
+	 * @see https://github.com/pfefferle/wordpress-webfinger/issues/59
+	 *
+	 * @param mixed $webfinger The WebFinger data-array.
+	 *
+	 * @return array The WebFinger data-array, or an empty array.
+	 */
+	public static function discard_errors( $webfinger ) {
+		if ( ! \is_array( $webfinger ) ) {
+			return array();
+		}
 
 		return $webfinger;
 	}

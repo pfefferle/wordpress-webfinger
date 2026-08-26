@@ -99,6 +99,8 @@ Project maintained on github at [pfefferle/wordpress-webfinger](https://github.c
 ### Unreleased
 
 * Fixed: The deprecated global classes are real aliases again, so the old class names and static methods keep working
+* Fixed: `mailto:` aliases were advertised but never resolved
+* Fixed: Errors from `webfinger_data` filters were served as the JRD document with a 200 status
 * Changed: Requires WordPress 6.4 or higher
 
 ### 4.0.1

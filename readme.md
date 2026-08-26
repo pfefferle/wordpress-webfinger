@@ -3,7 +3,7 @@
 - Contributors: pfefferle, willnorris
 - Donate link: https://notiz.blog/donate/
 - Tags: discovery, webfinger, JRD, ostatus, activitypub
-- Requires at least: 4.2
+- Requires at least: 6.4
 - Tested up to: 7.1
 - Stable tag: 4.0.1
 - Requires PHP: 7.4
@@ -80,6 +80,10 @@ See <https://github.com/pfefferle/wordpress-webfinger-legacy> for a complete exa
 
 ## Upgrade Notice
 
+### Unreleased
+
+This version requires WordPress 6.4 or higher. Older sites will not be offered the update.
+
 ### 4.0.0
 
 This is a major update with new features (Site Health checks, user profile settings) and requires PHP 7.2 or higher. After updating, visit **Tools → Site Health** to verify your WebFinger setup is working correctly.
@@ -91,6 +95,11 @@ This version drops classic WebFinger (XRD) support to keep the plugin lightweigh
 ## Changelog
 
 Project maintained on github at [pfefferle/wordpress-webfinger](https://github.com/pfefferle/wordpress-webfinger).
+
+### Unreleased
+
+* Fixed: The deprecated global classes are real aliases again, so the old class names and static methods keep working
+* Changed: Requires WordPress 6.4 or higher
 
 ### 4.0.1
 

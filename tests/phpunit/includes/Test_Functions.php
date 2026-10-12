@@ -95,12 +95,12 @@ class Test_Functions extends \WP_UnitTestCase {
 	 *
 	 * @dataProvider data_is_same_host
 	 *
-	 * @param string $uri      The URI to check, with `%HOST%` standing in for the blog host.
+	 * @param string $uri      The URI to check, with `%HOST%` (`%UPPERHOST%`) standing in for the (uppercased) blog host.
 	 * @param bool   $expected The expected result.
 	 */
 	public function test_is_same_host( $uri, $expected ) {
 		$host = \wp_parse_url( \home_url(), \PHP_URL_HOST );
-		$uri  = \str_replace( '%HOST%', $host, $uri );
+		$uri  = \str_replace( array( '%HOST%', '%UPPERHOST%' ), array( $host, \strtoupper( $host ) ), $uri );
 
 		$this->assertSame( $expected, \is_same_host( $uri ) );
 	}
@@ -125,8 +125,79 @@ class Test_Functions extends \WP_UnitTestCase {
 			'mailto: with a subject'         => array( 'mailto:user@%HOST%?subject=hi', true ),
 			'mailto: with a fragment'        => array( 'mailto:user@%HOST%#frag', true ),
 			'foreign mailto: with a subject' => array( 'mailto:user@different-domain.com?subject=hi', false ),
+			'uppercase same host URL'        => array( 'https://%UPPERHOST%/test-path', true ),
+			'uppercase same host acct: URI'  => array( 'acct:user@%UPPERHOST%', true ),
 			'not a URI'                      => array( 'not a uri', false ),
 			'empty string'                   => array( '', false ),
+		);
+	}
+
+	/**
+	 * Test is_same_host on a blog with an internationalized domain name.
+	 *
+	 * @covers ::is_same_host
+	 *
+	 * @dataProvider data_is_same_host_idn
+	 *
+	 * @param string $home     The home URL of the blog.
+	 * @param string $uri      The URI to check.
+	 * @param bool   $expected The expected result.
+	 */
+	public function test_is_same_host_idn( $home, $uri, $expected ) {
+		\add_filter(
+			'option_home',
+			function () use ( $home ) {
+				return $home;
+			}
+		);
+
+		$this->assertSame( $expected, \is_same_host( $uri ) );
+	}
+
+	/**
+	 * Data provider for test_is_same_host_idn.
+	 *
+	 * @return array[] Test data.
+	 */
+	public function data_is_same_host_idn() {
+		return array(
+			'U-label home, A-label acct: URI'   => array( 'https://café.example', 'acct:user@xn--caf-dma.example', true ),
+			'U-label home, U-label acct: URI'   => array( 'https://café.example', 'acct:user@café.example', true ),
+			'A-label home, U-label acct: URI'   => array( 'https://xn--caf-dma.example', 'acct:user@café.example', true ),
+			'A-label home, uppercase A-label'   => array( 'https://xn--caf-dma.example', 'https://XN--CAF-DMA.EXAMPLE/', true ),
+			'A-label home, IDN TLD acct: URI'   => array( 'https://example.xn--fiqs8s', 'acct:user@example.中国', true ),
+			'U-label home, ASCII lookalike URI' => array( 'https://café.example', 'acct:user@cafe.example', false ),
+		);
+	}
+
+	/**
+	 * Test normalize_webfinger_host.
+	 *
+	 * @covers ::normalize_webfinger_host
+	 *
+	 * @dataProvider data_normalize_webfinger_host
+	 *
+	 * @param string $host     The host to normalize.
+	 * @param string $expected The expected result.
+	 */
+	public function test_normalize_webfinger_host( $host, $expected ) {
+		$this->assertSame( $expected, \normalize_webfinger_host( $host ) );
+	}
+
+	/**
+	 * Data provider for test_normalize_webfinger_host.
+	 *
+	 * @return array[] Test data.
+	 */
+	public function data_normalize_webfinger_host() {
+		return array(
+			'ASCII host'          => array( 'example.org', 'example.org' ),
+			'uppercase host'      => array( 'Example.ORG', 'example.org' ),
+			'U-label'             => array( 'café.example', 'xn--caf-dma.example' ),
+			'uppercase A-label'   => array( 'XN--CAF-DMA.example', 'xn--caf-dma.example' ),
+			'IDN TLD'             => array( 'example.中国', 'example.xn--fiqs8s' ),
+			'Thai U-label'        => array( 'ตัวอย่าง.example', 'xn--72c1a1bt4awk9o.example' ),
+			'invalid, label > 63' => array( \str_repeat( 'A', 64 ) . '.example', \str_repeat( 'a', 64 ) . '.example' ),
 		);
 	}
 

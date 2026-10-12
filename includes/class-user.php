@@ -25,7 +25,8 @@ class User {
 	 * @uses apply_filters() Uses 'webfinger_user' to filter the user and 'webfinger_user_query' to add custom query-params.
 	 */
 	public static function get_user_by_uri( $uri ) {
-		$uri = \urldecode( $uri );
+		// Keep "+" as it is, it is a valid character in an `acct:` userpart.
+		$uri = \rawurldecode( $uri );
 
 		// Remove wildcards to prevent SQL injection via LIKE queries.
 		$uri = \str_replace( array( '*', '%' ), '', $uri );
@@ -173,7 +174,17 @@ class User {
 		}
 
 		$username = self::get_username( $user );
-		$host     = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+		$host     = \normalize_webfinger_host( \wp_parse_url( \home_url(), \PHP_URL_HOST ) );
+
+		// RFC 3986 producers should use uppercase hex digits for percent-encodings.
+		$username = \preg_replace_callback(
+			'/%[0-9a-f]{2}/i',
+			function ( $percent_encoding ) {
+				return \strtoupper( $percent_encoding[0] );
+			},
+			$username
+		);
+
 		$resource = $username . '@' . $host;
 
 		if ( $with_protocol ) {
@@ -197,7 +208,7 @@ class User {
 			return array();
 		}
 
-		$host      = \wp_parse_url( \home_url(), \PHP_URL_HOST );
+		$host      = \normalize_webfinger_host( \wp_parse_url( \home_url(), \PHP_URL_HOST ) );
 		$resources = array(
 			self::get_resource( $user ),
 			\get_author_posts_url( $user->ID, $user->user_nicename ),

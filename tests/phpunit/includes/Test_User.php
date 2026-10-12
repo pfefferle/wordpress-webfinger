@@ -99,9 +99,11 @@ class Test_User extends \WP_UnitTestCase {
 	 * Pin `home_url()` and `site_url()` to self::HOME_HOST for the current test.
 	 *
 	 * WP_UnitTestCase restores the hooks after every test.
+	 *
+	 * @param string $host The host to pin to.
 	 */
-	private function force_home_host() {
-		$url = 'http://' . self::HOME_HOST;
+	private function force_home_host( $host = self::HOME_HOST ) {
+		$url = 'http://' . $host;
 
 		\add_filter(
 			'option_home',
@@ -386,6 +388,93 @@ class Test_User extends \WP_UnitTestCase {
 		$this->assertEquals( self::$user_id, $user->ID );
 
 		\delete_user_meta( self::$user_id, 'webfinger_resource' );
+	}
+
+	/**
+	 * Test get_user_by_uri with internationalized resources.
+	 *
+	 * @see https://github.com/swicg/activitypub-webfinger/blob/main/internationalized.md
+	 *
+	 * @covers ::get_user_by_uri
+	 *
+	 * @dataProvider data_get_user_by_uri_internationalized
+	 *
+	 * @param string $home            The home host of the blog.
+	 * @param string $custom_resource The custom resource, as entered on the profile page.
+	 * @param string $uri             The resource to look up.
+	 */
+	public function test_get_user_by_uri_internationalized( $home, $custom_resource, $uri ) {
+		$this->force_home_host( $home );
+		\update_user_meta( self::$user_id, 'webfinger_resource', \sanitize_title( $custom_resource ) );
+
+		$user = User::get_user_by_uri( $uri );
+
+		\delete_user_meta( self::$user_id, 'webfinger_resource' );
+
+		$this->assertInstanceOf( \WP_User::class, $user );
+		$this->assertEquals( self::$user_id, $user->ID );
+	}
+
+	/**
+	 * Data provider for test_get_user_by_uri_internationalized.
+	 *
+	 * @return array[] Test data.
+	 */
+	public function data_get_user_by_uri_internationalized() {
+		$encoded = '%CE%B5%CE%BB%CF%80%CE%AF%CE%B4%CE%B1';
+
+		return array(
+			'percent-encoded userpart'           => array( 'example.org', 'ελπίδα', 'acct:' . $encoded . '@example.org' ),
+			'lowercase percent-encoded userpart' => array( 'example.org', 'ελπίδα', 'acct:' . \strtolower( $encoded ) . '@example.org' ),
+			'unencoded userpart'                 => array( 'example.org', 'ελπίδα', 'acct:ελπίδα@example.org' ),
+			'uppercase host'                     => array( 'example.org', 'ελπίδα', 'acct:' . $encoded . '@EXAMPLE.ORG' ),
+			'plus sign in userpart'              => array( 'example.org', 'anne+notes', 'acct:anne+notes@example.org' ),
+			'A-label host'                       => array( 'café.example', 'ελπίδα', 'acct:' . $encoded . '@xn--caf-dma.example' ),
+			'U-label host'                       => array( 'café.example', 'ελπίδα', 'acct:' . $encoded . '@café.example' ),
+			'A-label host on an A-label blog'    => array( 'xn--caf-dma.example', 'ελπίδα', 'acct:' . $encoded . '@xn--caf-dma.example' ),
+		);
+	}
+
+	/**
+	 * Test get_resource and get_resources encode internationalized resources.
+	 *
+	 * @see https://github.com/swicg/activitypub-webfinger/blob/main/internationalized.md
+	 *
+	 * @covers ::get_resource
+	 * @covers ::get_resources
+	 *
+	 * @dataProvider data_get_resource_internationalized
+	 *
+	 * @param string $home            The home host of the blog.
+	 * @param string $custom_resource The custom resource, as entered on the profile page.
+	 * @param string $expected        The expected resource.
+	 */
+	public function test_get_resource_internationalized( $home, $custom_resource, $expected ) {
+		$this->force_home_host( $home );
+		\update_user_meta( self::$user_id, 'webfinger_resource', \sanitize_title( $custom_resource ) );
+
+		$resource  = User::get_resource( self::$user_id );
+		$resources = User::get_resources( self::$user_id );
+
+		\delete_user_meta( self::$user_id, 'webfinger_resource' );
+
+		$this->assertSame( $expected, $resource );
+		$this->assertContains( $expected, $resources );
+		$this->assertContains( 'acct:testuser@' . \substr( \strrchr( $expected, '@' ), 1 ), $resources );
+	}
+
+	/**
+	 * Data provider for test_get_resource_internationalized.
+	 *
+	 * @return array[] Test data.
+	 */
+	public function data_get_resource_internationalized() {
+		return array(
+			'non-ASCII userpart'          => array( 'example.org', 'ελπίδα', 'acct:%CE%B5%CE%BB%CF%80%CE%AF%CE%B4%CE%B1@example.org' ),
+			'U-label host'                => array( 'café.example', 'customuser', 'acct:customuser@xn--caf-dma.example' ),
+			'non-ASCII userpart and host' => array( 'café.example', 'さくら', 'acct:%E3%81%95%E3%81%8F%E3%82%89@xn--caf-dma.example' ),
+			'A-label host stays as it is' => array( 'xn--caf-dma.example', 'customuser', 'acct:customuser@xn--caf-dma.example' ),
+		);
 	}
 
 	/**

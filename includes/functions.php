@@ -153,5 +153,27 @@ function is_same_host( $uri ) {
 		$host = \substr( \strrchr( $path, '@' ), 1 );
 	}
 
-	return (bool) $host && $host === $blog_host;
+	return (bool) $host && normalize_webfinger_host( $host ) === normalize_webfinger_host( $blog_host );
+}
+
+/**
+ * Normalize a host to its lowercase IDNA A-label form.
+ *
+ * Hosts are case-insensitive, and the host of an `acct:` URI is IDNA-encoded,
+ * so `café.example` and `XN--CAF-DMA.example` both become `xn--caf-dma.example`.
+ *
+ * @see https://github.com/swicg/activitypub-webfinger/blob/main/internationalized.md
+ *
+ * @param string $host The host.
+ *
+ * @return string The normalized host, or the lowercased input if it is not a valid IDN.
+ */
+function normalize_webfinger_host( $host ) {
+	try {
+		$host = \WpOrg\Requests\IdnaEncoder::encode( $host );
+	} catch ( \WpOrg\Requests\Exception $e ) {
+		return \strtolower( $host );
+	}
+
+	return \strtolower( $host );
 }
